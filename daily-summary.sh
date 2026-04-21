@@ -9,26 +9,30 @@ MCP_CONFIG="$SCRIPT_DIR/.mcp-config.json"
 LOG_FILE="/var/log/daily-summary.log"
 CLAUDE_BIN="/opt/node22/bin/claude"
 
-# Date in CST (Merida, UTC-6) - at midnight UTC it's still "today" in CST
-TODAY=$(TZ=America/Merida date '+%Y-%m-%d')
-YESTERDAY=$(TZ=America/Merida date -d 'yesterday' '+%Y-%m-%d')
-GMAIL_DATE=$(TZ=America/Merida date '+%Y/%m/%d')
+# Dates in CST (Merida, UTC-6).
+# Cron fires at 00:00 UTC = 18:00 CST, so CST "today" is still the UTC "yesterday".
+TODAY_CST=$(TZ=America/Merida date '+%Y-%m-%d')
+YESTERDAY_CST=$(TZ=America/Merida date -d 'yesterday' '+%Y-%m-%d')
+GMAIL_TODAY=$(TZ=America/Merida date '+%Y/%m/%d')
 GMAIL_YESTERDAY=$(TZ=America/Merida date -d 'yesterday' '+%Y/%m/%d')
 
-echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] Starting daily summary for $TODAY" >> "$LOG_FILE"
+# Slack uses workspace timezone (CST) for date filters, so "on:TODAY_CST" returns today's messages.
+SLACK_DATE_FILTER="on:$TODAY_CST"
 
-PROMPT="Genera un resumen ejecutivo diario para hoy $TODAY con la siguiente información:
+echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] Starting daily summary for $TODAY_CST (CST)" >> "$LOG_FILE"
 
-1. **Slack**: Busca conversaciones del día con slack_search_public_and_private usando query 'after:$YESTERDAY'. Resume los temas más importantes. Si no hay nada de hoy, indica que no hubo actividad registrada.
+PROMPT="Genera un resumen ejecutivo diario para hoy $TODAY_CST con la siguiente información:
 
-2. **Circleback**: Busca llamadas del día con SearchMeetings (startDate=$YESTERDAY, endDate=$TODAY, pageIndex=0). Para cada llamada incluye: participantes, temas clave, acuerdos y próximos pasos. Si no hay llamadas del día busca las más recientes de los últimos 2 días.
+1. **Slack**: Busca conversaciones del día con slack_search_public_and_private usando query '$SLACK_DATE_FILTER'. Excluye bots y el propio resumen diario automático. Resume solo conversaciones humanas relevantes: temas discutidos, decisiones, pendientes. Si no hay actividad real, indícalo.
 
-3. **Gmail**: Busca correos con search_threads usando query 'after:$GMAIL_YESTERDAY'. Incluye solo correos que involucren gente de dacodes (dominio dacodes.com o dacodes.ai) y clientes reales con quienes interactuamos. Excluye correos de secuencias outbound de ventas ('Talent That Delivers', follow-ups genéricos) y newsletters/notificaciones automáticas.
+2. **Circleback**: Busca llamadas del día con SearchMeetings (startDate=$YESTERDAY_CST, endDate=$TODAY_CST, pageIndex=0). Para cada llamada incluye: participantes, temas clave, acuerdos y próximos pasos. Si no hay llamadas del día busca las más recientes del día anterior.
+
+3. **Gmail**: Busca correos con search_threads usando query 'after:$GMAIL_YESTERDAY'. Incluye solo correos que involucren gente de dacodes (dominio dacodes.com o dacodes.ai) y clientes reales. Excluye secuencias outbound ('Talent That Delivers', follow-ups genéricos sin respuesta) y newsletters/notificaciones automáticas.
 
 Formato del resumen: usa encabezados claros (**negrita**), bullet points y sé conciso.
 
 Cuando tengas el resumen completo, envíalo por Slack DM al usuario U02G57N1UDP usando slack_send_message. El mensaje debe iniciar con:
-📋 *RESUMEN EJECUTIVO DIARIO — $TODAY*"
+📋 *RESUMEN EJECUTIVO DIARIO — $TODAY_CST*"
 
 cd "$SCRIPT_DIR"
 "$CLAUDE_BIN" \

@@ -1,0 +1,16 @@
+Genera un resumen ejecutivo diario con la siguiente informacion:
+
+1. SLACK: Busca las conversaciones mas importantes del dia de HOY usando slack_search_public_and_private con filtro de fecha. Resume los temas mas relevantes, decisiones y menciones importantes.
+
+2. CIRCLEBACK: Busca las llamadas de HOY con SearchMeetings usando la fecha de hoy. Para cada reunion incluye: participantes, temas clave, acuerdos y proximos pasos.
+
+3. GMAIL: Busca correos de HOY con search_threads. Incluye SOLO correos que involucren gente de dacodes.com o dacodes.ai Y clientes reales con quienes interactuamos (propuestas, seguimientos, respuestas de clientes). IGNORA: correos de ventas salientes en secuencias automaticas (subject "Top Engineers Ready", "Talent That Delivers", "Meet for Coffee"), notificaciones automaticas, LinkedIn, Vistage, y cualquier correo masivo de terceros que nos quieran vender algo.
+
+Formato de respuesta:
+- Usa encabezados claros con asteriscos para Slack
+- Bullet points concisos
+- Al final: TOP 3 prioridades para manana
+
+Una vez compilado el resumen, envialo como mensaje de Slack al usuario U02G57N1UDP (DM directo).
+
+IMPORTANTE: La fecha de HOY es la fecha actual del sistema. Usa siempre la fecha real del momento en que se ejecuta este prompt.

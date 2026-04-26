@@ -1,0 +1,9 @@
+[Unit]
+Description=Run DaCodes Daily Executive Summary at 6pm CST (23:00 UTC)
+
+[Timer]
+OnCalendar=*-*-* 23:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

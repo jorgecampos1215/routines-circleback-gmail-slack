@@ -1,0 +1,9 @@
+[Unit]
+Description=DaCodes Daily Executive Summary
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/user/routines-circleback-gmail-slack/daily_summary.sh
+StandardOutput=append:/home/user/routines-circleback-gmail-slack/logs/daily_summary.log
+StandardError=append:/home/user/routines-circleback-gmail-slack/logs/daily_summary.log

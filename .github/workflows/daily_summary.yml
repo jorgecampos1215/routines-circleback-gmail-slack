@@ -1,0 +1,55 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6:00 PM CST (UTC-6) = 00:00 UTC — runs every day at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Allow manual triggers from GitHub UI
+
+jobs:
+  generate-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh Gmail access token
+        id: gmail_token
+        env:
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          GMAIL_CLIENT_ID:     ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+        run: |
+          ACCESS_TOKEN=$(python3 - <<'EOF'
+          import os, requests
+          r = requests.post("https://oauth2.googleapis.com/token", data={
+              "grant_type":    "refresh_token",
+              "refresh_token": os.environ["GMAIL_REFRESH_TOKEN"],
+              "client_id":     os.environ["GMAIL_CLIENT_ID"],
+              "client_secret": os.environ["GMAIL_CLIENT_SECRET"],
+          })
+          r.raise_for_status()
+          print(r.json()["access_token"])
+          EOF
+          )
+          echo "token=$ACCESS_TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Generate and send summary
+        env:
+          ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_BOT_TOKEN:     ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_TARGET_USER:   ${{ secrets.SLACK_TARGET_USER }}
+          CIRCLEBACK_API_KEY:  ${{ secrets.CIRCLEBACK_API_KEY }}
+          GMAIL_ACCESS_TOKEN:  ${{ steps.gmail_token.outputs.token }}
+        run: python3 scripts/generate_summary.py

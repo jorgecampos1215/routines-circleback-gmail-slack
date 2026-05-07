@@ -1,0 +1,11 @@
+Genera un resumen diario ejecutivo con la siguiente información usando la fecha de hoy:
+
+1. **Slack**: Resume las conversaciones más importantes del día. Busca mensajes del día de hoy en todos los canales y DMs.
+
+2. **Circleback**: Resume las llamadas del día. Incluye: participantes, temas clave, acuerdos y próximos pasos. Busca reuniones de hoy y del día anterior.
+
+3. **Gmail**: Revisa correos del dia, mandame resumen de correos de todo lo que involucre gente de dacodes y clientes con los que interactuamos. Ignora gente que nos manda correos para vender o correos que mandamos en secuencias (subject "Talent That Delivers", "Top Engineers Ready", correos masivos de outbound sales). Solo incluye correos genuinos de clientes activos, prospectos con conversación real, o comunicaciones internas de DaCodes.
+
+Formato: usa encabezados claros, bullet points y sé conciso.
+
+Al terminar el resumen, envíalo como mensaje directo de Slack al usuario U02G57N1UDP. No respondas con el resumen en texto, solo envíalo por Slack.

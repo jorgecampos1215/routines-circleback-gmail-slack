@@ -1,0 +1,49 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6pm CDT = 23:00 UTC (lunes a viernes)
+    - cron: '0 23 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      date_override:
+        description: 'Fecha manual (YYYY-MM-DD). Si se omite, usa la fecha de hoy.'
+        required: false
+        type: string
+
+jobs:
+  generate-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Daily Executive Summary
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Genera un resumen ejecutivo diario para DaCodes y envíalo por Slack al usuario U02G57N1UDP.
+
+            Sigue estas instrucciones:
+
+            **1. SLACK**
+            Usa `slack_search_public_and_private` con query `on:${{ github.event.inputs.date_override || 'today' }}` para buscar conversaciones importantes del día. Si no hay actividad, indícalo.
+
+            **2. CIRCLEBACK**
+            Usa `SearchMeetings` con `startDate` y `endDate` igual a la fecha de hoy. Para cada reunión incluye: participantes, temas clave, acuerdos y próximos pasos. Si no hay llamadas hoy, usa `SearchCalendarEvents` para el mismo día.
+
+            **3. GMAIL**
+            Usa `search_threads` con `after:YYYY/MM/DD before:YYYY/MM/DD` (fecha de hoy). Incluye SOLO correos de gente de dacodes y clientes reales. IGNORA: secuencias outbound (subjects como "Talent That Delivers", "Tu equipo ideal", "AI-driven software development"), newsletters y notificaciones automáticas.
+
+            **FORMATO**: Estructura el mensaje con secciones claras (Slack, Circleback, Gmail), bullet points concisos, e iconos de urgencia (⚠️ facturas/pagos, 🚨 riesgos de colaboradores, ✅ confirmaciones). Al final agrega: `_Generado automáticamente a las 6pm | DaCodes Executive Daily Brief_`
+
+            **ENVÍO**: Usa `slack_send_message` con `channel_id: U02G57N1UDP`.
+          mcp_config: ${{ secrets.MCP_CONFIG }}
+          allowed_tools: >
+            mcp__Slack__slack_search_public_and_private,
+            mcp__Slack__slack_send_message,
+            mcp__Gmail__search_threads,
+            mcp__Gmail__get_thread,
+            mcp__Circleback__SearchMeetings,
+            mcp__Circleback__SearchCalendarEvents,
+            mcp__Circleback__ReadMeetings

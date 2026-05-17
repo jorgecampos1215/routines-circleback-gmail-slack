@@ -1,0 +1,33 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6:00 PM CST = 00:00 UTC (next day)
+    - cron: "0 0 * * *"
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  send-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily summary
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_TARGET_USER_ID: ${{ secrets.SLACK_TARGET_USER_ID }}
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+          CIRCLEBACK_API_KEY: ${{ secrets.CIRCLEBACK_API_KEY }}
+        run: python daily_summary.py

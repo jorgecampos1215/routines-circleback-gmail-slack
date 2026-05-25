@@ -1,0 +1,36 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6pm CST (UTC-6) = midnight UTC — runs every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # allow manual trigger for testing
+
+jobs:
+  generate-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Generate and send daily summary
+        env:
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_BOT_TOKEN:      ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_USER_ID:        ${{ secrets.SLACK_USER_ID }}
+          CIRCLEBACK_API_KEY:   ${{ secrets.CIRCLEBACK_API_KEY }}
+          GMAIL_CLIENT_ID:      ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET:  ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN:  ${{ secrets.GMAIL_REFRESH_TOKEN }}
+        run: python scripts/daily_summary.py

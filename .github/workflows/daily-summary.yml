@@ -1,0 +1,54 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6pm CST = midnight UTC (CST = UTC-6)
+    - cron: '0 0 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: >
+            mcp__Slack__slack_search_public_and_private,
+            mcp__Slack__slack_schedule_message,
+            mcp__Slack__slack_send_message,
+            mcp__Circleback__SearchMeetings,
+            mcp__Circleback__ReadMeetings,
+            mcp__Gmail__search_threads,
+            mcp__Gmail__get_thread
+          prompt: |
+            Genera un resumen ejecutivo diario con la información de HOY y envíalo por Slack a jorge.campos@dacodes.com (user_id: U02G57N1UDP).
+
+            Pasos:
+            1. Busca en Slack conversaciones importantes de hoy usando after:<fecha-hoy>
+            2. Busca en Circleback las reuniones de hoy (startDate y endDate = fecha de hoy)
+            3. Busca en Gmail correos de hoy que involucren gente de dacodes.com y clientes reales
+               (ignora newsletters, correos de venta, secuencias automáticas)
+            4. Compila el resumen con este formato:
+
+            📋 *Resumen Ejecutivo Diario — <día y fecha>*
+
+            💬 *SLACK*
+            [bullet points con conversaciones clave del día]
+
+            📞 *CIRCLEBACK — Llamadas del día*
+            [por cada reunión: nombre, participantes, temas clave, acuerdos, próximos pasos]
+
+            📧 *GMAIL — Correos relevantes*
+            [solo correos que involucren dacodes + clientes reales, sin secuencias ni newsletters]
+
+            ⚠️ *PENDIENTES CLAVE*
+            [lista de action items y fechas]
+
+            5. Envía el mensaje directo al user_id U02G57N1UDP en Slack usando slack_send_message.
+
+            Fecha de hoy: usa el sistema para obtener la fecha actual.

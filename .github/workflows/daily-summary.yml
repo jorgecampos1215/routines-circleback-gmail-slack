@@ -1,0 +1,52 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6pm CDT (UTC-5) = 23:00 UTC
+    # 6pm CST (UTC-6) = 00:00 UTC next day
+    # Runs at 23:00 UTC daily (= 6pm CDT / 5pm CST)
+    - cron: '0 23 * * *'
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Daily Executive Summary via Claude Code
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt_file: prompts/daily_summary.md
+          # MCP servers are configured via secrets below
+          mcp_config: |
+            {
+              "mcpServers": {
+                "Slack": {
+                  "command": "npx",
+                  "args": ["-y", "@modelcontextprotocol/server-slack"],
+                  "env": {
+                    "SLACK_BOT_TOKEN": "${{ secrets.SLACK_BOT_TOKEN }}",
+                    "SLACK_TEAM_ID": "${{ secrets.SLACK_TEAM_ID }}"
+                  }
+                },
+                "Gmail": {
+                  "command": "npx",
+                  "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"],
+                  "env": {
+                    "GMAIL_OAUTH_CREDENTIALS": "${{ secrets.GMAIL_OAUTH_CREDENTIALS }}"
+                  }
+                },
+                "Circleback": {
+                  "command": "npx",
+                  "args": ["-y", "circleback-mcp"],
+                  "env": {
+                    "CIRCLEBACK_API_KEY": "${{ secrets.CIRCLEBACK_API_KEY }}"
+                  }
+                }
+              }
+            }

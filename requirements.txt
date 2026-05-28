@@ -1,0 +1,8 @@
+anthropic>=0.40.0
+slack-sdk>=3.31.0
+google-api-python-client>=2.150.0
+google-auth>=2.35.0
+google-auth-oauthlib>=1.2.0
+google-auth-httplib2>=0.2.0
+pytz>=2024.2
+requests>=2.32.0

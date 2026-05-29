@@ -1,0 +1,32 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 00:00 UTC = 18:00 CST (Mexico City, UTC-6, sin horario de verano desde 2023)
+    - cron: "0 0 * * *"
+  workflow_dispatch: # permite ejecución manual desde GitHub Actions
+
+jobs:
+  send-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate and send daily summary
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_MCP_TOKEN: ${{ secrets.SLACK_MCP_TOKEN }}
+          CIRCLEBACK_API_KEY: ${{ secrets.CIRCLEBACK_API_KEY }}
+          GMAIL_OAUTH_TOKEN: ${{ secrets.GMAIL_OAUTH_TOKEN }}
+          SLACK_USER_ID: ${{ secrets.SLACK_USER_ID }}
+        run: python scripts/daily_summary.py

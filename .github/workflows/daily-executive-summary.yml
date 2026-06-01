@@ -1,0 +1,59 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6pm CDT (UTC-5) Monday–Friday = 23:00 UTC
+    - cron: "0 23 * * 1-5"
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  generate-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write MCP config
+        run: |
+          mkdir -p .claude
+          cat > .claude/mcp_servers.json << 'EOF'
+          {
+            "mcpServers": {
+              "Slack": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-slack"],
+                "env": {
+                  "SLACK_BOT_TOKEN": "${{ secrets.SLACK_BOT_TOKEN }}",
+                  "SLACK_TEAM_ID": "${{ secrets.SLACK_TEAM_ID }}"
+                }
+              },
+              "Gmail": {
+                "command": "npx",
+                "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"],
+                "env": {
+                  "GMAIL_CLIENT_ID": "${{ secrets.GMAIL_CLIENT_ID }}",
+                  "GMAIL_CLIENT_SECRET": "${{ secrets.GMAIL_CLIENT_SECRET }}",
+                  "GMAIL_REFRESH_TOKEN": "${{ secrets.GMAIL_REFRESH_TOKEN }}"
+                }
+              },
+              "Circleback": {
+                "command": "npx",
+                "args": ["-y", "circleback-mcp"],
+                "env": {
+                  "CIRCLEBACK_API_KEY": "${{ secrets.CIRCLEBACK_API_KEY }}"
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Generate and send daily summary
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt_file: prompts/daily_summary_prompt.md
+          mcp_config: .claude/mcp_servers.json
+          timeout_minutes: 10

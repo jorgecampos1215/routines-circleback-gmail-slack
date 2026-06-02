@@ -1,0 +1,62 @@
+name: Resumen Ejecutivo Diario 6pm
+
+on:
+  schedule:
+    # 6pm CST (Mexico City, UTC-6) = midnight UTC
+    - cron: '0 0 * * 1-5'  # Lunes a Viernes
+  workflow_dispatch:  # Permite ejecución manual desde GitHub
+
+jobs:
+  generate-and-send-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate and Send Daily Summary
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # MCP Servers configurados como secrets
+          mcp_config: |
+            {
+              "mcpServers": {
+                "Slack": {
+                  "type": "http",
+                  "url": "${{ secrets.SLACK_MCP_URL }}",
+                  "headers": {
+                    "Authorization": "Bearer ${{ secrets.SLACK_MCP_TOKEN }}"
+                  }
+                },
+                "Gmail": {
+                  "type": "http",
+                  "url": "${{ secrets.GMAIL_MCP_URL }}",
+                  "headers": {
+                    "Authorization": "Bearer ${{ secrets.GMAIL_MCP_TOKEN }}"
+                  }
+                },
+                "Circleback": {
+                  "type": "http",
+                  "url": "https://app.circleback.ai/api/mcp",
+                  "headers": {
+                    "Authorization": "Bearer ${{ secrets.CIRCLEBACK_MCP_TOKEN }}"
+                  }
+                }
+              }
+            }
+          prompt: |
+            Lee el archivo DAILY_SUMMARY_INSTRUCTIONS.md en este repositorio y sigue
+            las instrucciones al pie de la letra para generar y enviar el resumen
+            ejecutivo diario de hoy a Jorge Campos por Slack DM (user ID: U02G57N1UDP).
+
+            La fecha de hoy es: ${{ github.run_started_at }}
+
+            IMPORTANTE:
+            - Envía el mensaje directamente con slack_send_message, NO hagas draft
+            - Si Circleback requiere autenticación y no tienes token, busca los correos
+              de notifications@circleback.ai en Gmail como alternativa
+            - Completa el envío aunque alguna fuente no esté disponible

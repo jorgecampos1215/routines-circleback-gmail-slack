@@ -1,0 +1,41 @@
+name: 📊 Daily Executive Summary
+
+on:
+  schedule:
+    # 6pm Mexico City CDT (UTC-5) = 23:00 UTC  ← April–October
+    # 6pm Mexico City CST (UTC-6) = 00:00 UTC  ← November–March (update cron below)
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual test'
+
+jobs:
+  daily-summary:
+    name: Generate & Send Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily summary
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_USER_ID: ${{ secrets.SLACK_USER_ID }}
+          CIRCLEBACK_API_KEY: ${{ secrets.CIRCLEBACK_API_KEY }}
+          GMAIL_CREDENTIALS: ${{ secrets.GMAIL_CREDENTIALS }}
+        run: python daily_summary.py

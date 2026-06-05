@@ -1,0 +1,48 @@
+name: Resumen Ejecutivo Diario 6pm CST
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Midnight UTC = 6pm CST daily
+  workflow_dispatch:       # Manual trigger for testing
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate and Send Daily Executive Summary
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-6
+          prompt: |
+            Genera un resumen ejecutivo diario y envíalo a mi Slack (user ID: U02G57N1UDP).
+
+            Instrucciones:
+
+            1. **Slack**: Busca las conversaciones más importantes del día de hoy usando
+               slack_search_public_and_private con el filtro de fecha de hoy. Resume las
+               conversaciones de negocio más relevantes (ignora mensajes triviales, joins, etc.)
+
+            2. **Circleback**: Busca en Gmail los correos de notifications@circleback.ai
+               del día de hoy para obtener los resúmenes de llamadas. Para cada llamada incluye:
+               participantes, temas clave, acuerdos y próximos pasos.
+
+            3. **Gmail**: Busca correos del día de hoy que involucren:
+               - Gente de DaCodes (@dacodes.com, @dacodes.ai)
+               - Clientes con los que interactuamos activamente
+               IGNORA: correos de ventas en secuencia automatizada, newsletters,
+               notificaciones de herramientas, myvistage.com, LinkedIn digests.
+
+            Formato del resumen en Slack:
+            - Usa encabezados claros con emojis (💬 SLACK, 📞 CIRCLEBACK, 📧 GMAIL)
+            - Bullet points concisos
+            - Resalta acciones pendientes con ⚠️
+            - Incluye tabla de agenda del día si hay reuniones
+
+            Después de generar el resumen, envíalo con slack_send_message al
+            channel_id: U02G57N1UDP (DM de Jorge Campos).
+          mcp_config: ${{ secrets.MCP_CONFIG }}

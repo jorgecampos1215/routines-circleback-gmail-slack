@@ -1,0 +1,34 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6:00 PM hora CDMX (UTC-5 verano) = 23:00 UTC
+    # En invierno (CST, UTC-6) ajustar a: 0 0 * * * (medianoche UTC)
+    - cron: "0 23 * * *"
+  workflow_dispatch: # permite ejecutar manualmente desde GitHub Actions
+
+jobs:
+  send-summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily summary
+        env:
+          SLACK_BOT_TOKEN:       ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_USER_ID:         ${{ secrets.SLACK_USER_ID }}
+          ANTHROPIC_API_KEY:     ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_TOKEN_B64:       ${{ secrets.GMAIL_TOKEN_B64 }}
+          GMAIL_CREDENTIALS_B64: ${{ secrets.GMAIL_CREDENTIALS_B64 }}
+        run: python scripts/daily_summary.py

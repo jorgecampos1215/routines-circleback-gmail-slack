@@ -1,0 +1,23 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6pm CST (UTC-6) = midnight UTC
+    - cron: '0 0 * * 1-5'  # Lunes a viernes
+  workflow_dispatch:  # Permite ejecutar manualmente para pruebas
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate and send daily summary
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt_file: prompts/daily-summary.md
+          timeout_minutes: "10"

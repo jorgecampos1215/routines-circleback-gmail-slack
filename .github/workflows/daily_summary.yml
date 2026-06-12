@@ -1,0 +1,35 @@
+name: Daily Executive Summary
+
+on:
+  schedule:
+    # 6 PM Mexico City CDT (UTC-5) = 23:00 UTC — runs Mon–Fri
+    - cron: "0 23 * * 1-5"
+  workflow_dispatch:  # allow manual trigger
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install anthropic slack-sdk google-auth google-auth-oauthlib \
+                      google-auth-httplib2 google-api-python-client
+
+      - name: Write Gmail credentials
+        run: echo '${{ secrets.GMAIL_CREDENTIALS_JSON }}' > credentials.json
+
+      - name: Run daily summary
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          GMAIL_CREDENTIALS_JSON: credentials.json
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_USER_ID: ${{ secrets.SLACK_USER_ID }}
+        run: python daily_summary.py

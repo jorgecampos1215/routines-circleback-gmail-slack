@@ -34,13 +34,20 @@ function descargarArchivo(nombre, contenido, mime) {
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
 
-/* imagen de respaldo si el CDN no responde */
+/* imagen de respaldo si el CDN no responde: degradado sereno que varía por imagen */
+const FALLBACK_TONES = [
+  ['#dde7d6', '#a8bfa0', '#7d997a'], ['#e9e2cf', '#cbb98a', '#a08d55'],
+  ['#d8e2e4', '#a3bcc2', '#7c979e'], ['#e6ddd2', '#c2a98e', '#98805f'],
+  ['#dfe0d2', '#b0b491', '#878c67'], ['#e3dbe0', '#b3a3ad', '#8b7a85'],
+];
 window.addEventListener('error', e => {
   const t = e.target;
   if (t && t.tagName === 'IMG' && !t.dataset.fallback) {
     t.dataset.fallback = '1';
+    const h = (t.src || '').split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+    const [c1, c2, c3] = FALLBACK_TONES[h % FALLBACK_TONES.length];
     t.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><rect width="600" height="400" fill="#eef0e9"/><g fill="none" stroke="#b08d3e" stroke-width="6" stroke-linecap="round"><path d="M300 260 C 300 200, 260 180, 250 140 C 290 160, 296 190, 300 210 C 304 180, 312 156, 350 132 C 340 180, 302 200, 300 260 Z"/></g><text x="300" y="330" text-anchor="middle" font-family="Georgia" font-size="20" fill="#8a8478">Jardines del Recuerdo</text></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset=".62" stop-color="${c2}"/><stop offset="1" stop-color="${c3}"/></linearGradient></defs><rect width="800" height="520" fill="url(#g)"/><ellipse cx="${180 + (h % 440)}" cy="430" rx="330" ry="150" fill="#ffffff" opacity=".10"/><ellipse cx="${560 - (h % 320)}" cy="500" rx="420" ry="170" fill="#1e3d2b" opacity=".12"/><path d="M400 300 C 400 235, 358 215, 348 168 C 392 190, 396 224, 400 250 C 404 220, 414 194, 452 168 C 442 218, 402 236, 400 300 Z" fill="#f3ead6" opacity=".85"/></svg>`
     );
   }
 }, true);

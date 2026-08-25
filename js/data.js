@@ -177,6 +177,7 @@ const PRODUCTOS = [
   { id: 'p8', nombre: 'Luz del atardecer · donativo', precio: 250, img: IMG.nichosJardin, desc: 'Donativo para el mantenimiento de los jardines, dedicado a la memoria del difunto.', cat: 'Donativos' },
 ];
 const productoById = id => PRODUCTOS.find(p => p.id === id);
+const prodImg = p => (DB.productoImgs && DB.productoImgs[p.id]) || p.img;
 
 /* ---------- diseñador de placa (M8): formatos del reglamento ---------- */
 const PLACA_FORMATOS = {
@@ -245,6 +246,7 @@ const DB = Object.assign({
   invitados: [],
   pedidos: [],
   placas: [],                 // especificaciones enviadas a fábrica (M8)
+  productoImgs: {},           // fotos personalizadas del catálogo { productoId: dataURI }
   mensajesExtra: {},
   floresExtra: {},
   memorialesNuevos: [],

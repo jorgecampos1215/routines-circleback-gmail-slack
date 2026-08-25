@@ -307,7 +307,7 @@ function viewHome() {
       <div class="shop-grid">
         ${PRODUCTOS.slice(0, 4).map(p => `
           <a class="card product" href="#/tienda">
-            <div class="card-img"><img src="${p.img}" alt="${p.nombre}" loading="lazy"></div>
+            <div class="card-img"><img src="${prodImg(p)}" alt="${p.nombre}" loading="lazy"></div>
             <div class="card-body"><h3 style="font-size:17px">${p.nombre}</h3>
             <div class="rowline"><span class="price">${MXN(p.precio)}</span><span class="badge gold">${p.cat}</span></div></div>
           </a>`).join('')}
@@ -1043,7 +1043,7 @@ function viewMemorial(params, id) {
         <div class="sidebox">
           <h3>Flores recibidas</h3>
           <div class="flower-log">
-            ${flrs.map(f => { const p = productoById(f.producto); return `<div class="fl"><img src="${p.img}" alt="${p.nombre}"><span><b>${p.nombre}</b><br>de ${f.de} · ${fmtFecha(f.fecha)}</span></div>`; }).join('') || '<p style="font-size:13px;color:var(--ink-3)">Aún no se han enviado flores.</p>'}
+            ${flrs.map(f => { const p = productoById(f.producto); return `<div class="fl"><img src="${prodImg(p)}" alt="${p.nombre}"><span><b>${p.nombre}</b><br>de ${f.de} · ${fmtFecha(f.fecha)}</span></div>`; }).join('') || '<p style="font-size:13px;color:var(--ink-3)">Aún no se han enviado flores.</p>'}
           </div>
         </div>
         <div class="sidebox">
@@ -1270,7 +1270,7 @@ function viewTienda(params) {
     <div class="shop-grid">
       ${PRODUCTOS.map(p => `
         <div class="card product">
-          <div class="card-img"><img src="${p.img}" alt="${p.nombre}" loading="lazy"></div>
+          <div class="card-img"><img src="${prodImg(p)}" alt="${p.nombre}" loading="lazy"></div>
           <div class="card-body">
             <span class="badge gold">${p.cat}</span>
             <h3 style="font-size:17px">${p.nombre}</h3>
@@ -1307,7 +1307,7 @@ function abrirCarrito() {
     <p class="sub">Las flores se entregan el mismo día en el espacio del difunto.</p>
     <div class="cart-list">
       ${DB.carrito.map(c => { const p = productoById(c.productoId); return `
-        <div class="ci"><img src="${p.img}" alt="${p.nombre}"><div class="t"><b>${p.nombre}</b><span>${MXN(p.precio)} c/u</span></div>
+        <div class="ci"><img src="${prodImg(p)}" alt="${p.nombre}"><div class="t"><b>${p.nombre}</b><span>${MXN(p.precio)} c/u</span></div>
         <div class="qty"><button onclick="qtyCarrito('${p.id}',-1)">−</button>${c.qty}<button onclick="qtyCarrito('${p.id}',1)">+</button></div></div>`; }).join('')}
     </div>
     <div class="form-grid" style="margin-top:18px">
@@ -1826,13 +1826,17 @@ function adminAliadosHTML() {
 function adminTiendaHTML() {
   const pedidos = PEDIDOS_SEED.concat(DB.pedidos);
   return `
-  <div class="chart-card"><h3>Catálogo de la florería</h3><div class="sub">${PRODUCTOS.length} productos activos</div>
+  <div class="chart-card"><h3>Catálogo de la florería</h3><div class="sub">${PRODUCTOS.length} productos activos · sube tu propia foto por producto (se guarda en este navegador y se refleja en toda la plataforma)</div>
   <div class="table-wrap" style="border:none"><table class="data">
-    <tr><th></th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Inventario</th></tr>
+    <tr><th></th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Foto</th></tr>
     ${PRODUCTOS.map(p => `<tr>
-      <td><img src="${p.img}" alt="" style="width:44px;height:44px;border-radius:8px;object-fit:cover"></td>
+      <td><img id="prodimg-${p.id}" src="${prodImg(p)}" alt="" style="width:52px;height:52px;border-radius:8px;object-fit:cover"></td>
       <td><b>${p.nombre}</b></td><td>${p.cat}</td><td>${MXN(p.precio)}</td>
-      <td><span class="badge green">En stock</span></td>
+      <td style="white-space:nowrap">
+        <input type="file" accept="image/*" data-imgprod="${p.id}" id="file-${p.id}" style="display:none">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('file-${p.id}').click()">📷 Cambiar foto</button>
+        ${DB.productoImgs[p.id] ? `<button class="btn btn-ghost btn-sm" onclick="restaurarFotoProducto('${p.id}')">Restaurar</button>` : ''}
+      </td>
     </tr>`).join('')}
   </table></div></div>
   <div class="chart-card"><h3>Pedidos de flores</h3><div class="sub">Entregas en los espacios con notificación a la familia</div>
@@ -1907,6 +1911,49 @@ function bindAdminBody() {
   const s = document.getElementById('inv-sec'), e2 = document.getElementById('inv-est');
   if (s) s.onchange = () => { invFiltro.seccion = s.value; document.getElementById('tab-body').innerHTML = adminTabHTML(); bindAdminBody(); };
   if (e2) e2.onchange = () => { invFiltro.estado = e2.value; document.getElementById('tab-body').innerHTML = adminTabHTML(); bindAdminBody(); };
+  document.querySelectorAll('[data-imgprod]').forEach(inp => inp.onchange = () => {
+    const file = inp.files && inp.files[0];
+    if (!file) return;
+    subirFotoProducto(inp.dataset.imgprod, file);
+  });
+}
+
+/* foto personalizada de producto: se reduce en el navegador y se guarda localmente */
+function subirFotoProducto(pid, file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const MAXW = 900;
+      const scale = Math.min(1, MAXW / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      try {
+        DB.productoImgs[pid] = canvas.toDataURL('image/jpeg', 0.82);
+        saveDB();
+      } catch (e) {
+        toast('No se pudo guardar la foto (almacenamiento lleno). Usa una imagen más ligera.');
+        return;
+      }
+      const el = document.getElementById('prodimg-' + pid);
+      if (el) el.src = DB.productoImgs[pid];
+      document.getElementById('tab-body').innerHTML = adminTabHTML();
+      bindAdminBody();
+      toast(`Foto de "${productoById(pid).nombre}" actualizada 📷`);
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function restaurarFotoProducto(pid) {
+  delete DB.productoImgs[pid];
+  saveDB();
+  document.getElementById('tab-body').innerHTML = adminTabHTML();
+  bindAdminBody();
+  toast('Foto original restaurada.');
 }
 
 /* tooltip flotante de gráficas */

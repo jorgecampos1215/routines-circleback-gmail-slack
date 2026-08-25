@@ -25,12 +25,12 @@ const IMG = {
   masterplan:      'assets/img/masterplan.jpg',
 };
 
-/* flores frescas (CDN con respaldo local elegante) */
+/* flores frescas (fotos propias del cliente, assets locales) */
 const IMGF = {
-  rosasBlancas: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?auto=format&fit=crop&w=900&q=80',
-  floresMix:    'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=900&q=80',
-  floresRosa:   'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=900&q=80',
-  floresCampo:  'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?auto=format&fit=crop&w=900&q=80',
+  rosasBlancas: 'assets/img/flores/rosas-blancas.jpg',
+  floresMix:    'assets/img/flores/corona-funebre.jpg',
+  floresRosa:   'assets/img/flores/arreglo-primaveral.jpg',
+  floresCampo:  'assets/img/flores/tapete-floral.jpg',
 };
 
 /* ---------- utilidades ---------- */

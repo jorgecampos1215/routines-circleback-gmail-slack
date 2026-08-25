@@ -1,64 +1,78 @@
 /* ============================================================
-   M1 — Mapa interactivo 2D del panteón
-   SVG generado por código: secciones, espacios, capilla, lago,
-   caminos y arboledas. Pan + zoom con puntero y rueda.
+   M1 — Mapa interactivo 2D · NAJ PIXAM Casa del Alma
+   Plano SVG generado por código sobre el master plan:
+   acceso, oficinas/velatorios, capilla con velaria y espejo de
+   agua, campo santo, criptas, muros de nichos y crematorio.
    ============================================================ */
 
 const MAP_W = 1280, MAP_H = 900;
 const ST_COLOR = { disponible: '#308a45', apartado: '#e0a33e', ocupado: '#b05e30', vendido: '#3d6db5' };
-const ST_LABEL = { disponible: 'Disponible', apartado: 'Apartado', ocupado: 'Ocupado', vendido: 'Vendido' };
+const ST_LABEL = { disponible: 'Disponible', apartado: 'Apartado', ocupado: 'Ocupado', vendido: 'Vendido · preventa' };
 
-function arbol(x, y, s) {
-  return `<g opacity=".9">
-    <ellipse cx="${x}" cy="${y}" rx="${11 * s}" ry="${9 * s}" fill="#9db98a"/>
-    <ellipse cx="${x - 6 * s}" cy="${y + 4 * s}" rx="${8 * s}" ry="${7 * s}" fill="#8aa878"/>
-    <ellipse cx="${x + 7 * s}" cy="${y + 3 * s}" rx="${7 * s}" ry="${6 * s}" fill="#a8c295"/>
+function arbolSelva(x, y, s) {
+  return `<g opacity=".92">
+    <ellipse cx="${x}" cy="${y}" rx="${12 * s}" ry="${9 * s}" fill="#7e9464"/>
+    <ellipse cx="${x - 7 * s}" cy="${y + 4 * s}" rx="${8 * s}" ry="${6 * s}" fill="#6c8355"/>
+    <ellipse cx="${x + 8 * s}" cy="${y + 3 * s}" rx="${7 * s}" ry="${6 * s}" fill="#93a877"/>
+  </g>`;
+}
+function flamboyanSVG(x, y, s) {
+  return `<g opacity=".95">
+    <ellipse cx="${x}" cy="${y}" rx="${11 * s}" ry="${8 * s}" fill="#c45f3c"/>
+    <ellipse cx="${x - 6 * s}" cy="${y + 3 * s}" rx="${7 * s}" ry="${5 * s}" fill="#b04f30"/>
   </g>`;
 }
 
 function decorMapa() {
   const arboles = [
-    [545, 90, 1], [590, 150, .8], [560, 240, 1.1], [600, 330, .9], [545, 430, 1],
-    [590, 520, .85], [560, 640, 1], [600, 760, .9], [545, 840, 1.05],
-    [30, 90, .8], [30, 330, .9], [30, 560, .8], [30, 800, .9],
-    [1240, 90, .9], [1245, 300, .8], [905, 95, .8], [920, 590, .9], [1245, 840, .9],
-    [1100, 560, 1], [1180, 610, .8], [1060, 620, .9],
+    [545, 92, 1], [590, 168, .8], [560, 250, 1.1], [598, 336, .9], [545, 470, 1],
+    [590, 552, .85], [560, 640, 1], [598, 780, .9], [545, 852, 1.05],
+    [30, 92, .8], [30, 336, .9], [30, 580, .8], [30, 840, .9],
+    [1244, 92, .9], [1248, 330, .8], [905, 95, .8], [940, 610, .9], [1248, 852, .9],
   ];
+  const flamboyanes = [[500, 300, 1], [620, 560, .9], [1230, 560, 1], [70, 350, .8]];
   return `
-    <rect x="0" y="0" width="${MAP_W}" height="${MAP_H}" fill="#e4ebdc"/>
-    <!-- caminos -->
-    <rect x="510" y="0" width="70" height="${MAP_H}" rx="8" fill="#ddd6c6"/>
-    <rect x="0" y="480" width="${MAP_W}" height="56" rx="8" fill="#ddd6c6"/>
-    <rect x="880" y="0" width="44" height="480" rx="8" fill="#e2dccd"/>
-    <line x1="545" y1="0" x2="545" y2="${MAP_H}" stroke="#cfc7b2" stroke-width="2" stroke-dasharray="10 12"/>
-    <!-- lago -->
-    <ellipse cx="1105" cy="400" rx="150" ry="82" fill="#b7cfd9"/>
-    <ellipse cx="1105" cy="400" rx="118" ry="60" fill="#c7dde5"/>
-    <text x="1105" y="405" text-anchor="middle" class="map-deco-label">Lago del Recuerdo</text>
-    <!-- capilla -->
+    <rect x="0" y="0" width="${MAP_W}" height="${MAP_H}" fill="#e9e0c8"/>
+    <!-- andadores de sascab -->
+    <rect x="512" y="0" width="66" height="${MAP_H}" rx="8" fill="#dccfa9"/>
+    <rect x="0" y="500" width="${MAP_W}" height="52" rx="8" fill="#dccfa9"/>
+    <rect x="892" y="0" width="40" height="500" rx="8" fill="#e2d7b5"/>
+    <line x1="545" y1="0" x2="545" y2="${MAP_H}" stroke="#cbbb90" stroke-width="2" stroke-dasharray="10 12"/>
+    <!-- capilla con velaria y espejo de agua -->
     <g>
-      <rect x="668" y="330" width="150" height="110" rx="8" fill="#f0ebdf" stroke="#c9bfa6"/>
-      <polygon points="668,330 743,290 818,330" fill="#d8cdb2"/>
-      <rect x="736" y="255" width="14" height="42" fill="#d8cdb2"/>
-      <rect x="740" y="236" width="6" height="26" fill="#8a6a24"/>
-      <rect x="732" y="244" width="22" height="6" fill="#8a6a24"/>
-      <rect x="731" y="392" width="24" height="48" rx="10" fill="#b08d3e" opacity=".7"/>
-      <text x="743" y="465" text-anchor="middle" class="map-deco-label">Capilla San Rafael</text>
+      <ellipse cx="742" cy="470" rx="86" ry="24" fill="#b9cfd3"/>
+      <ellipse cx="742" cy="470" rx="64" ry="15" fill="#cbdee1"/>
+      <rect x="668" y="330" width="148" height="104" rx="6" fill="#efe6cf" stroke="#c6b791"/>
+      <path d="M650 330 Q 742 268 834 330 L 816 344 Q 742 296 668 344 Z" fill="#d8c69b" opacity=".9"/>
+      <rect x="736" y="352" width="12" height="34" fill="#a9682f"/>
+      <rect x="728" y="362" width="28" height="8" fill="#a9682f"/>
+      <text x="742" y="522" text-anchor="middle" class="map-deco-label">Capilla · espejo de agua</text>
+    </g>
+    <!-- oficinas / velatorios / crematorio -->
+    <g>
+      <rect x="640" y="560" width="120" height="56" rx="6" fill="#e7dcbd" stroke="#c6b791"/>
+      <text x="700" y="594" text-anchor="middle" class="map-deco-label">Velatorios</text>
+    </g>
+    <g>
+      <rect x="792" y="560" width="120" height="56" rx="6" fill="#e7dcbd" stroke="#c6b791"/>
+      <text x="852" y="588" text-anchor="middle" class="map-deco-label">Crematorio y</text>
+      <text x="852" y="602" text-anchor="middle" class="map-deco-label">fábrica de placas</text>
     </g>
     <!-- acceso -->
     <g>
-      <rect x="492" y="856" width="106" height="30" rx="6" fill="#c9bfa6"/>
-      <text x="545" y="876" text-anchor="middle" font-size="12" fill="#5c564b" font-weight="700">ACCESO PRINCIPAL</text>
+      <rect x="486" y="856" width="118" height="30" rx="6" fill="#c6b791"/>
+      <text x="545" y="876" text-anchor="middle" font-size="12" fill="#5f5544" font-weight="700">ACCESO PRINCIPAL</text>
     </g>
-    ${arboles.map(a => arbol(a[0], a[1], a[2])).join('')}
+    ${arboles.map(a => arbolSelva(a[0], a[1], a[2])).join('')}
+    ${flamboyanes.map(a => flamboyanSVG(a[0], a[1], a[2])).join('')}
   `;
 }
 
-/* filtros activos del mapa */
-const mapFiltro = { tipo: '', seccion: '', maxPrecio: 0, soloDisp: false, q: '' };
+/* filtros del mapa */
+const mapFiltro = { linea: '', seccion: '', maxPrecio: 0, soloDisp: false, q: '' };
 
 function espacioVisible(e) {
-  if (mapFiltro.tipo && e.tipo !== mapFiltro.tipo) return false;
+  if (mapFiltro.linea && e.linea !== mapFiltro.linea) return false;
   if (mapFiltro.seccion && e.seccion !== mapFiltro.seccion) return false;
   if (mapFiltro.maxPrecio && precioDe(e) > mapFiltro.maxPrecio) return false;
   if (mapFiltro.soloDisp && estadoDe(e) !== 'disponible') return false;
@@ -72,14 +86,15 @@ function svgEspacios(seleccionado) {
       const dim = !espacioVisible(e);
       const mem = memorialDeEspacio(e.id);
       const cls = ['sp', dim ? 'dim' : 'clickable', seleccionado === e.id ? 'selected' : ''].join(' ');
-      return `<rect id="sp-${e.id}" class="${cls}" x="${e.x}" y="${e.y}" width="${e.w}" height="${e.h}" rx="4"
+      /* los nichos se dibujan con esquinas rectas; tumbas redondeadas */
+      const rx = e.linea === 'nicho' ? 1.5 : 4;
+      return `<rect id="sp-${e.id}" class="${cls}" x="${e.x}" y="${e.y}" width="${e.w}" height="${e.h}" rx="${rx}"
         fill="${ST_COLOR[est]}" data-id="${e.id}">
-        <title>${e.id} · ${TIPOS[e.tipo].nombre} · ${ST_LABEL[est]}${mem ? ' · ' + mem.nombre : ''} · ${MXN(precioDe(e))}</title>
+        <title>${e.id} · ${TIPOS[e.tipo].nombre} (${sec.atributo}) · ${ST_LABEL[est]}${mem ? ' · ' + mem.nombre : ''} · ${MXN(precioDe(e))}</title>
       </rect>`;
     }).join('');
-    const labelY = sec.y - 12;
     return `<g>
-      <text x="${sec.x}" y="${labelY}" class="sec-label">SECCIÓN ${sec.id} · ${sec.nombre.toUpperCase()}</text>
+      <text x="${sec.x}" y="${sec.y - 12}" class="sec-label">${sec.id} · ${sec.nombre.toUpperCase()}</text>
       ${spaces}
     </g>`;
   }).join('');
@@ -87,7 +102,7 @@ function svgEspacios(seleccionado) {
 
 function renderMapaSVG(seleccionado) {
   return `<svg id="mapa-svg" viewBox="0 0 ${MAP_W} ${MAP_H}" preserveAspectRatio="xMidYMid meet"
-    role="img" aria-label="Plano interactivo del panteón">
+    role="img" aria-label="Plano interactivo del panteón NAJ PIXAM">
     ${decorMapa()}
     ${svgEspacios(seleccionado)}
   </svg>`;
@@ -139,7 +154,6 @@ function initPanZoom(svg) {
   });
   const end = ev => {
     if (drag && !drag.moved && ev.type === 'pointerup') {
-      // clic sin arrastre: seleccionar el espacio bajo el puntero
       const el = document.elementFromPoint(ev.clientX, ev.clientY);
       const id = el && el.dataset ? el.dataset.id : null;
       if (id && svg.onSpaceClick) svg.onSpaceClick(id);
@@ -155,4 +169,19 @@ function svgPoint(svg, ev) {
   const pt = svg.createSVGPoint();
   pt.x = ev.clientX; pt.y = ev.clientY;
   return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+/* plano de localización en miniatura para el contrato (M3) */
+function planoLocalizacionSVG(esp) {
+  const sec = seccionById(esp.seccion);
+  const pad = 26;
+  const x0 = sec.x - pad, y0 = sec.y - pad;
+  const w = sec.cols * (sec.cw + 4) + pad * 2, h = sec.rows * (sec.ch + 4) + pad * 2;
+  const rects = ESPACIOS.filter(e => e.seccion === sec.id).map(e =>
+    `<rect x="${e.x}" y="${e.y}" width="${e.w}" height="${e.h}" rx="2"
+      fill="${e.id === esp.id ? '#a9682f' : '#e0d6ba'}" stroke="#b8a97f" stroke-width="1"/>`).join('');
+  return `<svg viewBox="${x0} ${y0} ${w} ${h}" width="100%" style="max-width:420px;background:#f4eddb;border:1px solid #d8cba4;border-radius:8px" role="img" aria-label="Plano de localización del espacio ${esp.id}">
+    ${rects}
+    <text x="${esp.x + esp.w / 2}" y="${esp.y - 8}" text-anchor="middle" font-size="12" font-weight="700" fill="#a9682f">${esp.id}</text>
+  </svg>`;
 }

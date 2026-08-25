@@ -1,6 +1,6 @@
 /* ============================================================
-   Jardines del Recuerdo — SPA (demo funcional)
-   Router por hash + vistas de los módulos M1–M8.
+   NAJ PIXAM · Casa del Alma — SPA (demo funcional)
+   Router por hash + vistas de los módulos M1–M10.
    ============================================================ */
 
 const $app = () => document.getElementById('app');
@@ -20,7 +20,7 @@ function openModal(html) {
   const back = document.createElement('div');
   back.className = 'modal-back';
   back.innerHTML = `<div class="modal"><button class="x" data-close>✕</button>${html}</div>`;
-  back.addEventListener('click', e => { if (e.target === back || e.target.dataset.close !== undefined && e.target.hasAttribute('data-close')) closeModal(); });
+  back.addEventListener('click', e => { if (e.target === back || e.target.hasAttribute('data-close')) closeModal(); });
   document.body.appendChild(back);
   return back;
 }
@@ -34,11 +34,10 @@ function descargarArchivo(nombre, contenido, mime) {
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
 
-/* imagen de respaldo si el CDN no responde: degradado sereno que varía por imagen */
+/* respaldo si alguna imagen no carga: degradado sereno en tonos caliza */
 const FALLBACK_TONES = [
-  ['#dde7d6', '#a8bfa0', '#7d997a'], ['#e9e2cf', '#cbb98a', '#a08d55'],
-  ['#d8e2e4', '#a3bcc2', '#7c979e'], ['#e6ddd2', '#c2a98e', '#98805f'],
-  ['#dfe0d2', '#b0b491', '#878c67'], ['#e3dbe0', '#b3a3ad', '#8b7a85'],
+  ['#e9dfc6', '#cbb98a', '#a08d55'], ['#e5e0cd', '#b0b491', '#878c67'],
+  ['#e6ddd2', '#c2a98e', '#98805f'], ['#dde7d6', '#a8bfa0', '#7d997a'],
 ];
 window.addEventListener('error', e => {
   const t = e.target;
@@ -47,12 +46,15 @@ window.addEventListener('error', e => {
     const h = (t.src || '').split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
     const [c1, c2, c3] = FALLBACK_TONES[h % FALLBACK_TONES.length];
     t.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset=".62" stop-color="${c2}"/><stop offset="1" stop-color="${c3}"/></linearGradient></defs><rect width="800" height="520" fill="url(#g)"/><ellipse cx="${180 + (h % 440)}" cy="430" rx="330" ry="150" fill="#ffffff" opacity=".10"/><ellipse cx="${560 - (h % 320)}" cy="500" rx="420" ry="170" fill="#1e3d2b" opacity=".12"/><path d="M400 300 C 400 235, 358 215, 348 168 C 392 190, 396 224, 400 250 C 404 220, 414 194, 452 168 C 442 218, 402 236, 400 300 Z" fill="#f3ead6" opacity=".85"/></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset=".62" stop-color="${c2}"/><stop offset="1" stop-color="${c3}"/></linearGradient></defs><rect width="800" height="520" fill="url(#g)"/><ellipse cx="${180 + (h % 440)}" cy="430" rx="330" ry="150" fill="#ffffff" opacity=".10"/><ellipse cx="${560 - (h % 320)}" cy="500" rx="420" ry="170" fill="#3f5233" opacity=".12"/><path d="M400 300 C 400 235, 358 215, 348 168 C 392 190, 396 224, 400 250 C 404 220, 414 194, 452 168 C 442 218, 402 236, 400 300 Z" fill="#f3e6d2" opacity=".85"/></svg>`
     );
   }
 }, true);
 
-/* ---------- sesión (C2) ---------- */
+const monograma = (nombre, size, font) =>
+  `<div class="p" style="width:${size}px;height:${size}px;font-size:${font}px">${nombre.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>`;
+
+/* ---------- sesión y roles (C2 / M6) ---------- */
 function login(rol, nombre, email) {
   DB.user = { rol, nombre, email };
   saveDB(); renderHeader(); router();
@@ -65,8 +67,9 @@ function modalLogin(despues) {
     <h2>Iniciar sesión</h2>
     <p class="sub">Demo: elige un rol para explorar la plataforma. En producción este acceso usa correo y contraseña con recuperación.</p>
     <div class="role-cards">
-      <div class="radio-card" id="rc-titular"><b>Titular / comprador</b><span>Gestiona espacios, contratos, pagos y familiares invitados.</span></div>
-      <div class="radio-card" id="rc-admin"><b>Administrador del panteón</b><span>Inventario, precios, contratos, cobranza y reportes.</span></div>
+      <div class="radio-card" id="rc-titular"><b>👤 Titular / comprador</b><span>Compra y administra espacios, contratos, pagos y accesos familiares.</span></div>
+      <div class="radio-card" id="rc-funeraria"><b>🤝 Funeraria aliada</b><span>Acceso B2B con ${cfg('descFuneraria')}% de descuento; compra a nombre de su cliente final.</span></div>
+      <div class="radio-card" id="rc-admin"><b>🛡️ Administrador del panteón</b><span>Inventario, precios, financiamiento, contratos, cobranza y reportes.</span></div>
     </div>
     <div id="login-form" style="margin-top:18px;display:none">
       <div class="form-grid">
@@ -77,12 +80,15 @@ function modalLogin(despues) {
     </div>
   `);
   document.getElementById('rc-titular').onclick = () => {
+    document.querySelectorAll('.role-cards .radio-card').forEach(x => x.classList.remove('on'));
     document.getElementById('rc-titular').classList.add('on');
-    document.getElementById('rc-admin').classList.remove('on');
     document.getElementById('login-form').style.display = 'block';
   };
+  document.getElementById('rc-funeraria').onclick = () => {
+    closeModal(); login('funeraria', 'Funeraria La Paz de Kanasín', 'ventas@lapazkanasin.mx');
+  };
   document.getElementById('rc-admin').onclick = () => {
-    closeModal(); login('admin', 'Administración del Panteón', 'admin@jardinesdelrecuerdo.mx');
+    closeModal(); login('admin', 'Administración NAJ PIXAM', 'admin@najpixam.mx');
     location.hash = '#/admin';
   };
   document.getElementById('lg-go').onclick = () => {
@@ -99,20 +105,19 @@ const NAV = [
   ['#/tienda', 'Florería'], ['#/cuenta', 'Mi cuenta'], ['#/admin', 'Administración'],
 ];
 
+const LOGO_SVG = `<svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="16" fill="#3f5233"/><path d="M17 27 C 17 19, 11.5 17, 10.5 10.5 C 16 13.5, 16.4 17.5, 17 20.5 C 17.6 17, 18.6 13.5, 23.5 9.5 C 22 17, 17.2 19, 17 27 Z" fill="#e9d3a8"/><circle cx="17" cy="7.4" r="1.6" fill="#c99a52"/></svg>`;
+
 function renderHeader() {
   const route = location.hash || '#/';
   document.getElementById('site-header').innerHTML = `
     <div class="container header-in">
-      <a class="brand" href="#/">
-        <svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="14" fill="#1e3d2b"/><path d="M15 23 C 15 16, 10.5 14.5, 9.5 9.5 C 14 12, 14.5 15.5, 15 18 C 15.5 14.5, 16.5 11.5, 21 8.5 C 19.5 14.5, 15.2 16, 15 23 Z" fill="#e8d9ae"/></svg>
-        Jardines del Recuerdo
-      </a>
+      <a class="brand" href="#/">${LOGO_SVG}<span class="bt"><b>NAJ PIXAM</b><span>Casa del Alma</span></span></a>
       <nav class="main-nav">
         ${NAV.map(([h, l]) => `<a href="${h}" class="${route === h || (h !== '#/' && route.startsWith(h)) ? 'active' : ''}">${l}</a>`).join('')}
       </nav>
       <div class="header-cta">
         ${DB.user
-          ? `<span class="userchip">${DB.user.rol === 'admin' ? '🛡️' : '👤'} <b>${DB.user.nombre.split(' ')[0]}</b></span>
+          ? `<span class="userchip">${DB.user.rol === 'admin' ? '🛡️' : DB.user.rol === 'funeraria' ? '🤝' : '👤'} <b>${DB.user.nombre.split(' ')[0]}</b>${DB.user.rol === 'funeraria' ? ` · aliado −${cfg('descFuneraria')}%` : ''}</span>
              <button class="btn btn-ghost btn-sm" onclick="logout()">Salir</button>`
           : `<button class="btn btn-outline btn-sm" onclick="modalLogin()">Iniciar sesión</button>`}
       </div>
@@ -125,53 +130,53 @@ function footerHTML() {
     <div class="container">
       <div class="footer-in">
         <div>
-          <div class="footer-brand">Jardines del Recuerdo</div>
-          <p style="font-size:13.5px;max-width:34ch">Panteón y memorial digital. Un lugar sereno para honrar la memoria, con la tranquilidad de tenerlo todo en orden.</p>
+          <div class="footer-brand">NAJ PIXAM<small>Casa del Alma</small></div>
+          <p style="font-size:13.5px;max-width:36ch;margin-top:10px">Panteón y memorial digital en Kanasín, Yucatán. Un lugar para el alma, con la tranquilidad de tenerlo todo en orden.</p>
         </div>
         <div><h4>Plataforma</h4>
-          <a href="#/mapa">Mapa interactivo</a><a href="#/mapa">Comprar un espacio</a>
+          <a href="#/mapa">Mapa interactivo</a><a href="#/mapa">Tumbas y nichos</a>
           <a href="#/memoriales">Memoriales</a><a href="#/tienda">Florería y productos</a>
         </div>
-        <div><h4>Titulares</h4>
-          <a href="#/cuenta">Mi cuenta</a><a href="#/cuenta">Mis contratos</a>
-          <a href="#/cuenta">Pagos y mantenimiento</a><a href="#/cuenta">Familiares invitados</a>
+        <div><h4>Titulares y aliados</h4>
+          <a href="#/cuenta">Mi cuenta</a><a href="#/cuenta">Contratos y pagos</a>
+          <a href="#/" onclick="modalLogin()">Portal de funerarias</a><a href="#/" onclick="toast('Demo: el esquema de gobierno se atiende con convenio directo')">Esquema gobierno</a>
         </div>
         <div><h4>Contacto</h4>
-          <a href="#/">Carretera al Panteón km 3.5, Mérida, Yuc.</a>
-          <a href="#/">Tel. (999) 123 4567 · Atención 24 h</a>
-          <a href="#/">hola@jardinesdelrecuerdo.mx</a>
+          <a href="#/">Kanasín, Yucatán · junto al anillo periférico</a>
+          <a href="#/">Tel. (999) 123 4567 · Atención 24 h, 365 días</a>
+          <a href="#/">hola@najpixam.mx</a>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2026 Jardines del Recuerdo · Demo funcional desarrollada por DaCodes</span>
-        <span>Aviso de privacidad · Reglamento del panteón</span>
+        <span>© 2026 NAJ PIXAM · Casa del Alma · Demo funcional desarrollada por DaCodes</span>
+        <span>Contrato de adhesión NOM-036-SCFI-2016 · Reglamento del panteón · Aviso de privacidad</span>
       </div>
     </div>
   </footer>`;
 }
 
 /* ============================================================
-   VISTA: Inicio (C1)
+   VISTA: Inicio (C1 + M6)
    ============================================================ */
 function viewHome() {
-  const destacadas = [SECCIONES[0], SECCIONES[1], SECCIONES[2]];
   const disponibles = ESPACIOS.filter(e => estadoDe(e) === 'disponible').length;
+  const destacadas = [SECCIONES[0], SECCIONES[4], SECCIONES[2]];
   return `
   <section class="hero">
-    <img class="bg" src="${IMG.hero}" alt="Jardines del panteón al amanecer">
+    <img class="bg" src="${IMG.acceso}" alt="Acceso principal de NAJ PIXAM Casa del Alma">
     <div class="container">
-      <div class="eyebrow">Panteón & Memorial Digital</div>
-      <h1>Un lugar sereno para honrar toda una vida</h1>
-      <p class="lead">Explora el panteón en un mapa interactivo, elige y adquiere un espacio en línea con contrato y firma digital, y mantén vivo el recuerdo en un memorial para toda la familia.</p>
+      <div class="eyebrow">Panteón & Memorial Digital · Kanasín, Yucatán</div>
+      <h1>La casa del alma, bajo la luz del Mayab</h1>
+      <p class="lead">Recorre el panteón en un plano interactivo, adquiere tumbas y nichos en línea —de contado o financiado— con contrato de adhesión y firma digital, y honra la memoria con un memorial y una placa diseñada por ti.</p>
       <div class="actions">
         <a class="btn btn-gold" href="#/mapa">Explorar el mapa</a>
         <a class="btn btn-outline" style="border-color:#fff;color:#fff" href="#/memoriales">Visitar un memorial</a>
       </div>
       <div class="hero-stats">
         <div><b>${disponibles}</b><span>espacios disponibles hoy</span></div>
-        <div><b>6</b><span>jardines y secciones</span></div>
+        <div><b>2</b><span>líneas: tumbas y nichos</span></div>
         <div><b>24 h</b><span>atención a familias</span></div>
-        <div><b>100%</b><span>trámite en línea</span></div>
+        <div><b>0%</b><span>interés en financiamiento</span></div>
       </div>
     </div>
   </section>
@@ -181,18 +186,48 @@ function viewHome() {
       <div class="section-head center">
         <div class="eyebrow">Cómo funciona</div>
         <h2>Todo el proceso, sin filas ni papeleo</h2>
-        <p>Desde la selección del espacio hasta la firma del contrato y el pago, en minutos y desde cualquier dispositivo.</p>
+        <p>A necesidad o en preventa: desde la selección del espacio hasta la firma del contrato de adhesión y el pago, en minutos.</p>
       </div>
       <div class="grid grid-4 steps">
-        <div class="step"><h3>Explora el mapa</h3><p>Recorre el plano del panteón y compara terrenos, gavetas y criptas murales disponibles en tiempo real.</p></div>
-        <div class="step"><h3>Elige tu espacio</h3><p>Consulta la ficha con ubicación exacta, precio y desglose de derechos y mantenimiento anual.</p></div>
-        <div class="step"><h3>Firma en línea</h3><p>El contrato se genera con tus datos y se firma digitalmente con sello de tiempo. El PDF queda resguardado en tu cuenta.</p></div>
-        <div class="step"><h3>Paga seguro</h3><p>Pago único con tarjeta vía Stripe y mantenimiento anual como suscripción, con recordatorios automáticos.</p></div>
+        <div class="step"><h3>Explora el mapa</h3><p>Recorre el plano del panteón y compara tumbas y nichos disponibles en tiempo real, por sección y atributo.</p></div>
+        <div class="step"><h3>Elige tu espacio</h3><p>Ficha con ubicación exacta y desglose completo: espacio, excavación, extras normativos y mantenimiento.</p></div>
+        <div class="step"><h3>Firma en línea</h3><p>Contrato de adhesión registrado ante Profeco (NOM-036), con titular sustituto y beneficiarios, firmado digitalmente.</p></div>
+        <div class="step"><h3>Paga a tu ritmo</h3><p>De contado o financiado con enganche y mensualidades sin intereses. El título de derechos se entrega al liquidar.</p></div>
       </div>
     </div>
   </section>
 
   <section class="section tinted">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Líneas de servicio</div>
+        <h2>Tumbas y nichos, cada uno a su manera</h2>
+      </div>
+      <div class="grid grid-2">
+        <a class="card" href="#/mapa?linea=tumba">
+          <div class="card-img" style="height:250px"><img src="${IMG.camposanto}" alt="Campo santo bajo la velaria" loading="lazy"></div>
+          <div class="card-body">
+            <span class="badge gold">⚱️ Tumba · inhumación de cuerpo</span>
+            <h3 style="margin-top:10px">Lotes, criptas y campo santo</h3>
+            <p>El precio depende de la ubicación (sección). La excavación se cobra aparte, conforme al Reglamento de Panteones de Kanasín. Desde ${MXN(SECCIONES[1].base * .94)}.</p>
+          </div></a>
+        <a class="card" href="#/mapa?linea=nicho">
+          <div class="card-img" style="height:250px"><img src="${IMG.nichosTechados}" alt="Muros de nichos techados" loading="lazy"></div>
+          <div class="card-body">
+            <span class="badge gold">🕊️ Nicho · restos cremados</span>
+            <h3 style="margin-top:10px">Nichos techados, jardín y familiares</h3>
+            <p>El precio depende de si el nicho es techado o no techado. Ideales tras la cremación en el crematorio del propio panteón. Desde ${MXN(SECCIONES[5].base * .94)}.</p>
+          </div></a>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:26px;flex-wrap:wrap">
+        <span class="badge green">Compra a necesidad · cuerpo presente</span>
+        <span class="badge blue">Preventa / provisión · para ti o un beneficiario</span>
+        <span class="badge gold">Financiamiento sin intereses · título al liquidar</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
     <div class="container">
       <div class="section-head">
         <div class="eyebrow">Nuestros jardines</div>
@@ -205,33 +240,59 @@ function viewHome() {
             <div class="card-img"><img src="${s.img}" alt="${s.nombre}" loading="lazy"></div>
             <div class="card-body">
               <span class="badge green">${disp} disponibles</span>
-              <h3 style="margin-top:10px">${s.nombre}</h3>
-              <p>${TIPOS[s.tipo].nombre}s desde ${MXN(s.base * .92)} · Sección ${s.id}</p>
+              <h3 style="margin-top:10px;font-size:19px">${s.nombre}</h3>
+              <p>${TIPOS[s.tipo].nombre} · desde ${MXN(s.base * .94)}</p>
             </div></a>`;
         }).join('')}
       </div>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section tinted">
     <div class="container split">
       <div>
         <div class="section-head" style="margin-bottom:18px">
-          <div class="eyebrow">Memorial digital</div>
+          <div class="eyebrow">El proyecto</div>
+          <h2>Arquitectura que abraza a la selva</h2>
+          <p>Master plan de Ricardo Yslas Gámez Arquitectos: capilla con espejo de agua, velatorios, crematorio, campo santo, criptas, muros de nichos y fábrica de placas, entre andadores de sascab y flamboyanes.</p>
+        </div>
+        <ul class="checklist">
+          <li>Diseño conforme al Reglamento de Panteones de Kanasín y la Ley de Salud de Yucatán</li>
+          <li>Capilla San Rafael con velaria y espejo de agua</li>
+          <li>Crematorio y velatorios dentro del propio panteón</li>
+          <li>Fábrica propia de nichos, tumbas y placas conmemorativas</li>
+        </ul>
+        <div style="margin-top:26px"><a class="btn btn-primary" href="#/mapa">Recorrer el plano interactivo</a></div>
+      </div>
+      <div class="img-stack">
+        <img src="${IMG.conjunto}" alt="Vista aérea del conjunto NAJ PIXAM">
+        <img class="over" src="${IMG.capillaInterior}" alt="Interior de la capilla">
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container split">
+      <div class="img-stack">
+        <img src="${IMG.flamboyan}" alt="Flamboyán entre columnas de caliza">
+        <img class="over" src="${IMG.andadores}" alt="Andadores del panteón">
+      </div>
+      <div>
+        <div class="section-head" style="margin-bottom:18px">
+          <div class="eyebrow">Memorial digital & placa</div>
           <h2>El recuerdo también merece un lugar</h2>
-          <p>Cada difunto cuenta con una página conmemorativa donde la familia comparte mensajes, fotografías y recibe flores de quienes lo quisieron.</p>
+          <p>Cada difunto cuenta con una página conmemorativa con muro de recuerdos y flores, y su placa se diseña en línea dentro de los formatos del reglamento — nuestra fábrica la talla y la instala.</p>
         </div>
         <ul class="checklist">
           <li>Muro de recuerdos con mensajes de familiares y amigos</li>
-          <li>Envío y donación de flores directamente a la lápida</li>
-          <li>Código QR en la lápida que enlaza al memorial</li>
+          <li>Diseñador de placa con vista previa en vivo (M8)</li>
+          <li>Código QR en la placa que enlaza al memorial</li>
           <li>Acceso familiar administrado por el titular</li>
         </ul>
-        <div style="margin-top:26px"><a class="btn btn-primary" href="#/memoriales">Explorar memoriales</a></div>
-      </div>
-      <div class="img-stack">
-        <img src="${IMG.atardecer}" alt="Atardecer en los jardines">
-        <img class="over" src="${IMG.floresRosa}" alt="Flores en memoria">
+        <div style="margin-top:26px;display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="#/memoriales">Explorar memoriales</a>
+          <a class="btn btn-outline" href="#/placa">Diseñar una placa</a>
+        </div>
       </div>
     </div>
   </section>
@@ -241,13 +302,13 @@ function viewHome() {
       <div class="section-head">
         <div class="eyebrow">Florería del panteón</div>
         <h2>Flores frescas, entregadas con respeto</h2>
-        <p>Nuestro equipo coloca cada arreglo directamente en el espacio del difunto y notifica a la familia con fotografía de entrega.</p>
+        <p>Cualquier persona puede enviar o donar flores a un difunto; nuestro equipo las coloca en el espacio y notifica a la familia.</p>
       </div>
       <div class="shop-grid">
         ${PRODUCTOS.slice(0, 4).map(p => `
           <a class="card product" href="#/tienda">
             <div class="card-img"><img src="${p.img}" alt="${p.nombre}" loading="lazy"></div>
-            <div class="card-body"><h3 style="font-size:18px">${p.nombre}</h3>
+            <div class="card-body"><h3 style="font-size:17px">${p.nombre}</h3>
             <div class="rowline"><span class="price">${MXN(p.precio)}</span><span class="badge gold">${p.cat}</span></div></div>
           </a>`).join('')}
       </div>
@@ -256,27 +317,53 @@ function viewHome() {
   </section>
 
   <section class="section">
-    <div class="container split">
-      <div class="img-stack"><img src="${IMG.valle}" alt="Vista del valle"></div>
+    <div class="container">
+      <div class="section-head center">
+        <div class="eyebrow">Un panteón para todos</div>
+        <h2>Público, funerarias y gobierno</h2>
+      </div>
+      <div class="grid grid-3">
+        <div class="card seg-card">
+          <h3>Público general</h3>
+          <ul><li>Lista de precios pública</li><li>Compra a necesidad o en preventa</li><li>Financiamiento sin intereses</li></ul>
+          <a class="btn btn-primary btn-sm" href="#/mapa">Explorar espacios</a>
+        </div>
+        <div class="card seg-card">
+          <h3>Funerarias aliadas</h3>
+          <ul><li>${cfg('descFuneraria')}% de descuento de aliado</li><li>Compra a nombre del cliente final</li><li>Nicho tras cremación o tumba con cuerpo presente</li></ul>
+          <button class="btn btn-outline btn-sm" onclick="modalLogin()">Acceso de aliado</button>
+        </div>
+        <div class="card seg-card">
+          <h3>Gobierno</h3>
+          <ul><li>Esquema y condiciones propias</li><li>Convenios institucionales</li><li>Atención directa con la administración</li></ul>
+          <button class="btn btn-ghost btn-sm" onclick="toast('Demo: los convenios de gobierno se gestionan con la administración')">Solicitar convenio</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tinted" style="padding-bottom:0">
+    <div class="container split" style="padding-bottom:84px">
       <div>
         <div class="section-head" style="margin-bottom:14px">
           <div class="eyebrow">Apps móviles</div>
-          <h2>Llévalo contigo, iOS y Android</h2>
-          <p>Consulta tus espacios, recibe recordatorios de mantenimiento, envía flores y visita memoriales desde tu teléfono.</p>
+          <h2>La relación continúa en tu teléfono</h2>
+          <p>Memorial, placa, flores, ubicación del espacio en tus visitas, recordatorios de mensualidades y pago del mantenimiento — iOS y Android.</p>
         </div>
         <div class="store-badges">
           <a class="store-badge" href="#/" onclick="toast('Demo: la app iOS se publica junto con la plataforma')"><span style="font-size:26px"></span><span><small>Descárgala en el</small><b>App Store</b></span></a>
           <a class="store-badge" href="#/" onclick="toast('Demo: la app Android se publica junto con la plataforma')"><span style="font-size:24px">▶</span><span><small>Disponible en</small><b>Google Play</b></span></a>
         </div>
       </div>
+      <div class="img-stack"><img src="${IMG.porticoAcceso}" alt="Pórtico de acceso"></div>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0">
+  <section class="section" style="padding-top:64px">
     <div class="container">
-      <div class="panel" style="background:var(--forest);color:#fff;text-align:center;border:none">
-        <h2 style="color:#fff;font-size:34px">La previsión es un acto de amor</h2>
-        <p style="color:#c9d6cb;max-width:60ch;margin:10px auto 24px">Adquirir un espacio en previsión evita a tu familia decisiones difíciles en los momentos más delicados. Nuestro equipo te acompaña en todo el proceso.</p>
+      <div class="panel" style="background:var(--jungle);color:#fff;text-align:center;border:none">
+        <h2 style="color:#fdf9ee;font-size:34px">La previsión es un acto de amor</h2>
+        <p style="color:#cfd6c0;max-width:62ch;margin:10px auto 24px">Adquirir un espacio en preventa —para ti o para un beneficiario— evita a tu familia decisiones difíciles en los momentos más delicados, con mensualidades sin intereses.</p>
         <a class="btn btn-gold" href="#/mapa">Ver espacios disponibles</a>
       </div>
     </div>
@@ -291,6 +378,7 @@ let mapaSel = null;
 
 function viewMapa(params) {
   if (params.sec) mapFiltro.seccion = params.sec;
+  if (params.linea) mapFiltro.linea = params.linea;
   if (params.sel) mapaSel = params.sel;
   setTimeout(initMapa, 0);
   return `
@@ -298,10 +386,10 @@ function viewMapa(params) {
     <div class="map-canvas-wrap" id="map-wrap">
       ${renderMapaSVG(mapaSel)}
       <div class="map-toolbar">
-        <label class="tool">Tipo
-          <select id="f-tipo">
-            <option value="">Todos</option>
-            ${Object.entries(TIPOS).map(([k, t]) => `<option value="${k}" ${mapFiltro.tipo === k ? 'selected' : ''}>${t.nombre}</option>`).join('')}
+        <label class="tool">Línea
+          <select id="f-linea">
+            <option value="">Todas</option>
+            ${Object.entries(LINEAS).map(([k, l]) => `<option value="${k}" ${mapFiltro.linea === k ? 'selected' : ''}>${l.nombre}</option>`).join('')}
           </select></label>
         <label class="tool">Sección
           <select id="f-seccion">
@@ -311,11 +399,11 @@ function viewMapa(params) {
         <label class="tool">Precio máx.
           <select id="f-precio">
             <option value="0">Sin límite</option>
-            <option value="30000" ${mapFiltro.maxPrecio === 30000 ? 'selected' : ''}>Hasta $30,000</option>
-            <option value="60000" ${mapFiltro.maxPrecio === 60000 ? 'selected' : ''}>Hasta $60,000</option>
-            <option value="90000" ${mapFiltro.maxPrecio === 90000 ? 'selected' : ''}>Hasta $90,000</option>
+            <option value="40000" ${mapFiltro.maxPrecio === 40000 ? 'selected' : ''}>Hasta $40,000</option>
+            <option value="80000" ${mapFiltro.maxPrecio === 80000 ? 'selected' : ''}>Hasta $80,000</option>
+            <option value="120000" ${mapFiltro.maxPrecio === 120000 ? 'selected' : ''}>Hasta $120,000</option>
           </select></label>
-        <label class="tool"><input type="checkbox" id="f-disp" ${mapFiltro.soloDisp ? 'checked' : ''} style="accent-color:var(--forest)"> Solo disponibles</label>
+        <label class="tool"><input type="checkbox" id="f-disp" ${mapFiltro.soloDisp ? 'checked' : ''} style="accent-color:var(--jungle)"> Solo disponibles</label>
         <label class="tool">🔍 <input type="search" id="f-buscar" list="dl-difuntos" placeholder="Buscar difunto en el mapa…"></label>
         <datalist id="dl-difuntos">${todosMemoriales().map(m => `<option value="${m.nombre}">`).join('')}</datalist>
       </div>
@@ -337,42 +425,43 @@ function fichaEspacioHTML(id) {
   const e = id && espacioById(id);
   if (!e) {
     return `<div class="empty">
-      <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#8a8478" stroke-width="1.4"><path d="M12 21s-7-5.1-7-11a7 7 0 0 1 14 0c0 5.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
-      <h3 style="font-size:22px;color:var(--forest);margin-bottom:8px">Selecciona un espacio</h3>
-      <p style="font-size:14px">Haz clic en cualquier espacio del plano para ver su ficha: tipo, ubicación, precio y disponibilidad. Usa la rueda del ratón para acercar.</p>
+      <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#94886f" stroke-width="1.4"><path d="M12 21s-7-5.1-7-11a7 7 0 0 1 14 0c0 5.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+      <h3 style="font-size:22px;color:var(--jungle);margin-bottom:8px">Selecciona un espacio</h3>
+      <p style="font-size:14px">Haz clic en cualquier espacio del plano para ver su ficha: línea, tipo, ubicación, atributo de precio y disponibilidad. Acerca con la rueda del ratón.</p>
     </div>`;
   }
   const sec = seccionById(e.seccion);
   const est = estadoDe(e);
-  const tipo = TIPOS[e.tipo];
   const mem = memorialDeEspacio(e.id);
-  const precio = precioDe(e);
+  const rol = DB.user && DB.user.rol;
+  const d = desglose(e, 'necesidad', rol);
   let accion = '';
   if (est === 'disponible') {
     accion = `<a class="btn btn-gold btn-block" href="#/comprar/${e.id}">Iniciar compra en línea</a>
-      <p style="font-size:12px;color:var(--ink-3);text-align:center;margin-top:10px">Se aparta 15 minutos mientras completas el proceso.</p>`;
+      <p style="font-size:12px;color:var(--ink-3);text-align:center;margin-top:10px">Se aparta 15 minutos mientras completas el proceso. Contado o financiado sin intereses.</p>`;
   } else if (est === 'apartado') {
     accion = `<button class="btn btn-outline btn-block" disabled>Apartado temporalmente</button>`;
   } else if (mem) {
-    accion = `<a class="btn btn-primary btn-block" href="#/memorial/${mem.id}">Ver memorial de ${mem.nombre.split(' ')[0]} ${mem.nombre.split(' ')[1] || ''}</a>
+    accion = `<a class="btn btn-primary btn-block" href="#/memorial/${mem.id}">Ver memorial de ${mem.nombre.split(' ')[1] || mem.nombre}</a>
       <a class="btn btn-ghost btn-block" style="margin-top:8px" href="#/tienda?destino=${mem.id}">Enviar flores 🌹</a>`;
   } else {
-    accion = `<button class="btn btn-outline btn-block" disabled>${est === 'vendido' ? 'Espacio vendido' : 'Espacio ocupado'}</button>`;
+    accion = `<button class="btn btn-outline btn-block" disabled>${est === 'vendido' ? 'Vendido en preventa' : 'Espacio ocupado'}</button>`;
   }
   return `<div class="space-card">
     <img class="ficha-img" src="${sec.img}" alt="${sec.nombre}">
     <div class="body">
       <span class="tag ${est}"><span class="dot" style="background:${ST_COLOR[est]}"></span>${ST_LABEL[est]}</span>
-      <h2 style="margin-top:10px">${tipo.icon} ${tipo.nombre} ${e.id}</h2>
-      <div class="loc">Sección ${sec.id} · ${sec.nombre} · Fila ${e.fila}, Posición ${e.col}</div>
-      <p style="font-size:13.5px;color:var(--ink-2)">${tipo.desc}</p>
-      ${mem ? `<p style="font-size:13.5px;margin-top:10px">🕊️ Aquí descansa <b>${mem.nombre}</b> (${new Date(mem.nac).getFullYear()}–${new Date(mem.def).getFullYear()}).</p>` : ''}
+      <h2 style="margin-top:10px">${LINEAS[e.linea].icon} ${TIPOS[e.tipo].nombre} ${e.id}</h2>
+      <div class="loc">${sec.nombre} · ${e.linea === 'nicho' ? sec.atributo : 'Sección ' + sec.id} · Fila ${e.fila}, Posición ${e.col}</div>
+      <p style="font-size:13.5px;color:var(--ink-2)">${LINEAS[e.linea].desc}</p>
+      ${mem ? `<p style="font-size:13.5px;margin-top:10px">🕊️ Aquí descansa <b>${mem.nombre}</b> (${mem.nac ? new Date(mem.nac).getFullYear() : '·'}–${new Date(mem.def).getFullYear()}).</p>` : ''}
       ${est === 'disponible' || est === 'apartado' ? `
       <table class="price-table">
-        <tr><td>Espacio (${tipo.nombre.toLowerCase()})</td><td>${MXN(precio)}</td></tr>
-        <tr><td>Derechos de inhumación</td><td>${MXN(tipo.derechos)}</td></tr>
-        <tr><td>Mantenimiento anual (suscripción)</td><td>${MXN(tipo.mant)}/año</td></tr>
-        <tr class="total"><td>Pago inicial</td><td>${MXN(precio + tipo.derechos + tipo.mant)}</td></tr>
+        <tr><td>Espacio (${TIPOS[e.tipo].nombre.toLowerCase()})</td><td>${MXN(precioDe(e))}</td></tr>
+        ${rol === 'funeraria' ? `<tr><td>Descuento aliado (−${cfg('descFuneraria')}%)</td><td>−${MXN(d.descuento)}</td></tr>` : ''}
+        ${e.linea === 'tumba' ? `<tr><td>Excavación (a necesidad, aparte)</td><td>${MXN(cfg('excavacion'))}</td></tr>` : `<tr><td>Apertura/cierre por urna</td><td>${MXN(cfg('aperturaCierreNicho'))}</td></tr>`}
+        <tr><td>Mantenimiento anual</td><td>${MXN(mantDe(e))}/año</td></tr>
+        <tr class="sub"><td colspan="2">Extras normativos por cuenta del consumidor: IVA ${cfg('ivaPct')}%, derechos municipales, Registro Civil y maniobras — se desglosan al comprar.</td></tr>
       </table>` : ''}
       <div style="margin-top:16px">${accion}</div>
     </div>
@@ -399,7 +488,7 @@ function initMapa() {
     refreshSpaces();
   };
   const bind = (id, fn) => { const n = document.getElementById(id); if (n) n.onchange = fn; };
-  bind('f-tipo', ev => { mapFiltro.tipo = ev.target.value; refreshSpaces(); });
+  bind('f-linea', ev => { mapFiltro.linea = ev.target.value; refreshSpaces(); });
   bind('f-seccion', ev => { mapFiltro.seccion = ev.target.value; refreshSpaces(); });
   bind('f-precio', ev => { mapFiltro.maxPrecio = +ev.target.value; refreshSpaces(); });
   bind('f-disp', ev => { mapFiltro.soloDisp = ev.target.checked; refreshSpaces(); });
@@ -432,14 +521,15 @@ let timerInt = null;
 
 function viewComprar(params, espId) {
   const e = espacioById(espId);
-  if (!e) return `<div class="wizard"><div class="panel"><h2>Espacio no encontrado</h2><p class="sub">El espacio solicitado no existe.</p><a class="btn btn-primary" href="#/mapa">Volver al mapa</a></div></div>`;
+  if (!e) return `<div class="wizard"><div class="panel"><h2>Espacio no encontrado</h2><a class="btn btn-primary" href="#/mapa">Volver al mapa</a></div></div>`;
   const est = estadoDe(e);
   const esMio = DB.reserva && DB.reserva.espacioId === espId;
   if (est !== 'disponible' && !esMio && !(wiz && wiz.espacioId === espId)) {
     return `<div class="wizard"><div class="panel"><h2>Este espacio ya no está disponible</h2><p class="sub">Alguien más lo apartó o adquirió. Elige otro espacio en el mapa.</p><a class="btn btn-primary" href="#/mapa">Volver al mapa</a></div></div>`;
   }
   if (!wiz || wiz.espacioId !== espId) {
-    wiz = { espacioId: espId, step: 1, modo: 'inmediato', titular: {}, difunto: {}, firma: '', acepto: false };
+    wiz = { espacioId: espId, step: 1, modalidad: 'necesidad', titular: {}, difunto: {}, sustituto: {}, ben1: {}, ben2: {},
+            clienteFinal: '', firma: '', acepto: false, pagoTipo: 'contado', engPct: cfg('engancheMin'), plazo: cfg('plazos')[1] };
   }
   setTimeout(bindWizard, 0);
   return `<div class="wizard">${wizardHTML(e)}</div>`;
@@ -447,10 +537,9 @@ function viewComprar(params, espId) {
 
 function wizardHTML(e) {
   const pasos = ['Espacio', 'Datos', 'Contrato', 'Pago', 'Confirmación'];
-  const tipo = TIPOS[e.tipo];
   const sec = seccionById(e.seccion);
-  const precio = precioDe(e);
-  const total = precio + tipo.derechos;
+  const rol = DB.user && DB.user.rol;
+  const d = desglose(e, wiz.modalidad, rol);
   const stepsBar = `<div class="wizard-steps">${pasos.map((p, i) =>
     `<span class="wstep ${wiz.step === i + 1 ? 'active' : ''} ${wiz.step > i + 1 ? 'done' : ''}"><span class="n">${wiz.step > i + 1 ? '✓' : i + 1}</span>${p}</span>`).join('')}</div>`;
 
@@ -460,14 +549,16 @@ function wizardHTML(e) {
   let body = '';
   if (wiz.step === 1) {
     body = `<div class="panel">
-      <h2>${tipo.icon} ${tipo.nombre} ${e.id}</h2>
-      <p class="sub">Sección ${sec.id} · ${sec.nombre} · Fila ${e.fila}, Posición ${e.col}</p>
-      <img src="${sec.img}" alt="${sec.nombre}" style="border-radius:12px;height:220px;width:100%;object-fit:cover;margin-bottom:18px">
+      <h2>${LINEAS[e.linea].icon} ${TIPOS[e.tipo].nombre} ${e.id}</h2>
+      <p class="sub">${sec.nombre} · ${e.linea === 'nicho' ? sec.atributo : 'Sección ' + sec.id} · Fila ${e.fila}, Posición ${e.col}</p>
+      <img src="${sec.img}" alt="${sec.nombre}" style="border-radius:12px;height:230px;width:100%;object-fit:cover;margin-bottom:18px">
       <table class="price-table">
-        <tr><td>Espacio (${tipo.nombre.toLowerCase()})</td><td>${MXN(precio)}</td></tr>
-        <tr><td>Derechos de inhumación</td><td>${MXN(tipo.derechos)}</td></tr>
-        <tr><td>Mantenimiento anual — suscripción Stripe</td><td>${MXN(tipo.mant)}/año</td></tr>
-        <tr class="total"><td>Pago único hoy + primer año de mantenimiento</td><td>${MXN(total + tipo.mant)}</td></tr>
+        <tr><td>Espacio (${TIPOS[e.tipo].nombre.toLowerCase()})</td><td>${MXN(precioDe(e))}</td></tr>
+        ${rol === 'funeraria' ? `<tr><td>Descuento aliado (−${cfg('descFuneraria')}%)</td><td>−${MXN(d.descuento)}</td></tr>` : ''}
+        ${e.linea === 'tumba' ? `<tr><td>Excavación (solo compra a necesidad)</td><td>${MXN(cfg('excavacion'))}</td></tr>` : ''}
+        <tr><td>Mantenimiento anual (recurrente)</td><td>${MXN(mantDe(e))}/año</td></tr>
+        <tr class="sub"><td colspan="2">Más extras normativos por cuenta del consumidor (IVA ${cfg('ivaPct')}%, derechos municipales de Kanasín, Registro Civil y maniobras) — se desglosan en el paso de pago según la modalidad.</td></tr>
+        <tr class="total"><td>Vigencia del derecho de uso</td><td>${cfg('vigenciaAnios')} años desde la ocupación</td></tr>
       </table>
       <div class="wizard-nav">
         <a class="btn btn-ghost" href="#/mapa?sel=${e.id}">← Volver al mapa</a>
@@ -478,27 +569,44 @@ function wizardHTML(e) {
   if (wiz.step === 2) {
     body = `<div class="panel">
       ${timer}
-      <h2>Datos del titular y del difunto</h2>
-      <p class="sub">El titular es quien firma el contrato, realiza los pagos y administra el espacio y los accesos familiares.</p>
-      <h3 style="font-size:17px;margin-bottom:12px;color:var(--forest)">Titular / comprador</h3>
+      <h2>Datos del contrato</h2>
+      <p class="sub">El titular firma el contrato de adhesión, paga y administra el espacio. Puede designar titular sustituto y hasta dos beneficiarios (cláusulas décima cuarta y décima quinta).</p>
+      <h3 class="ft">Titular / consumidor</h3>
       <div class="form-grid">
-        <div class="field"><label>Nombre completo *</label><input id="t-nombre" value="${wiz.titular.nombre || (DB.user && DB.user.rol === 'titular' ? DB.user.nombre : '')}"></div>
-        <div class="field"><label>Correo electrónico *</label><input id="t-email" type="email" value="${wiz.titular.email || (DB.user && DB.user.rol === 'titular' ? DB.user.email : '')}"></div>
+        <div class="field"><label>Nombre completo *</label><input id="t-nombre" value="${wiz.titular.nombre || (DB.user && DB.user.rol !== 'admin' ? DB.user.nombre : '')}"></div>
+        <div class="field"><label>Correo electrónico *</label><input id="t-email" type="email" value="${wiz.titular.email || (DB.user ? DB.user.email : '')}"></div>
         <div class="field"><label>Teléfono *</label><input id="t-tel" value="${wiz.titular.tel || ''}" placeholder="(999) 000 0000"></div>
-        <div class="field"><label>Domicilio</label><input id="t-dom" value="${wiz.titular.dom || ''}" placeholder="Calle, número, colonia, ciudad"></div>
+        <div class="field"><label>Domicilio</label><input id="t-dom" value="${wiz.titular.dom || ''}" placeholder="Calle, número, colonia, municipio"></div>
       </div>
-      <h3 style="font-size:17px;margin:24px 0 12px;color:var(--forest)">¿Para quién es el espacio?</h3>
-      <div class="radio-cards">
-        <div class="radio-card ${wiz.modo === 'inmediato' ? 'on' : ''}" data-modo="inmediato"><b>Registro del difunto ahora</b><span>La inhumación es próxima; se crea el memorial de inmediato.</span></div>
-        <div class="radio-card ${wiz.modo === 'prevision' ? 'on' : ''}" data-modo="prevision"><b>Compra en previsión</b><span>Adquieres el espacio a futuro. El registro del difunto se hace cuando sea necesario.</span></div>
+      ${rol === 'funeraria' ? `
+      <h3 class="ft">Cliente final (compra de aliado)</h3>
+      <div class="form-grid"><div class="field full"><label>Nombre del cliente final *</label><input id="t-cliente" value="${wiz.clienteFinal || ''}" placeholder="La funeraria compra a nombre de su cliente"></div></div>` : ''}
+      <h3 class="ft">Modalidad de compra</h3>
+      <div class="radio-cards three">
+        <div class="radio-card ${wiz.modalidad === 'necesidad' ? 'on' : ''}" data-modo="necesidad"><b>A necesidad</b><span>Cuerpo presente o cenizas por depositar; se registra al difunto y se crea el memorial.</span></div>
+        <div class="radio-card ${wiz.modalidad === 'prevision-propia' ? 'on' : ''}" data-modo="prevision-propia"><b>Preventa · para mí</b><span>El titular adquiere su propio espacio a futuro.</span></div>
+        <div class="radio-card ${wiz.modalidad === 'prevision-beneficiario' ? 'on' : ''}" data-modo="prevision-beneficiario"><b>Preventa · beneficiario</b><span>El espacio se destina a un beneficiario designado.</span></div>
       </div>
-      <div id="difunto-form" style="margin-top:18px;display:${wiz.modo === 'inmediato' ? 'block' : 'none'}">
+      <div id="difunto-form" style="margin-top:18px;display:${wiz.modalidad === 'necesidad' ? 'block' : 'none'}">
+        <h3 class="ft">Datos del difunto</h3>
         <div class="form-grid">
           <div class="field"><label>Nombre completo del difunto *</label><input id="d-nombre" value="${wiz.difunto.nombre || ''}"></div>
           <div class="field"><label>Fecha de nacimiento</label><input id="d-nac" type="date" value="${wiz.difunto.nac || ''}"></div>
           <div class="field"><label>Fecha de defunción</label><input id="d-def" type="date" value="${wiz.difunto.def || ''}"></div>
           <div class="field"><label>Epitafio o dedicatoria (opcional)</label><input id="d-epi" value="${wiz.difunto.epi || ''}" placeholder="Unas palabras para recordarle"></div>
         </div>
+      </div>
+      <h3 class="ft">Titular sustituto (opcional)</h3>
+      <div class="form-grid">
+        <div class="field"><label>Nombre</label><input id="s-nombre" value="${wiz.sustituto.nombre || ''}"></div>
+        <div class="field"><label>Parentesco</label><input id="s-par" value="${wiz.sustituto.par || ''}" placeholder="Cónyuge, hijo(a)…"></div>
+      </div>
+      <h3 class="ft">Beneficiarios (hasta dos, opcional)</h3>
+      <div class="form-grid">
+        <div class="field"><label>Beneficiario 1 · nombre</label><input id="b1-nombre" value="${wiz.ben1.nombre || ''}"></div>
+        <div class="field"><label>Parentesco</label><input id="b1-par" value="${wiz.ben1.par || ''}"></div>
+        <div class="field"><label>Beneficiario 2 · nombre</label><input id="b2-nombre" value="${wiz.ben2.nombre || ''}"></div>
+        <div class="field"><label>Parentesco</label><input id="b2-par" value="${wiz.ben2.par || ''}"></div>
       </div>
       <div class="wizard-nav">
         <button class="btn btn-ghost" id="w-back">← Regresar</button>
@@ -509,16 +617,16 @@ function wizardHTML(e) {
   if (wiz.step === 3) {
     body = `<div class="panel">
       ${timer}
-      <h2>Contrato de cesión de uso</h2>
-      <p class="sub">Lee el contrato generado con tus datos. La firma es de aceptación en línea (clickwrap) con sello de tiempo; el PDF queda resguardado en tu cuenta.</p>
+      <h2>Contrato de adhesión</h2>
+      <p class="sub">Derechos de uso de lotes o nichos en temporalidad, conforme a la NOM-036-SCFI-2016 y registrado ante Profeco. La firma es de aceptación en línea (clickwrap) con sello de tiempo; el PDF queda resguardado en tu cuenta.</p>
       <div class="contract-box">${contratoTexto(e, wiz, null)}</div>
       <label class="check-line"><input type="checkbox" id="c-acepto" ${wiz.acepto ? 'checked' : ''}>
-        He leído y acepto los términos del contrato, el reglamento interno del panteón y el aviso de privacidad.</label>
+        He leído y acepto el contrato de adhesión, el reglamento interno del panteón y el aviso de privacidad. Entiendo que los derechos no son transferibles salvo a un familiar, con consentimiento por escrito del proveedor.</label>
       <div class="signature-row">
-        <div class="field"><label>Firma: escribe tu nombre completo tal como aparece arriba *</label>
-          <input id="c-firma" value="${wiz.firma || ''}" placeholder="${wiz.titular.nombre || ''}" style="font-family:var(--font-display);font-size:20px;font-style:italic"></div>
+        <div class="field"><label>Firma: escribe tu nombre completo tal como aparece en el contrato *</label>
+          <input id="c-firma" value="${wiz.firma || ''}" placeholder="${wiz.titular.nombre || ''}" style="font-family:var(--font-serif);font-size:20px;font-style:italic"></div>
       </div>
-      <div class="stamp">🕐 Sello de tiempo al firmar: <b id="stamp-now">${new Date().toLocaleString('es-MX')}</b> · IP registrada · Folio por asignar</div>
+      <div class="stamp">🕐 Sello de tiempo al firmar: <b>${new Date().toLocaleString('es-MX')}</b> · IP registrada · Folio por asignar</div>
       <div class="wizard-nav">
         <button class="btn btn-ghost" id="w-back">← Regresar</button>
         <button class="btn btn-gold" id="w-next">Firmar y continuar al pago</button>
@@ -526,27 +634,55 @@ function wizardHTML(e) {
     </div>`;
   }
   if (wiz.step === 4) {
+    const engMonto = Math.round(d.financiable * wiz.engPct / 100);
+    const mensualidad = Math.ceil((d.financiable - engMonto) / wiz.plazo);
+    const hoyFin = engMonto + d.extras + d.mant;
     body = `<div class="panel">
       ${timer}
       <h2>Pago seguro</h2>
-      <p class="sub">Procesado por Stripe. Hoy se cobra el pago único; el mantenimiento anual queda como suscripción con renovación automática y recordatorios.</p>
+      <p class="sub">Procesado por Stripe. Precio fijo que no genera intereses (cláusula tercera). El título de derechos se entrega al liquidar.</p>
+      <h3 class="ft">Forma de pago</h3>
+      <div class="radio-cards">
+        <div class="radio-card ${wiz.pagoTipo === 'contado' ? 'on' : ''}" data-pago="contado"><b>De contado</b><span>Un solo pago hoy. Título de derechos inmediato.</span></div>
+        <div class="radio-card ${wiz.pagoTipo === 'financiado' ? 'on' : ''}" data-pago="financiado"><b>Financiado sin intereses</b><span>Enganche + mensualidades fijas vía suscripción Stripe.</span></div>
+      </div>
+      <div id="fin-opts" style="display:${wiz.pagoTipo === 'financiado' ? 'block' : 'none'}">
+        <div class="fin-grid">
+          <div class="field"><label>Enganche (mín. ${cfg('engancheMin')}%)</label>
+            <select id="p-eng">${[30, 40, 50].filter(x => x >= cfg('engancheMin')).map(x => `<option value="${x}" ${wiz.engPct === x ? 'selected' : ''}>${x}%</option>`).join('')}</select></div>
+          <div class="field"><label>Plazo (mensualidades)</label>
+            <select id="p-plazo">${cfg('plazos').map(x => `<option value="${x}" ${wiz.plazo === x ? 'selected' : ''}>${x} meses</option>`).join('')}</select></div>
+          <div class="field"><label>Mensualidad resultante</label><input value="${MXN(mensualidad)}" disabled></div>
+        </div>
+        <div class="fin-summary">La cuota anual de mantenimiento (${MXN(d.mant)}) se integra a tu suscripción y continúa tras la liquidación.</div>
+      </div>
+      <h3 class="ft">Desglose</h3>
+      <table class="price-table">
+        <tr><td>Espacio ${e.id}${d.descuento ? ` (con descuento de aliado −${cfg('descFuneraria')}%)` : ''}</td><td>${MXN(d.precioEspacio - d.descuento)}</td></tr>
+        ${d.excavacion ? `<tr><td>Excavación (tumba, a necesidad)</td><td>${MXN(d.excavacion)}</td></tr>` : ''}
+        <tr><td>IVA ${cfg('ivaPct')}% (extra normativo)</td><td>${MXN(d.iva)}</td></tr>
+        <tr><td>Derechos municipales de Kanasín</td><td>${MXN(d.derechos)}</td></tr>
+        ${d.registro ? `<tr><td>Registro Civil</td><td>${MXN(d.registro)}</td></tr>` : ''}
+        ${d.maniobras ? `<tr><td>Maniobras de inhumación</td><td>${MXN(d.maniobras)}</td></tr>` : ''}
+        <tr><td>Mantenimiento — año 1</td><td>${MXN(d.mant)}</td></tr>
+        ${wiz.pagoTipo === 'financiado' ? `
+          <tr><td>Enganche ${wiz.engPct}% sobre ${MXN(d.financiable)}</td><td>${MXN(engMonto)}</td></tr>
+          <tr class="total"><td>Total a pagar hoy</td><td>${MXN(hoyFin)}</td></tr>
+          <tr class="sub"><td colspan="2">Después: ${wiz.plazo} mensualidades de ${MXN(mensualidad)} sin intereses.</td></tr>`
+        : `<tr class="total"><td>Total a pagar hoy (contado)</td><td>${MXN(d.totalHoyContado)}</td></tr>`}
+      </table>
       <div class="paybox">
         <div class="brandrow"><b>Tarjeta de crédito o débito</b><span class="cardlogos"><span>VISA</span><span>MC</span><span>AMEX</span></span></div>
         <div class="form-grid">
-          <div class="field full"><label>Número de tarjeta</label><input id="p-num" inputmode="numeric" placeholder="4242 4242 4242 4242" value="4242 4242 4242 4242"></div>
-          <div class="field"><label>Vencimiento</label><input id="p-exp" placeholder="MM/AA" value="12/28"></div>
-          <div class="field"><label>CVC</label><input id="p-cvc" placeholder="123" value="123"></div>
+          <div class="field full"><label>Número de tarjeta</label><input id="p-num" inputmode="numeric" value="4242 4242 4242 4242"></div>
+          <div class="field"><label>Vencimiento</label><input id="p-exp" value="12/28"></div>
+          <div class="field"><label>CVC</label><input id="p-cvc" value="123"></div>
         </div>
-        <p style="font-size:11.5px;color:var(--ink-3);margin-top:10px">🔒 Demo: no se realiza ningún cargo real. En producción, Stripe procesa el pago y la suscripción anual.</p>
+        <p style="font-size:11.5px;color:var(--ink-3);margin-top:10px">🔒 Demo: no se realiza ningún cargo real. En producción, Stripe procesa el pago, el plan de mensualidades y el mantenimiento recurrente.</p>
       </div>
-      <table class="price-table">
-        <tr><td>Pago único (espacio + derechos)</td><td>${MXN(total)}</td></tr>
-        <tr><td>Mantenimiento año 1 — inicia suscripción anual</td><td>${MXN(tipo.mant)}</td></tr>
-        <tr class="total"><td>Total a pagar hoy</td><td>${MXN(total + tipo.mant)}</td></tr>
-      </table>
       <div class="wizard-nav">
         <button class="btn btn-ghost" id="w-back">← Regresar</button>
-        <button class="btn btn-gold" id="w-pay">Pagar ${MXN(total + tipo.mant)}</button>
+        <button class="btn btn-gold" id="w-pay">Pagar ${MXN(wiz.pagoTipo === 'financiado' ? hoyFin : d.totalHoyContado)}</button>
       </div>
     </div>`;
   }
@@ -560,41 +696,75 @@ function wizardHTML(e) {
       </div>
       <table class="price-table">
         <tr><td>Folio de compra</td><td><span class="folio">${c.folio}</span></td></tr>
-        <tr><td>Contrato</td><td><span class="folio">${c.contrato.folio}</span> · firmado ${new Date(c.contrato.fecha).toLocaleString('es-MX')}</td></tr>
-        <tr><td>Espacio</td><td>${tipo.nombre} ${e.id} · Sección ${sec.id}</td></tr>
-        <tr><td>Pago único</td><td>${MXN(c.pagoUnico)}</td></tr>
-        <tr><td>Suscripción de mantenimiento</td><td>${MXN(tipo.mant)}/año · próxima renovación ${fmtFecha(c.mantenimiento.proximaRenovacion)}</td></tr>
+        <tr><td>Contrato de adhesión</td><td><span class="folio">${c.contrato.folio}</span> · firmado ${new Date(c.contrato.fecha).toLocaleString('es-MX')}</td></tr>
+        <tr><td>Espacio</td><td>${TIPOS[e.tipo].nombre} ${e.id} · ${sec.nombre}</td></tr>
+        <tr><td>Forma de pago</td><td>${c.pago.tipo === 'contado' ? 'Contado · título de derechos disponible' : `Financiado: ${c.pago.plazo} mensualidades de ${MXN(c.pago.mensualidad)} sin intereses`}</td></tr>
+        <tr><td>Mantenimiento</td><td>${MXN(mantDe(e))}/año · próxima renovación ${fmtFecha(c.mantenimiento.proximaRenovacion)}</td></tr>
       </table>
       <div class="wizard-nav" style="justify-content:center;gap:12px">
         <button class="btn btn-outline" onclick="verContrato('${c.folio}')">Ver contrato</button>
         <a class="btn btn-primary" href="#/cuenta">Ir a mi cuenta</a>
-        ${c.memorialId ? `<a class="btn btn-gold" href="#/memorial/${c.memorialId}">Ver memorial</a>` : `<a class="btn btn-ghost" href="#/mapa?sel=${e.id}">Ver en el mapa</a>`}
+        ${c.memorialId ? `<a class="btn btn-gold" href="#/placa?mem=${c.memorialId}">Diseñar la placa</a>` : `<a class="btn btn-ghost" href="#/mapa?sel=${e.id}">Ver en el mapa</a>`}
       </div>
     </div>`;
   }
   return stepsBar + body;
 }
 
+/* ---------- Contrato de adhesión (M3, modelo Profeco / NOM-036) ---------- */
 function contratoTexto(e, w, compra) {
-  const tipo = TIPOS[e.tipo];
   const sec = seccionById(e.seccion);
-  const precio = precioDe(e);
-  const titular = (w && w.titular.nombre) || (compra && compra.titular.nombre) || '____________________';
-  const difunto = (w && w.modo === 'inmediato' && w.difunto.nombre) || (compra && compra.difunto && compra.difunto.nombre) || null;
+  const src = compra || w;
+  const titular = (src.titular && src.titular.nombre) || '____________________';
+  const modalidad = src.modalidad || 'necesidad';
+  const difunto = modalidad === 'necesidad' && src.difunto && src.difunto.nombre ? src.difunto.nombre : null;
+  const sust = src.sustituto && src.sustituto.nombre;
+  const bens = [src.ben1, src.ben2].filter(b => b && b.nombre);
+  const rolFun = compra ? compra.segmento === 'funeraria' : (DB.user && DB.user.rol === 'funeraria');
+  const d = compra ? compra.desglose : desglose(e, modalidad, rolFun ? 'funeraria' : null);
   return `
-    <h3>Contrato de cesión de derechos de uso a perpetuidad</h3>
-    <p><b>Panteón Jardines del Recuerdo</b>, en lo sucesivo "EL PANTEÓN", y <b>${titular}</b>, en lo sucesivo "EL TITULAR", celebran el presente contrato respecto del espacio <b>${tipo.nombre} ${e.id}</b>, ubicado en la Sección ${sec.id} (${sec.nombre}), Fila ${e.fila}, Posición ${e.col}.</p>
-    <h3>Primera — Objeto</h3>
-    <p>EL PANTEÓN cede a EL TITULAR el derecho de uso del espacio descrito para fines de inhumación${difunto ? `, destinado en primer término a <b>${difunto}</b>` : ' (compra en previsión)'}, conforme al reglamento interno vigente.</p>
-    <h3>Segunda — Contraprestación</h3>
-    <p>EL TITULAR paga en este acto ${MXN(precio)} por el espacio y ${MXN(tipo.derechos)} por derechos de inhumación. El mantenimiento anual de ${MXN(tipo.mant)} se cobra como suscripción recurrente; su impago coloca la cuenta en estatus vencido conforme a las reglas de morosidad del reglamento.</p>
-    <h3>Tercera — Firma electrónica</h3>
-    <p>Las partes acuerdan que la aceptación en línea (clickwrap) con sello de tiempo constituye la manifestación del consentimiento de EL TITULAR. El documento PDF resultante queda resguardado y disponible en la cuenta del titular y en el panel administrativo.</p>
-    <h3>Cuarta — Accesos familiares</h3>
-    <p>EL TITULAR podrá invitar familiares con acceso limitado (ver memorial y enviar o donar flores y productos), pudiendo revocar dichos accesos en cualquier momento.</p>
-    <h3>Quinta — Reglamento</h3>
-    <p>EL TITULAR declara conocer y aceptar el reglamento interno del panteón, que forma parte integrante del presente contrato.</p>
+    <h3>Contrato de derechos de uso de lotes o nichos en panteón en temporalidad</h3>
+    <p>Que celebran por una parte <b>NAJ PIXAM · CASA DEL ALMA, S.A. DE C.V.</b>, con domicilio en Kanasín, Yucatán, en lo sucesivo <b>"EL PROVEEDOR"</b>, y por la otra <b>${titular}</b>, en lo sucesivo <b>"EL CONSUMIDOR"</b>, conforme al siguiente glosario, declaraciones y cláusulas.</p>
+    <h3>Glosario</h3>
+    <p><b>Titular sustituto:</b> persona designada por el consumidor para disponer de los derechos en su ausencia o imposibilidad. <b>Beneficiarios:</b> hasta dos personas que, al faltar el consumidor y el titular sustituto, adquieren los derechos y obligaciones de este contrato. <b>Usuario:</b> la persona a quien se destinan los derechos de uso.</p>
+    <h3>Primera · Consentimiento y objeto</h3>
+    <p>La naturaleza jurídica de este contrato es la venta de derechos de uso <b>en temporalidad</b> del espacio descrito a continuación, en el panteón NAJ PIXAM · Casa del Alma:</p>
+    <table>
+      <tr><td><b>Espacio</b></td><td>${TIPOS[e.tipo].nombre} ${e.id}</td></tr>
+      <tr><td><b>Línea de servicio</b></td><td>${LINEAS[e.linea].nombre} — ${e.linea === 'tumba' ? 'inhumación de cuerpo' : 'restos cremados'}</td></tr>
+      <tr><td><b>Ubicación</b></td><td>${sec.nombre}, fila ${e.fila}, posición ${e.col} (${sec.atributo})</td></tr>
+      <tr><td><b>Modalidad</b></td><td>${modalidad === 'necesidad' ? 'A necesidad (uso inmediato)' : 'Preventa / provisión' + (modalidad === 'prevision-beneficiario' ? ' a favor de beneficiario' : ' del propio titular')}</td></tr>
+      <tr><td><b>Vigencia</b></td><td>${cfg('vigenciaAnios')} años contados a partir de la ocupación del espacio</td></tr>
+      ${difunto ? `<tr><td><b>Usuario</b></td><td>${difunto}</td></tr>` : ''}
+      ${compra && compra.clienteFinal ? `<tr><td><b>Cliente final (aliado)</b></td><td>${compra.clienteFinal}</td></tr>` : (!compra && src.clienteFinal ? `<tr><td><b>Cliente final (aliado)</b></td><td>${src.clienteFinal}</td></tr>` : '')}
+    </table>
+    <p>Al término de la temporalidad, el consumidor se obliga a retirar los restos en un plazo no mayor a 90 días; podrá contratar la <b>perpetuidad</b> del mismo espacio mediante contrato separado. Tratándose de nichos, la apertura y cierre por resguardo o retiro de urna se cubre a la tarifa vigente del catálogo informativo.</p>
+    <h3>Segunda · Precio</h3>
+    <p>El consumidor pagará como precio de los derechos de uso la cantidad de <b>${MXN(d.precioEspacio - d.descuento)}</b>${d.descuento ? ` (precio de lista ${MXN(d.precioEspacio)} con descuento de aliado)` : ''}${d.excavacion ? `, más <b>${MXN(d.excavacion)}</b> por excavación` : ''}. Dicha cantidad es <b>fija y no generará intereses</b> de ninguna especie.</p>
+    <h3>Tercera · Forma de pago</h3>
+    <p>${compra
+      ? (compra.pago.tipo === 'contado'
+        ? `Pago de contado en una sola exhibición por <b>${MXN(compra.desglose.totalHoyContado)}</b> (incluye extras normativos y primer año de mantenimiento).`
+        : `Un pago inicial (enganche ${compra.pago.engPct}%) de <b>${MXN(compra.pago.enganche)}</b> y ${compra.pago.plazo} mensualidades fijas de <b>${MXN(compra.pago.mensualidad)}</b>, sin intereses, mediante cargo recurrente.`)
+      : 'De contado o mediante pago inicial (enganche) y mensualidades fijas sin intereses, según la carátula de pago elegida por el consumidor, que forma parte integrante de este contrato.'}
+    El consumidor podrá realizar pagos por adelantado o liquidar el total sin penalización alguna. El proveedor entregará el <b>título de derechos</b> una vez cubierto el precio total.</p>
+    <h3>Cuarta · Extras normativos por cuenta del consumidor</h3>
+    <p>Serán por cuenta del consumidor el IVA (${cfg('ivaPct')}%), los derechos municipales conforme al Reglamento de Panteones de Kanasín, los derechos ante el Registro Civil y las maniobras de inhumación o exhumación, a la tarifa vigente del catálogo informativo.</p>
+    <h3>Quinta · Mantenimiento</h3>
+    <p>El proveedor tiene a su cargo el arreglo y mantenimiento de las áreas comunes. El consumidor pagará una cuota anual de mantenimiento de <b>${MXN(d.mant)}</b> (tarifa vigente del catálogo) a partir de la ocupación del espacio. La falta de uno o más pagos anuales consecutivos es causa de rescisión.</p>
+    <h3>Sexta · Titular sustituto y beneficiarios</h3>
+    <p>${sust ? `El consumidor designa como titular sustituto a <b>${src.sustituto.nombre}</b> (${src.sustituto.par || 'parentesco por acreditar'}).` : 'El consumidor podrá designar en cualquier momento un titular sustituto, sin que ello condicione el otorgamiento de los derechos.'}
+    ${bens.length ? ` Designa como beneficiario(s): ${bens.map((b, i) => `<b>${b.nombre}</b> (${b.par || 's/parentesco'})`).join(' y ')}.` : ' Podrá designar hasta dos beneficiarios.'}</p>
+    <h3>Séptima · Cesión de derechos</h3>
+    <p>Los derechos de este contrato <b>no son transferibles, salvo a un familiar</b>, previo consentimiento expreso y por escrito del proveedor, estando el consumidor al corriente de sus pagos y cubriendo el costo del catálogo informativo. El proveedor responderá la solicitud en un plazo de 10 días naturales.</p>
+    <h3>Octava · Rescisión, pena convencional y cancelación</h3>
+    <p>Son causas de rescisión imputables al consumidor: dejar de efectuar tres o más pagos consecutivos, la falta de pagos anuales de mantenimiento y la cesión sin consentimiento. La parte que incumpla pagará una pena convencional del <b>20%</b> del precio total. El consumidor puede <b>cancelar sin costo dentro de los 5 días hábiles</b> siguientes a la firma, con devolución íntegra en un plazo máximo de 5 días hábiles.</p>
+    <h3>Novena · Firma electrónica y reglamento</h3>
+    <p>Las partes acuerdan que la aceptación en línea (clickwrap) con sello de tiempo constituye la manifestación del consentimiento del consumidor. El consumidor declara conocer y aceptar el reglamento interno del panteón, que forma parte integrante del presente contrato. El servicio se presta las 24 horas, los 365 días del año.</p>
+    <h3>Plano de localización del derecho de uso contratado</h3>
+    ${typeof planoLocalizacionSVG === 'function' ? planoLocalizacionSVG(e) : ''}
     ${compra ? `<p style="margin-top:16px"><i>Firmado electrónicamente por <b>${compra.contrato.firma}</b> el ${new Date(compra.contrato.fecha).toLocaleString('es-MX')} · Folio ${compra.contrato.folio}</i></p>` : ''}
+    <p class="reg">Este modelo de contrato de adhesión se basa en el registrado ante la Procuraduría Federal del Consumidor conforme a la NOM-036-SCFI-2016 (referencia: registro 4667-2025). NAJ PIXAM tramitará su propio registro; cualquier variación en perjuicio del consumidor frente al contrato registrado se tendrá por no puesta.</p>
   `;
 }
 
@@ -605,7 +775,6 @@ function bindWizard() {
   const back = document.getElementById('w-back');
   const pay = document.getElementById('w-pay');
 
-  // temporizador de reserva
   if (timerInt) clearInterval(timerInt);
   const tEl = document.getElementById('rtimer');
   if (tEl && DB.reserva) {
@@ -625,22 +794,27 @@ function bindWizard() {
 
   document.querySelectorAll('.radio-card[data-modo]').forEach(rc => {
     rc.onclick = () => {
-      wiz.modo = rc.dataset.modo;
+      guardarPaso();
+      wiz.modalidad = rc.dataset.modo;
       document.querySelectorAll('.radio-card[data-modo]').forEach(x => x.classList.toggle('on', x === rc));
-      document.getElementById('difunto-form').style.display = wiz.modo === 'inmediato' ? 'block' : 'none';
+      document.getElementById('difunto-form').style.display = wiz.modalidad === 'necesidad' ? 'block' : 'none';
     };
   });
+  document.querySelectorAll('.radio-card[data-pago]').forEach(rc => {
+    rc.onclick = () => { guardarPaso(); wiz.pagoTipo = rc.dataset.pago; rerender(); };
+  });
+  const pe = document.getElementById('p-eng'), pp = document.getElementById('p-plazo');
+  if (pe) pe.onchange = () => { wiz.engPct = +pe.value; rerender(); };
+  if (pp) pp.onchange = () => { wiz.plazo = +pp.value; rerender(); };
 
   if (back) back.onclick = () => { guardarPaso(); wiz.step--; rerender(); };
   if (next) next.onclick = () => {
-    if (wiz.step === 1) {
-      iniciarReserva(e.id);
-      wiz.step = 2; rerender(); return;
-    }
+    if (wiz.step === 1) { iniciarReserva(e.id); wiz.step = 2; rerender(); return; }
     if (wiz.step === 2) {
       guardarPaso();
       if (!wiz.titular.nombre || !wiz.titular.email || !wiz.titular.tel) { toast('Completa nombre, correo y teléfono del titular.'); return; }
-      if (wiz.modo === 'inmediato' && !wiz.difunto.nombre) { toast('Indica el nombre del difunto o elige compra en previsión.'); return; }
+      if (wiz.modalidad === 'necesidad' && !wiz.difunto.nombre) { toast('Indica el nombre del difunto o elige preventa.'); return; }
+      if (DB.user && DB.user.rol === 'funeraria' && !wiz.clienteFinal) { toast('Indica el nombre del cliente final.'); return; }
       wiz.step = 3; rerender(); return;
     }
     if (wiz.step === 3) {
@@ -663,6 +837,10 @@ function bindWizard() {
     if (document.getElementById('t-nombre')) {
       wiz.titular = { nombre: v('t-nombre'), email: v('t-email'), tel: v('t-tel'), dom: v('t-dom') };
       wiz.difunto = { nombre: v('d-nombre'), nac: v('d-nac'), def: v('d-def'), epi: v('d-epi') };
+      wiz.sustituto = { nombre: v('s-nombre'), par: v('s-par') };
+      wiz.ben1 = { nombre: v('b1-nombre'), par: v('b1-par') };
+      wiz.ben2 = { nombre: v('b2-nombre'), par: v('b2-par') };
+      if (document.getElementById('t-cliente')) wiz.clienteFinal = v('t-cliente');
     }
     const ac = document.getElementById('c-acepto');
     if (ac) { wiz.acepto = ac.checked; wiz.firma = v('c-firma'); }
@@ -675,39 +853,51 @@ function bindWizard() {
 }
 
 function completarCompra(e) {
-  const tipo = TIPOS[e.tipo];
+  const rol = DB.user && DB.user.rol;
+  const d = desglose(e, wiz.modalidad, rol);
   const n = DB.compras.length + 1;
   const hoy = new Date();
   const unAno = new Date(hoy); unAno.setFullYear(unAno.getFullYear() + 1);
-  const conDifunto = wiz.modo === 'inmediato' && wiz.difunto.nombre;
+  const conDifunto = wiz.modalidad === 'necesidad' && wiz.difunto.nombre;
   let memorialId = null;
   if (conDifunto) {
     memorialId = 'mem-u' + (DB.memorialesNuevos.length + 1);
     DB.memorialesNuevos.push({
       id: memorialId, nombre: wiz.difunto.nombre, nac: wiz.difunto.nac || '', def: wiz.difunto.def || hoy.toISOString().slice(0, 10),
-      foto: null, cover: IMG.hojas, publico: true, espacio: e.id,
+      foto: null, cover: seccionById(e.seccion).img, publico: true, espacio: e.id,
       epitafio: wiz.difunto.epi || 'Siempre en nuestro corazón.',
       mensajes: [], flores: [],
     });
   }
+  const engMonto = Math.round(d.financiable * wiz.engPct / 100);
+  const mensualidad = Math.ceil((d.financiable - engMonto) / wiz.plazo);
+  const contado = wiz.pagoTipo === 'contado';
   const compra = {
     folio: 'CP-2026-' + String(1000 + n),
     espacioId: e.id,
-    titular: wiz.titular,
+    modalidad: wiz.modalidad,
+    segmento: rol === 'funeraria' ? 'funeraria' : 'publico',
+    clienteFinal: wiz.clienteFinal || null,
+    titular: wiz.titular, sustituto: wiz.sustituto, ben1: wiz.ben1, ben2: wiz.ben2,
     difunto: conDifunto ? wiz.difunto : null,
     memorialId,
-    pagoUnico: precioDe(e) + tipo.derechos,
-    contrato: { folio: 'CT-2026-' + String(800 + n), firma: wiz.firma, fecha: hoy.toISOString(), estado: 'vigente' },
-    pagos: [
-      { concepto: `Pago único ${TIPOS[e.tipo].nombre} ${e.id} (espacio + derechos)`, monto: precioDe(e) + tipo.derechos, fecha: hoy.toISOString(), metodo: 'Tarjeta •••• 4242' },
-      { concepto: `Mantenimiento anual ${e.id} — año 1 (suscripción)`, monto: tipo.mant, fecha: hoy.toISOString(), metodo: 'Tarjeta •••• 4242' },
-    ],
+    desglose: d,
+    pago: contado
+      ? { tipo: 'contado' }
+      : { tipo: 'financiado', engPct: wiz.engPct, enganche: engMonto, plazo: wiz.plazo, mensualidad, pagadas: 0 },
+    liquidado: contado,
+    contrato: { folio: 'NP-2026-' + String(800 + n), firma: wiz.firma, fecha: hoy.toISOString(), estado: 'vigente' },
+    pagos: [{
+      concepto: contado ? `Pago de contado ${e.id} (espacio, extras y mantenimiento año 1)` : `Enganche ${wiz.engPct}% + extras y mantenimiento año 1 · ${e.id}`,
+      monto: contado ? d.totalHoyContado : engMonto + d.extras + d.mant,
+      fecha: hoy.toISOString(), metodo: 'Tarjeta •••• 4242',
+    }],
     mantenimiento: { estado: 'al corriente', proximaRenovacion: unAno.toISOString() },
   };
   DB.compras.push(compra);
   DB.overrides[e.id] = conDifunto ? 'ocupado' : 'vendido';
   DB.reserva = null;
-  if (!DB.user || DB.user.rol !== 'admin') DB.user = { rol: 'titular', nombre: wiz.titular.nombre, email: wiz.titular.email };
+  if (!DB.user || DB.user.rol === 'admin') DB.user = { rol: 'titular', nombre: wiz.titular.nombre, email: wiz.titular.email };
   saveDB();
   renderHeader();
   wiz.compra = compra;
@@ -722,10 +912,11 @@ function verContrato(folioCompra) {
   const e = espacioById(c.espacioId);
   openModal(`
     <h2>Contrato ${c.contrato.folio}</h2>
-    <p class="sub">Resguardado digitalmente · <span class="tag vigente">vigente</span></p>
-    <div class="contract-box" style="height:380px">${contratoTexto(e, null, c)}</div>
+    <p class="sub">Resguardado digitalmente · <span class="tag vigente">vigente</span> ${c.liquidado ? '· <span class="tag liquidado">liquidado</span>' : ''}</p>
+    <div class="contract-box" style="height:400px">${contratoTexto(e, null, c)}</div>
     <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="descargarContrato('${c.folio}')">Descargar PDF del contrato</button>
+      ${c.liquidado ? `<button class="btn btn-gold" onclick="descargarTitulo('${c.folio}')">Descargar título de derechos</button>` : ''}
       <button class="btn btn-ghost" onclick="closeModal()">Cerrar</button>
     </div>
   `);
@@ -736,14 +927,34 @@ function descargarContrato(folioCompra) {
   if (!c) return;
   const e = espacioById(c.espacioId);
   const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Contrato ${c.contrato.folio}</title>
-  <style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;color:#26221c;line-height:1.6;padding:0 20px}h3{color:#1e3d2b}</style>
-  </head><body><h1>Jardines del Recuerdo</h1>${contratoTexto(e, null, c)}</body></html>`;
+  <style>body{font-family:Georgia,serif;max-width:760px;margin:40px auto;color:#2b241a;line-height:1.6;padding:0 20px}h1,h3{color:#3f5233}table{border-collapse:collapse;width:100%}td{border:1px solid #c9bd9a;padding:6px 10px}</style>
+  </head><body><h1>NAJ PIXAM · Casa del Alma</h1>${contratoTexto(e, null, c)}</body></html>`;
   descargarArchivo(`Contrato_${c.contrato.folio}.html`, html, 'text/html;charset=utf-8');
   toast('Contrato descargado (en producción se genera PDF sellado).');
 }
 
+function descargarTitulo(folioCompra) {
+  const c = DB.compras.find(x => x.folio === folioCompra);
+  if (!c || !c.liquidado) return;
+  const e = espacioById(c.espacioId);
+  const sec = seccionById(e.seccion);
+  descargarArchivo(`Titulo_de_derechos_${c.contrato.folio}.txt`,
+`NAJ PIXAM · CASA DEL ALMA — TÍTULO DE DERECHOS DE USO
+======================================================
+Titular:   ${c.titular.nombre}
+Espacio:   ${TIPOS[e.tipo].nombre} ${e.id} · ${sec.nombre}
+Vigencia:  ${cfg('vigenciaAnios')} años desde la ocupación
+Contrato:  ${c.contrato.folio} (liquidado)
+Emitido:   ${new Date().toLocaleString('es-MX')}
+======================================================
+Cláusula séptima del contrato: el título se entrega al
+cubrir el precio total. Demo: en producción se emite como
+PDF sellado y foliado.`);
+  toast('Título de derechos descargado.');
+}
+
 /* ============================================================
-   VISTA: Memoriales (M6)
+   VISTA: Memoriales (M7)
    ============================================================ */
 function viewMemoriales() {
   const lista = todosMemoriales().filter(m => m.publico);
@@ -751,7 +962,7 @@ function viewMemoriales() {
   <div class="page-head"><div class="container">
     <div class="eyebrow">Memorial digital</div>
     <h1>Memoriales</h1>
-    <p>Espacios conmemorativos públicos. Deja un mensaje o envía flores a quienes descansan en nuestros jardines.</p>
+    <p>Espacios conmemorativos públicos. Deja un mensaje o envía flores a quienes descansan en NAJ PIXAM.</p>
   </div></div>
   <section class="section"><div class="container">
     <div style="max-width:420px;margin-bottom:34px" class="field">
@@ -766,11 +977,10 @@ function viewMemoriales() {
 
 function memCardHTML(m) {
   return `<a class="card mem-card" href="#/memorial/${m.id}" data-nombre="${m.nombre.toLowerCase()}">
-    ${m.foto ? `<img class="p" src="${m.foto}" alt="${m.nombre}">`
-             : `<div class="p" style="width:104px;height:104px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:var(--font-display);font-size:34px;color:var(--gold)">${m.nombre.split(' ').filter(w => w[0] === w[0].toUpperCase()).slice(0, 2).map(w => w[0]).join('')}</div>`}
+    ${m.foto ? `<img class="p" src="${m.foto}" alt="${m.nombre}">` : monograma(m.nombre, 104, 32)}
     <h3>${m.nombre}</h3>
     <div class="dates">${m.nac ? new Date(m.nac).getFullYear() : '·'} — ${new Date(m.def).getFullYear()}</div>
-    <p style="font-style:italic;font-family:var(--font-display);font-size:15.5px">"${m.epitafio}"</p>
+    <p style="font-style:italic;font-family:var(--font-serif);font-size:15.5px">"${m.epitafio}"</p>
   </a>`;
 }
 
@@ -784,10 +994,10 @@ function qrSVG(seed) {
   const rnd = mulberry32(seed.split('').reduce((a, c) => a + c.charCodeAt(0) * 7, 0));
   const N = 21, S = 5;
   let cells = '';
-  const finder = (x, y) => `<rect x="${x * S}" y="${y * S}" width="${7 * S}" height="${7 * S}" fill="#26221c"/><rect x="${(x + 1) * S}" y="${(y + 1) * S}" width="${5 * S}" height="${5 * S}" fill="#fff"/><rect x="${(x + 2) * S}" y="${(y + 2) * S}" width="${3 * S}" height="${3 * S}" fill="#26221c"/>`;
+  const finder = (x, y) => `<rect x="${x * S}" y="${y * S}" width="${7 * S}" height="${7 * S}" fill="#2b241a"/><rect x="${(x + 1) * S}" y="${(y + 1) * S}" width="${5 * S}" height="${5 * S}" fill="#fff"/><rect x="${(x + 2) * S}" y="${(y + 2) * S}" width="${3 * S}" height="${3 * S}" fill="#2b241a"/>`;
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     const enFinder = (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
-    if (!enFinder && rnd() > .52) cells += `<rect x="${x * S}" y="${y * S}" width="${S}" height="${S}" fill="#26221c"/>`;
+    if (!enFinder && rnd() > .52) cells += `<rect x="${x * S}" y="${y * S}" width="${S}" height="${S}" fill="#2b241a"/>`;
   }
   return `<svg width="${N * S + 16}" height="${N * S + 16}" viewBox="-8 -8 ${N * S + 16} ${N * S + 16}" role="img" aria-label="Código QR del memorial">
     <rect x="-8" y="-8" width="${N * S + 16}" height="${N * S + 16}" fill="#fff"/>${cells}${finder(0, 0)}${finder(N - 7, 0)}${finder(0, N - 7)}</svg>`;
@@ -804,7 +1014,7 @@ function viewMemorial(params, id) {
   <div class="memorial-cover"><img src="${m.cover}" alt="Memorial de ${m.nombre}"></div>
   <div class="memorial-id container">
     ${m.foto ? `<img class="portrait" src="${m.foto}" alt="${m.nombre}">`
-             : `<div class="portrait" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:44px;color:var(--gold)">${m.nombre.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>`}
+             : `<div class="portrait" style="display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:44px;color:var(--copper)">${m.nombre.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>`}
     <h1>${m.nombre}</h1>
     <div class="dates">${m.nac ? fmtFecha(m.nac) : ''} — ${fmtFecha(m.def)}</div>
     <p class="epitaph">"${m.epitafio}"</p>
@@ -812,7 +1022,7 @@ function viewMemorial(params, id) {
   <div class="memorial-body container">
     <div class="memorial-grid">
       <div class="muro">
-        <h2 style="color:var(--forest);font-size:28px;margin-bottom:18px">Muro de recuerdos</h2>
+        <h2 style="color:var(--jungle);font-size:28px;margin-bottom:18px">Muro de recuerdos</h2>
         <div class="sidebox" style="margin-bottom:22px">
           <h3>Deja un mensaje</h3>
           <div class="field" style="margin-bottom:10px"><input id="msg-autor" placeholder="Tu nombre" value="${DB.user ? DB.user.nombre : ''}"></div>
@@ -837,14 +1047,19 @@ function viewMemorial(params, id) {
           </div>
         </div>
         <div class="sidebox">
+          <h3>Placa conmemorativa</h3>
+          <p style="font-size:13.5px;color:var(--ink-2);margin-bottom:14px">Diseña la placa dentro de los formatos del reglamento; nuestra fábrica la produce e instala.</p>
+          <a class="btn btn-outline btn-sm btn-block" href="#/placa?mem=${m.id}">Diseñar placa ✦</a>
+        </div>
+        <div class="sidebox">
           <h3>Ubicación en el panteón</h3>
-          ${e ? `<p style="font-size:13.5px;color:var(--ink-2)">${TIPOS[e.tipo].nombre} <b>${e.id}</b> · Sección ${sec.id}, ${sec.nombre} · Fila ${e.fila}, Posición ${e.col}</p>
+          ${e ? `<p style="font-size:13.5px;color:var(--ink-2)">${TIPOS[e.tipo].nombre} <b>${e.id}</b> · ${sec.nombre} · Fila ${e.fila}, Posición ${e.col}</p>
           <a class="btn btn-outline btn-sm btn-block" style="margin-top:12px" href="#/mapa?sel=${e.id}">Ver en el mapa</a>` : ''}
         </div>
         <div class="sidebox qr-wrap">
-          <h3>QR para lápida</h3>
+          <h3>QR para la placa</h3>
           ${qrSVG(m.id)}
-          <p>Placa con QR físico que enlaza a este memorial (opcional, se solicita desde Mi cuenta).</p>
+          <p>QR físico grabado en la placa que enlaza a este memorial.</p>
         </div>
       </div>
     </div>
@@ -863,7 +1078,175 @@ function publicarMensaje(memId) {
 }
 
 /* ============================================================
-   VISTA: Tienda (M7)
+   VISTA: Diseñador de placa (M8)
+   ============================================================ */
+let placaSt = null;
+
+function viewPlaca(params) {
+  const mem = params.mem ? memorialById(params.mem) : null;
+  if (!placaSt || (params.mem && placaSt.memId !== params.mem)) {
+    const esp = mem && espacioById(mem.espacio);
+    const linea = esp ? esp.linea : 'tumba';
+    placaSt = {
+      memId: mem ? mem.id : null,
+      formato: linea === 'tumba' ? 'lapida-caliza' : (esp && seccionById(esp.seccion).atributo === 'Familiar techado' ? 'placa-familiar' : 'placa-bronce'),
+      nombre: mem ? mem.nombre : 'Nombre del difunto',
+      f1: mem && mem.nac ? new Date(mem.nac).getFullYear() : '1940',
+      f2: mem ? new Date(mem.def).getFullYear() : '2026',
+      texto: mem ? mem.epitafio : 'Siempre en nuestro corazón',
+      ornamento: 'flor', fuente: 'display', qr: true,
+    };
+  }
+  setTimeout(bindPlaca, 0);
+  return `
+  <div class="page-head"><div class="container">
+    <div class="eyebrow">M8 · Diseñador de placa</div>
+    <h1>Diseña la placa conmemorativa</h1>
+    <p>Dentro de los formatos y medidas del reglamento del panteón (placa, florero y cruz permitidos). La especificación se envía a la fábrica de nichos y tumbas de NAJ PIXAM.</p>
+  </div></div>
+  <section class="section"><div class="container placa-layout">
+    <div class="panel" style="position:sticky;top:96px">
+      <h2 style="font-size:21px">Configuración</h2>
+      <div class="field" style="margin-top:14px"><label>Formato (según tipo de espacio)</label>
+        <select id="pl-formato">${Object.entries(PLACA_FORMATOS).map(([k, f]) => `<option value="${k}" ${placaSt.formato === k ? 'selected' : ''}>${f.nombre} · ${f.medidas} · ${MXN(f.precio)}</option>`).join('')}</select>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Dedicado a</label>
+        ${placaSt.memId ? `<input id="pl-nombre" value="${placaSt.nombre}" disabled><span class="hint">Tomado del memorial vinculado.</span>` :
+        `<select id="pl-mem"><option value="">Escribir manualmente…</option>${todosMemoriales().map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')}</select>
+         <input id="pl-nombre" value="${placaSt.nombre}" style="margin-top:8px">`}
+      </div>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Año inicial</label><input id="pl-f1" value="${placaSt.f1}"></div>
+        <div class="field"><label>Año final</label><input id="pl-f2" value="${placaSt.f2}"></div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Texto o dedicatoria (máx. 80)</label><input id="pl-texto" maxlength="80" value="${placaSt.texto}"></div>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Ornamento</label>
+          <select id="pl-orn">${Object.entries(PLACA_ORNAMENTOS).map(([k, l]) => `<option value="${k}" ${placaSt.ornamento === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+        <div class="field"><label>Tipografía</label>
+          <select id="pl-fuente"><option value="display" ${placaSt.fuente === 'display' ? 'selected' : ''}>Lapidaria (Marcellus)</option><option value="serif" ${placaSt.fuente === 'serif' ? 'selected' : ''}>Clásica (Cormorant)</option></select></div>
+      </div>
+      <label class="check-line" style="margin-top:12px"><input type="checkbox" id="pl-qr" ${placaSt.qr ? 'checked' : ''}> Incluir QR al memorial digital</label>
+      <button class="btn btn-gold btn-block" style="margin-top:20px" onclick="generarPlaca()">Generar especificación · ${MXN(PLACA_FORMATOS[placaSt.formato].precio)}</button>
+      <p class="hint" style="margin-top:10px;font-size:12px;color:var(--ink-3)">La fábrica valida la especificación y programa la instalación. Reutiliza los datos del difunto y del memorial.</p>
+    </div>
+    <div class="placa-preview">
+      <div class="placa-svg-wrap">
+        <div id="placa-svg">${placaSVG()}</div>
+        <p class="placa-spec" id="placa-spec">${PLACA_FORMATOS[placaSt.formato].nombre} · ${PLACA_FORMATOS[placaSt.formato].medidas} · ${PLACA_FORMATOS[placaSt.formato].desc}</p>
+      </div>
+    </div>
+  </div></section>
+  ${footerHTML()}`;
+}
+
+function placaOrnamentoSVG(tipo, x, y, color) {
+  if (tipo === 'cruz') return `<g stroke="${color}" stroke-width="7" stroke-linecap="round"><line x1="${x}" y1="${y - 26}" x2="${x}" y2="${y + 26}"/><line x1="${x - 18}" y1="${y - 8}" x2="${x + 18}" y2="${y - 8}"/></g>`;
+  if (tipo === 'flor') return `<g fill="${color}">${[0, 72, 144, 216, 288].map(a => `<ellipse cx="${x}" cy="${y - 15}" rx="7" ry="15" transform="rotate(${a} ${x} ${y})"/>`).join('')}<circle cx="${x}" cy="${y}" r="6" fill="${color}" opacity=".55"/></g>`;
+  if (tipo === 'paloma') return `<g fill="${color}"><path d="M${x - 26} ${y + 6} Q ${x - 6} ${y - 22} ${x + 24} ${y - 12} Q ${x + 8} ${y - 6} ${x + 2} ${y + 4} Q ${x + 16} ${y + 2} ${x + 26} ${y + 10} Q ${x} ${y + 18} ${x - 26} ${y + 6} Z"/></g>`;
+  return '';
+}
+
+function placaSVG() {
+  const f = PLACA_FORMATOS[placaSt.formato];
+  const W = 560, H = placaSt.formato === 'placa-bronce' ? 380 : 400;
+  const fam = placaSt.fuente === 'display' ? 'Marcellus, Georgia, serif' : "'Cormorant Garamond', Georgia, serif";
+  const tinta = f.tinta;
+  const nombreSize = placaSt.nombre.length > 26 ? 30 : 36;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Vista previa de la placa conmemorativa">
+    <defs>
+      <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="${f.fondo}"/><stop offset=".55" stop-color="${f.fondo}"/><stop offset="1" stop-color="${f.fondo}" stop-opacity=".82"/>
+      </linearGradient>
+      <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feColorMatrix in="n" type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer><feComposite operator="over" in2="SourceGraphic"/></filter>
+    </defs>
+    <rect x="8" y="8" width="${W - 16}" height="${H - 16}" rx="14" fill="url(#pg)" stroke="${tinta}" stroke-opacity=".35" stroke-width="2" filter="url(#grain)"/>
+    <rect x="24" y="24" width="${W - 48}" height="${H - 48}" rx="8" fill="none" stroke="${tinta}" stroke-opacity=".5" stroke-width="1.4"/>
+    ${placaOrnamentoSVG(placaSt.ornamento, W / 2, 82, tinta)}
+    <text x="${W / 2}" y="${placaSt.ornamento === 'ninguno' ? 120 : 158}" text-anchor="middle" font-family="${fam}" font-size="${nombreSize}" fill="${tinta}" letter-spacing="1.5">${placaSt.nombre}</text>
+    <text x="${W / 2}" y="${placaSt.ornamento === 'ninguno' ? 158 : 196}" text-anchor="middle" font-family="${fam}" font-size="19" fill="${tinta}" letter-spacing="4">${placaSt.f1} — ${placaSt.f2}</text>
+    <line x1="${W / 2 - 60}" y1="${placaSt.ornamento === 'ninguno' ? 180 : 218}" x2="${W / 2 + 60}" y2="${placaSt.ornamento === 'ninguno' ? 180 : 218}" stroke="${tinta}" stroke-opacity=".5"/>
+    <text x="${W / 2}" y="${placaSt.ornamento === 'ninguno' ? 216 : 254}" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, serif" font-style="italic" font-size="20" fill="${tinta}">"${placaSt.texto}"</text>
+    ${placaSt.qr ? `<g transform="translate(${W - 92}, ${H - 92}) scale(.52)"><rect x="-6" y="-6" width="121" height="121" fill="#fffdf7" rx="6"/>${qrInner(placaSt.memId || placaSt.nombre)}</g>
+    <text x="${W - 64}" y="${H - 26}" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="${tinta}" opacity=".8">MEMORIAL</text>` : ''}
+    <text x="32" y="${H - 26}" font-family="Inter, sans-serif" font-size="10" fill="${tinta}" opacity=".65">NAJ PIXAM · ${f.medidas}</text>
+  </svg>`;
+}
+function qrInner(seed) {
+  const rnd = mulberry32(String(seed).split('').reduce((a, c) => a + c.charCodeAt(0) * 7, 0));
+  const N = 21, S = 5.2;
+  let cells = '';
+  const finder = (x, y) => `<rect x="${x * S}" y="${y * S}" width="${7 * S}" height="${7 * S}" fill="#2b241a"/><rect x="${(x + 1) * S}" y="${(y + 1) * S}" width="${5 * S}" height="${5 * S}" fill="#fff"/><rect x="${(x + 2) * S}" y="${(y + 2) * S}" width="${3 * S}" height="${3 * S}" fill="#2b241a"/>`;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const enFinder = (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
+    if (!enFinder && rnd() > .52) cells += `<rect x="${x * S}" y="${y * S}" width="${S}" height="${S}" fill="#2b241a"/>`;
+  }
+  return cells + finder(0, 0) + finder(N - 7, 0) + finder(0, N - 7);
+}
+
+function bindPlaca() {
+  const upd = () => {
+    const v = id => { const n = document.getElementById(id); return n ? n.value : null; };
+    placaSt.formato = v('pl-formato') || placaSt.formato;
+    if (document.getElementById('pl-nombre') && !document.getElementById('pl-nombre').disabled) placaSt.nombre = v('pl-nombre') || placaSt.nombre;
+    placaSt.f1 = v('pl-f1') || placaSt.f1;
+    placaSt.f2 = v('pl-f2') || placaSt.f2;
+    placaSt.texto = v('pl-texto') || '';
+    placaSt.ornamento = v('pl-orn') || placaSt.ornamento;
+    placaSt.fuente = v('pl-fuente') || placaSt.fuente;
+    const q = document.getElementById('pl-qr'); if (q) placaSt.qr = q.checked;
+    document.getElementById('placa-svg').innerHTML = placaSVG();
+    const f = PLACA_FORMATOS[placaSt.formato];
+    document.getElementById('placa-spec').textContent = `${f.nombre} · ${f.medidas} · ${f.desc}`;
+  };
+  ['pl-formato', 'pl-nombre', 'pl-f1', 'pl-f2', 'pl-texto', 'pl-orn', 'pl-fuente', 'pl-qr'].forEach(id => {
+    const n = document.getElementById(id);
+    if (n) { n.oninput = upd; n.onchange = upd; }
+  });
+  const selMem = document.getElementById('pl-mem');
+  if (selMem) selMem.onchange = () => {
+    const m = memorialById(selMem.value);
+    if (m) {
+      placaSt.memId = m.id; placaSt.nombre = m.nombre;
+      placaSt.f1 = m.nac ? new Date(m.nac).getFullYear() : placaSt.f1;
+      placaSt.f2 = new Date(m.def).getFullYear();
+      placaSt.texto = m.epitafio;
+      location.hash = '#/placa?mem=' + m.id;
+    }
+  };
+}
+
+function generarPlaca() {
+  const f = PLACA_FORMATOS[placaSt.formato];
+  const folio = 'PL-' + (1200 + DB.placas.length);
+  const spec = {
+    folio, formato: placaSt.formato, memorial: placaSt.memId,
+    nombre: placaSt.nombre, fechas: `${placaSt.f1} — ${placaSt.f2}`, texto: placaSt.texto,
+    ornamento: placaSt.ornamento, fuente: placaSt.fuente, qr: placaSt.qr,
+    precio: f.precio, fecha: new Date().toISOString(), estado: 'en fábrica',
+  };
+  DB.placas.push(spec);
+  saveDB();
+  descargarArchivo(`Especificacion_placa_${folio}.txt`,
+`NAJ PIXAM — ESPECIFICACIÓN PARA FÁBRICA DE NICHOS Y TUMBAS
+===========================================================
+Folio:      ${folio}
+Formato:    ${f.nombre} (${f.medidas})
+Dedicada a: ${spec.nombre}
+Fechas:     ${spec.fechas}
+Texto:      "${spec.texto}"
+Ornamento:  ${PLACA_ORNAMENTOS[spec.ornamento]}
+Tipografía: ${spec.fuente === 'display' ? 'Lapidaria (Marcellus)' : 'Clásica (Cormorant)'}
+QR:         ${spec.qr ? 'Sí — enlaza al memorial ' + (spec.memorial || '(por vincular)') : 'No'}
+Precio:     ${MXN(f.precio)}
+===========================================================
+Conforme al reglamento del panteón: placa, florero y cruz
+permitidos según medidas del formato.`);
+  toast(`Especificación ${folio} enviada a la fábrica ✦`);
+}
+
+/* ============================================================
+   VISTA: Florería (M9)
    ============================================================ */
 let tiendaDestino = null;
 
@@ -877,7 +1260,7 @@ function viewTienda(params) {
     <p>Compra, envía o dona flores a un difunto. Cualquier visitante puede enviar; la familia recibe la notificación con foto de entrega.</p>
   </div></div>
   <section class="section"><div class="container">
-    <div class="tool" style="display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:30px;gap:10px;align-items:center;box-shadow:var(--shadow)">
+    <div class="tool" style="display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:30px;gap:10px;align-items:center;box-shadow:var(--shadow)">
       🕊️ <b style="font-size:14px">Destinatario:</b>
       <select id="destino-sel" onchange="tiendaDestino=this.value||null" style="border:none;outline:none;font-size:14px;background:none">
         <option value="">Elegir al pagar…</option>
@@ -890,7 +1273,7 @@ function viewTienda(params) {
           <div class="card-img"><img src="${p.img}" alt="${p.nombre}" loading="lazy"></div>
           <div class="card-body">
             <span class="badge gold">${p.cat}</span>
-            <h3 style="font-size:18px">${p.nombre}</h3>
+            <h3 style="font-size:17px">${p.nombre}</h3>
             <p style="font-size:13px">${p.desc}</p>
             <div class="rowline"><span class="price">${MXN(p.precio)}</span>
             <button class="btn btn-primary btn-sm" onclick="agregarCarrito('${p.id}')">Agregar</button></div>
@@ -967,31 +1350,32 @@ function pagarCarrito() {
 }
 
 /* ============================================================
-   VISTA: Mi cuenta (M5 + M3 + M4)
+   VISTA: Mi cuenta (M5 + M3 + M4 + M8)
    ============================================================ */
 let cuentaTab = 'espacios';
 
 function viewCuenta() {
-  if (!DB.user || DB.user.rol !== 'titular') {
+  if (!DB.user || DB.user.rol === 'admin') {
     return `<section class="section"><div class="container" style="max-width:560px">
       <div class="panel" style="text-align:center">
         <h2>Mi cuenta</h2>
-        <p class="sub">Inicia sesión como titular para ver tus espacios, contratos, pagos y familiares invitados.</p>
+        <p class="sub">Inicia sesión como titular o funeraria aliada para ver tus espacios, contratos, plan de pagos y familiares invitados.</p>
         <button class="btn btn-primary" onclick="modalLogin('#/cuenta')">Iniciar sesión</button>
       </div></div></section>${footerHTML()}`;
   }
   setTimeout(() => bindTabs('cuenta'), 0);
   return `
   <div class="page-head"><div class="container">
-    <div class="eyebrow">Portal del titular</div>
+    <div class="eyebrow">${DB.user.rol === 'funeraria' ? 'Portal de aliados · funeraria' : 'Portal del titular'}</div>
     <h1>Hola, ${DB.user.nombre.split(' ')[0]}</h1>
-    <p>Administra tus espacios, contratos, pagos de mantenimiento y los accesos de tu familia.</p>
+    <p>${DB.user.rol === 'funeraria' ? `Compra a nombre de tus clientes con ${cfg('descFuneraria')}% de descuento de aliado.` : 'Administra tus espacios, contratos, plan de pagos, placas y los accesos de tu familia.'}</p>
   </div></div>
   <div class="container dash-layout">
     <nav class="dash-nav" id="tabs-cuenta">
-      <button data-tab="espacios" class="${cuentaTab === 'espacios' ? 'active' : ''}">🌿 Mis espacios</button>
+      <button data-tab="espacios" class="${cuentaTab === 'espacios' ? 'active' : ''}">🌿 Mis espacios y pagos</button>
       <button data-tab="contratos" class="${cuentaTab === 'contratos' ? 'active' : ''}">📜 Contratos</button>
-      <button data-tab="pagos" class="${cuentaTab === 'pagos' ? 'active' : ''}">💳 Pagos y recibos</button>
+      <button data-tab="pagos" class="${cuentaTab === 'pagos' ? 'active' : ''}">💳 Recibos</button>
+      <button data-tab="placas" class="${cuentaTab === 'placas' ? 'active' : ''}">✦ Mis placas</button>
       <button data-tab="familia" class="${cuentaTab === 'familia' ? 'active' : ''}">👪 Familiares invitados</button>
     </nav>
     <div id="tab-body">${cuentaTabHTML()}</div>
@@ -1004,40 +1388,51 @@ function cuentaTabHTML() {
     if (!DB.compras.length) {
       return `<div class="panel" style="text-align:center">
         <h2>Aún no tienes espacios</h2>
-        <p class="sub">Explora el mapa y adquiere un terreno, gaveta o cripta 100% en línea.</p>
+        <p class="sub">Explora el mapa y adquiere una tumba o un nicho 100% en línea, de contado o financiado sin intereses.</p>
         <a class="btn btn-gold" href="#/mapa">Explorar el mapa</a></div>`;
     }
     return DB.compras.map(c => {
-      const e = espacioById(c.espacioId); const sec = seccionById(e.seccion); const tipo = TIPOS[e.tipo];
+      const e = espacioById(c.espacioId); const sec = seccionById(e.seccion);
       const vencida = new Date(c.mantenimiento.proximaRenovacion) < new Date();
+      const fin = c.pago.tipo === 'financiado' ? c.pago : null;
+      const prog = fin ? Math.round((fin.pagadas / fin.plazo) * 100) : 100;
       return `<div class="card mis-espacios" style="margin-bottom:18px"><div class="esp">
         <img src="${sec.img}" alt="${sec.nombre}">
         <div>
-          <h3>${tipo.icon} ${tipo.nombre} ${e.id} · Sección ${sec.id}</h3>
-          <div class="meta">${sec.nombre} · Fila ${e.fila}, Posición ${e.col} · Folio ${c.folio}</div>
+          <h3>${LINEAS[e.linea].icon} ${TIPOS[e.tipo].nombre} ${e.id} · ${sec.nombre}</h3>
+          <div class="meta">Fila ${e.fila}, Posición ${e.col} · Folio ${c.folio} · ${c.modalidad === 'necesidad' ? 'A necesidad' : 'Preventa'}${c.clienteFinal ? ' · Cliente: ' + c.clienteFinal : ''}</div>
           <div style="margin-top:8px">
-            ${c.difunto ? `<span class="badge gold">🕊️ ${c.difunto.nombre}</span>` : '<span class="badge green">Compra en previsión</span>'}
+            ${c.difunto ? `<span class="badge gold">🕊️ ${c.difunto.nombre}</span>` : '<span class="badge blue">Preventa / provisión</span>'}
             <span class="tag ${vencida ? 'vencido' : 'alcorriente'}" style="margin-left:6px">Mantenimiento ${vencida ? 'vencido' : 'al corriente'}</span>
+            ${c.liquidado ? '<span class="tag liquidado" style="margin-left:6px">Liquidado · título disponible</span>' : ''}
           </div>
-          <div class="meta" style="margin-top:6px">Próxima renovación: ${fmtFecha(c.mantenimiento.proximaRenovacion)} · ${MXN(TIPOS[e.tipo].mant)}/año</div>
+          ${fin ? `
+          <div style="margin-top:10px;max-width:420px">
+            <div class="meta">Plan de pagos: ${fin.pagadas} de ${fin.plazo} mensualidades de ${MXN(fin.mensualidad)} (sin intereses) · ${prog}%</div>
+            <div class="progressbar"><i style="width:${prog}%"></i></div>
+          </div>` : ''}
+          <div class="meta" style="margin-top:6px">Renovación de mantenimiento: ${fmtFecha(c.mantenimiento.proximaRenovacion)} · ${MXN(mantDe(e))}/año</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <a class="btn btn-outline btn-sm" href="#/mapa?sel=${e.id}">Ver en mapa</a>
-          ${c.memorialId ? `<a class="btn btn-primary btn-sm" href="#/memorial/${c.memorialId}">Memorial</a>` : ''}
-          <button class="btn btn-gold btn-sm" onclick="renovarMantenimiento('${c.folio}')">Renovar mantenimiento</button>
+          ${c.memorialId ? `<a class="btn btn-primary btn-sm" href="#/memorial/${c.memorialId}">Memorial</a>
+          <a class="btn btn-ghost btn-sm" href="#/placa?mem=${c.memorialId}">Diseñar placa ✦</a>` : ''}
+          ${fin && !c.liquidado ? `<button class="btn btn-gold btn-sm" onclick="pagarMensualidad('${c.folio}')">Pagar mensualidad</button>` : ''}
+          ${c.liquidado ? `<button class="btn btn-gold btn-sm" onclick="descargarTitulo('${c.folio}')">Título de derechos</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="renovarMantenimiento('${c.folio}')">Renovar mantenimiento</button>
         </div>
       </div></div>`;
     }).join('');
   }
   if (cuentaTab === 'contratos') {
-    if (!DB.compras.length) return `<div class="panel"><p>No hay contratos aún. Los contratos firmados aparecen aquí con su PDF resguardado.</p></div>`;
+    if (!DB.compras.length) return `<div class="panel"><p>No hay contratos aún. Los contratos de adhesión firmados aparecen aquí con su PDF resguardado.</p></div>`;
     return `<div class="table-wrap"><table class="data">
       <tr><th>Folio</th><th>Espacio</th><th>Firmado</th><th>Estado</th><th></th></tr>
       ${DB.compras.map(c => `<tr>
         <td><span class="folio">${c.contrato.folio}</span></td>
         <td>${c.espacioId}</td>
         <td>${new Date(c.contrato.fecha).toLocaleString('es-MX')}</td>
-        <td><span class="tag vigente">vigente</span></td>
+        <td><span class="tag vigente">vigente</span>${c.liquidado ? ' <span class="tag liquidado">liquidado</span>' : ''}</td>
         <td><button class="btn btn-outline btn-sm" onclick="verContrato('${c.folio}')">Ver / descargar</button></td>
       </tr>`).join('')}
     </table></div>`;
@@ -1054,10 +1449,30 @@ function cuentaTabHTML() {
       </tr>`).join('')}
     </table></div>`;
   }
-  if (cuentaTab === 'familia') {
+  if (cuentaTab === 'placas') {
     return `<div class="panel">
-      <h2 style="font-size:22px">Familiares invitados</h2>
-      <p class="sub">Los familiares invitados pueden ver el memorial y enviar o donar flores y productos. No tienen acceso a contratos ni pagos, y puedes revocar su acceso en cualquier momento.</p>
+      <h2 style="font-size:22px">Mis placas conmemorativas</h2>
+      <p class="sub">Especificaciones enviadas a la fábrica de nichos y tumbas del panteón.</p>
+      ${DB.placas.length ? `<div class="table-wrap"><table class="data">
+        <tr><th>Folio</th><th>Formato</th><th>Dedicada a</th><th>Precio</th><th>Estado</th></tr>
+        ${DB.placas.map(p => `<tr>
+          <td><span class="folio">${p.folio}</span></td><td>${PLACA_FORMATOS[p.formato].nombre}</td>
+          <td>${p.nombre}<br><span style="font-size:11.5px;color:var(--ink-3)">${p.fechas} · "${p.texto}"</span></td>
+          <td>${MXN(p.precio)}</td><td><span class="tag apartado">${p.estado}</span></td>
+        </tr>`).join('')}
+      </table></div>` : '<p style="color:var(--ink-3);font-size:14px">Aún no has diseñado placas.</p>'}
+      <a class="btn btn-primary" style="margin-top:16px" href="#/placa">Diseñar una placa ✦</a>
+    </div>`;
+  }
+  if (cuentaTab === 'familia') {
+    const c0 = DB.compras[0];
+    return `<div class="panel">
+      <h2 style="font-size:22px">Designaciones y familiares invitados</h2>
+      <p class="sub">El titular sustituto y los beneficiarios provienen del contrato. Los familiares invitados solo pueden ver el memorial y enviar o donar flores; puedes revocar su acceso en cualquier momento.</p>
+      ${c0 ? `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+        ${c0.sustituto && c0.sustituto.nombre ? `<span class="badge blue">Titular sustituto: ${c0.sustituto.nombre} (${c0.sustituto.par || 's/p'})</span>` : '<span class="badge gold">Sin titular sustituto designado</span>'}
+        ${[c0.ben1, c0.ben2].filter(b => b && b.nombre).map((b, i) => `<span class="badge green">Beneficiario ${i + 1}: ${b.nombre}</span>`).join('') || '<span class="badge gold">Sin beneficiarios designados</span>'}
+      </div>` : ''}
       <div class="invite-row">
         <input id="inv-nombre" placeholder="Nombre del familiar">
         <input id="inv-email" type="email" placeholder="correo@ejemplo.com">
@@ -1088,6 +1503,21 @@ function bindTabs(cual) {
   if (cual === 'admin') bindAdminBody();
 }
 
+function pagarMensualidad(folio) {
+  const c = DB.compras.find(x => x.folio === folio);
+  if (!c || c.pago.tipo !== 'financiado' || c.liquidado) return;
+  c.pago.pagadas++;
+  c.pagos.push({ concepto: `Mensualidad ${c.pago.pagadas}/${c.pago.plazo} · ${c.espacioId}`, monto: c.pago.mensualidad, fecha: new Date().toISOString(), metodo: 'Suscripción Stripe' });
+  if (c.pago.pagadas >= c.pago.plazo) {
+    c.liquidado = true;
+    toast('¡Plan liquidado! Tu título de derechos ya está disponible 🎉');
+  } else {
+    toast(`Mensualidad ${c.pago.pagadas}/${c.pago.plazo} pagada ✓`);
+  }
+  saveDB();
+  document.getElementById('tab-body').innerHTML = cuentaTabHTML();
+}
+
 function renovarMantenimiento(folio) {
   const c = DB.compras.find(x => x.folio === folio);
   if (!c) return;
@@ -1096,7 +1526,7 @@ function renovarMantenimiento(folio) {
   prox.setFullYear(prox.getFullYear() + 1);
   c.mantenimiento.proximaRenovacion = prox.toISOString();
   c.mantenimiento.estado = 'al corriente';
-  c.pagos.push({ concepto: `Mantenimiento anual ${c.espacioId} — renovación`, monto: TIPOS[e.tipo].mant, fecha: new Date().toISOString(), metodo: 'Suscripción Stripe' });
+  c.pagos.push({ concepto: `Mantenimiento anual ${c.espacioId} — renovación`, monto: mantDe(e), fecha: new Date().toISOString(), metodo: 'Suscripción Stripe' });
   saveDB();
   document.getElementById('tab-body').innerHTML = cuentaTabHTML();
   toast('Mantenimiento renovado un año más ✓');
@@ -1107,14 +1537,14 @@ function descargarRecibo(i) {
   const p = pagos[i];
   if (!p) return;
   descargarArchivo(`Recibo_${p.folio}_${i + 1}.txt`,
-`JARDINES DEL RECUERDO — RECIBO DE PAGO
---------------------------------------
+`NAJ PIXAM · CASA DEL ALMA — RECIBO DE PAGO
+-------------------------------------------
 Fecha:    ${new Date(p.fecha).toLocaleString('es-MX')}
 Concepto: ${p.concepto}
 Método:   ${p.metodo}
 Monto:    ${MXN(p.monto)}
 Folio de compra: ${p.folio}
---------------------------------------
+-------------------------------------------
 Demo: en producción este recibo se emite como PDF con folio fiscal.`);
 }
 
@@ -1135,7 +1565,7 @@ function revocarFamiliar(i) {
 }
 
 /* ============================================================
-   VISTA: Administración (M8)
+   VISTA: Administración (M10)
    ============================================================ */
 let adminTab = 'dashboard';
 const invFiltro = { seccion: '', estado: '' };
@@ -1145,24 +1575,26 @@ function viewAdmin() {
     return `<section class="section"><div class="container" style="max-width:560px">
       <div class="panel" style="text-align:center">
         <h2>Panel administrativo</h2>
-        <p class="sub">Acceso exclusivo del personal del panteón: inventario, precios, contratos, cobranza y reportes.</p>
-        <button class="btn btn-primary" onclick="login('admin','Administración del Panteón','admin@jardinesdelrecuerdo.mx')">Entrar como administrador (demo)</button>
+        <p class="sub">Acceso exclusivo del personal del panteón: inventario, precios, financiamiento, contratos, cobranza, aliados y reportes.</p>
+        <button class="btn btn-primary" onclick="login('admin','Administración NAJ PIXAM','admin@najpixam.mx')">Entrar como administrador (demo)</button>
       </div></div></section>${footerHTML()}`;
   }
   setTimeout(() => bindTabs('admin'), 0);
   return `
   <div class="page-head"><div class="container">
-    <div class="eyebrow">Panel administrativo</div>
+    <div class="eyebrow">Panel administrativo · M10</div>
     <h1>Operación del panteón</h1>
-    <p>Inventario sobre plano, contratos, cobranza de mantenimiento, tienda y reportes.</p>
+    <p>Inventario sobre plano, configuración de precios y financiamiento, contratos, cobranza, aliados, fábrica y reportes.</p>
   </div></div>
   <div class="container dash-layout">
     <nav class="dash-nav" id="tabs-admin">
       <button data-tab="dashboard" class="${adminTab === 'dashboard' ? 'active' : ''}">📊 Dashboard</button>
-      <button data-tab="inventario" class="${adminTab === 'inventario' ? 'active' : ''}">🗺️ Inventario y precios</button>
+      <button data-tab="inventario" class="${adminTab === 'inventario' ? 'active' : ''}">🗺️ Inventario</button>
+      <button data-tab="config" class="${adminTab === 'config' ? 'active' : ''}">⚙️ Precios y financiamiento</button>
       <button data-tab="contratos" class="${adminTab === 'contratos' ? 'active' : ''}">📜 Contratos</button>
       <button data-tab="cobranza" class="${adminTab === 'cobranza' ? 'active' : ''}">💰 Cobranza</button>
-      <button data-tab="tienda" class="${adminTab === 'tienda' ? 'active' : ''}">🌹 Tienda y pedidos</button>
+      <button data-tab="aliados" class="${adminTab === 'aliados' ? 'active' : ''}">🤝 Funerarias y gobierno</button>
+      <button data-tab="tienda" class="${adminTab === 'tienda' ? 'active' : ''}">🌹 Florería y fábrica</button>
       <button data-tab="reportes" class="${adminTab === 'reportes' ? 'active' : ''}">⬇ Reportes</button>
     </nav>
     <div id="tab-body">${adminTabHTML()}</div>
@@ -1179,27 +1611,29 @@ function conteoEstados() {
 function adminTabHTML() {
   if (adminTab === 'dashboard') return adminDashboardHTML();
   if (adminTab === 'inventario') return adminInventarioHTML();
+  if (adminTab === 'config') return adminConfigHTML();
   if (adminTab === 'contratos') return adminContratosHTML();
   if (adminTab === 'cobranza') return adminCobranzaHTML();
+  if (adminTab === 'aliados') return adminAliadosHTML();
   if (adminTab === 'tienda') return adminTiendaHTML();
   if (adminTab === 'reportes') return adminReportesHTML();
   return '';
 }
 
-/* --- Dashboard con gráficas accesibles --- */
 function adminDashboardHTML() {
   const c = conteoEstados();
   const total = ESPACIOS.length;
   const ocupPct = Math.round(((c.ocupado + c.vendido) / total) * 100);
-  const ventas12 = VENTAS_MES.reduce((a, v) => a + v.monto, 0) + DB.compras.reduce((a, x) => a + x.pagoUnico, 0);
+  const ventas12 = VENTAS_MES.reduce((a, v) => a + v.monto, 0) + DB.compras.reduce((a, x) => a + (x.desglose ? x.desglose.financiable : 0), 0);
   const vencidos = COBRANZA_SEED.filter(x => x.estado === 'vencido').length;
-  const mantAnual = ESPACIOS.reduce((a, e) => a + (['ocupado', 'vendido'].includes(estadoDe(e)) ? TIPOS[e.tipo].mant : 0), 0);
+  const mantAnual = ESPACIOS.reduce((a, e) => a + (['ocupado', 'vendido'].includes(estadoDe(e)) ? mantDe(e) : 0), 0);
+  const finActivos = DB.compras.filter(x => x.pago.tipo === 'financiado' && !x.liquidado).length;
   return `
   <div class="kpis">
     <div class="kpi"><div class="v">${ocupPct}%</div><div class="l">Ocupación total (${c.ocupado + c.vendido} de ${total} espacios)</div><span class="delta up">▲ 2.1 pts vs. trimestre anterior</span></div>
     <div class="kpi"><div class="v">${c.disponible}</div><div class="l">Espacios disponibles para venta</div></div>
     <div class="kpi"><div class="v">${MXN(ventas12).replace(' MXN', '')}</div><div class="l">Ventas últimos 12 meses (MXN)</div><span class="delta up">▲ 12% anual</span></div>
-    <div class="kpi"><div class="v">${vencidos}</div><div class="l">Cuentas de mantenimiento vencidas</div><span class="delta down">Requieren seguimiento</span></div>
+    <div class="kpi"><div class="v">${vencidos + finActivos}</div><div class="l">${vencidos} mantenimientos vencidos · ${finActivos} financiamientos activos</div><span class="delta down">Cobranza en seguimiento</span></div>
   </div>
   ${chartVentasHTML()}
   <div class="chart-card">
@@ -1212,6 +1646,14 @@ function adminDashboardHTML() {
         <div class="li" style="border-top:1px solid var(--line);padding-top:8px;margin-top:4px">Ingreso anual por mantenimiento<b>${MXN(mantAnual)}</b></div>
       </div>
     </div>
+  </div>
+  <div class="chart-card">
+    <h3>Ventas por línea y segmento (12 meses)</h3>
+    <div class="sub">Conforme al modelo de negocio: público, funerarias aliadas y gobierno</div>
+    <div class="table-wrap" style="border:none"><table class="data">
+      <tr><th>Línea</th><th>Público general</th><th>Funerarias</th><th>Gobierno</th><th>Total</th></tr>
+      ${VENTAS_SEGMENTO.map(v => `<tr><td><b>${v.linea}</b></td><td>${MXN(v.publico)}</td><td>${MXN(v.funerarias)}</td><td>${MXN(v.gobierno)}</td><td><b>${MXN(v.publico + v.funerarias + v.gobierno)}</b></td></tr>`).join('')}
+    </table></div>
   </div>`;
 }
 
@@ -1221,23 +1663,23 @@ function chartVentasHTML() {
   const bw = (W - padL - 10) / VENTAS_MES.length;
   const y = v => padT + (H - padT - padB) * (1 - v / max);
   const grid = [0, 200000, 400000, 600000, 800000].map(v =>
-    `<line x1="${padL}" y1="${y(v)}" x2="${W - 6}" y2="${y(v)}" stroke="#eee9df" stroke-width="1"/>
-     <text x="${padL - 8}" y="${y(v) + 4}" text-anchor="end" font-size="10.5" fill="#8a8478">${v / 1000}k</text>`).join('');
+    `<line x1="${padL}" y1="${y(v)}" x2="${W - 6}" y2="${y(v)}" stroke="#efe8d4" stroke-width="1"/>
+     <text x="${padL - 8}" y="${y(v) + 4}" text-anchor="end" font-size="10.5" fill="#94886f">${v / 1000}k</text>`).join('');
   const maxIdx = VENTAS_MES.reduce((mi, v, i, a) => v.monto > a[mi].monto ? i : mi, 0);
   const bars = VENTAS_MES.map((v, i) => {
     const x = padL + i * bw + bw * 0.18, w = bw * 0.64;
-    const yy = y(v.monto), h = H - padB - yy;
-    return `<path d="M${x} ${yy + 4} q0-4 4-4 h${w - 8} q4 0 4 4 V${H - padB} H${x} Z" fill="#2c5a3f"
+    const yy = y(v.monto);
+    return `<path d="M${x} ${yy + 4} q0-4 4-4 h${w - 8} q4 0 4 4 V${H - padB} H${x} Z" fill="#52683f"
         class="bar-mes" data-tip="${v.mes}: ${MXN(v.monto)}"/>
-      ${i === maxIdx ? `<text x="${x + w / 2}" y="${yy - 7}" text-anchor="middle" font-size="11" font-weight="600" fill="#5c564b">${MXN(v.monto).replace(' MXN', '')}</text>` : ''}
-      <text x="${x + w / 2}" y="${H - padB + 16}" text-anchor="middle" font-size="10" fill="#8a8478">${v.mes.split(' ')[0]}</text>`;
+      ${i === maxIdx ? `<text x="${x + w / 2}" y="${yy - 7}" text-anchor="middle" font-size="11" font-weight="600" fill="#5f5544">${MXN(v.monto).replace(' MXN', '')}</text>` : ''}
+      <text x="${x + w / 2}" y="${H - padB + 16}" text-anchor="middle" font-size="10" fill="#94886f">${v.mes.split(' ')[0]}</text>`;
   }).join('');
   return `<div class="chart-card">
     <h3>Ventas de espacios por mes</h3>
-    <div class="sub">Pago único (espacio + derechos), septiembre 2025 – agosto 2026 · pasa el cursor para ver el detalle</div>
+    <div class="sub">Precio del espacio (tumbas y nichos), septiembre 2025 – agosto 2026 · pasa el cursor para ver el detalle</div>
     <div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:560px" role="img" aria-label="Gráfica de barras de ventas mensuales">
       ${grid}${bars}
-      <line x1="${padL}" y1="${H - padB}" x2="${W - 6}" y2="${H - padB}" stroke="#d8d2c4" stroke-width="1"/>
+      <line x1="${padL}" y1="${H - padB}" x2="${W - 6}" y2="${H - padB}" stroke="#ddd2b2" stroke-width="1"/>
     </svg></div>
     <details style="margin-top:10px"><summary style="font-size:12.5px;color:var(--ink-3);cursor:pointer">Ver datos en tabla</summary>
       <div class="table-wrap" style="margin-top:10px"><table class="data"><tr><th>Mes</th><th>Ventas (MXN)</th></tr>
@@ -1260,12 +1702,11 @@ function donutEstadosSVG(c) {
   });
   return `<svg width="220" height="220" viewBox="0 0 220 220" role="img" aria-label="Distribución de espacios por estado">
     ${arcs}
-    <text x="${CX}" y="${CY - 4}" text-anchor="middle" font-size="30" font-weight="700" fill="#1e3d2b" font-family="Georgia">${total}</text>
-    <text x="${CX}" y="${CY + 18}" text-anchor="middle" font-size="11" fill="#8a8478">espacios</text>
+    <text x="${CX}" y="${CY - 4}" text-anchor="middle" font-size="30" fill="#3f5233" font-family="Marcellus, Georgia">${total}</text>
+    <text x="${CX}" y="${CY + 18}" text-anchor="middle" font-size="11" fill="#94886f">espacios</text>
   </svg>`;
 }
 
-/* --- Inventario --- */
 function adminInventarioHTML() {
   const filas = ESPACIOS.filter(e =>
     (!invFiltro.seccion || e.seccion === invFiltro.seccion) &&
@@ -1285,13 +1726,13 @@ function adminInventarioHTML() {
     <span style="font-size:12.5px;color:var(--ink-3)">Mostrando ${filas.length} de ${ESPACIOS.length} espacios · los cambios se reflejan al instante en el mapa público</span>
   </div>
   <div class="table-wrap"><table class="data">
-    <tr><th>Espacio</th><th>Sección</th><th>Tipo</th><th>Precio (editable)</th><th>Estado</th><th>Difunto</th></tr>
+    <tr><th>Espacio</th><th>Línea</th><th>Atributo</th><th>Precio (editable)</th><th>Estado</th><th>Difunto</th></tr>
     ${filas.map(e => {
-      const est = estadoDe(e); const mem = memorialDeEspacio(e.id);
+      const est = estadoDe(e); const mem = memorialDeEspacio(e.id); const sec = seccionById(e.seccion);
       return `<tr>
-        <td><b>${e.id}</b></td>
-        <td>${e.seccion} · Fila ${e.fila}</td>
-        <td>${TIPOS[e.tipo].nombre}</td>
+        <td><b>${e.id}</b> · F${e.fila}</td>
+        <td>${LINEAS[e.linea].nombre}</td>
+        <td>${sec.atributo}</td>
         <td><input type="number" value="${precioDe(e)}" data-precio="${e.id}" style="width:110px;border:1px solid var(--line);border-radius:8px;padding:6px 8px"></td>
         <td><select data-estado="${e.id}" style="border:1px solid var(--line);border-radius:8px;padding:6px 8px">
           ${Object.entries(ST_LABEL).map(([k, l]) => `<option value="${k}" ${est === k ? 'selected' : ''}>${l}</option>`).join('')}
@@ -1302,34 +1743,58 @@ function adminInventarioHTML() {
   </table></div>`;
 }
 
-/* --- Contratos --- */
+function adminConfigHTML() {
+  const campos = [
+    ['excavacion', 'Excavación (tumba) MXN'], ['mantTumba', 'Mantenimiento anual tumba MXN'], ['mantNicho', 'Mantenimiento anual nicho MXN'],
+    ['ivaPct', 'IVA %'], ['derechosMunicipales', 'Derechos municipales MXN'], ['registroCivil', 'Registro Civil MXN'],
+    ['maniobras', 'Maniobras de inhumación MXN'], ['aperturaCierreNicho', 'Apertura/cierre de nicho MXN'],
+    ['engancheMin', 'Enganche mínimo %'], ['descFuneraria', 'Descuento funerarias %'], ['vigenciaAnios', 'Vigencia (años)'],
+  ];
+  return `<div class="panel">
+    <h2 style="font-size:22px">Parámetros de precio y financiamiento</h2>
+    <p class="sub">Todos los conceptos del modelo de negocio son configurables (requerimiento §3). Los cambios aplican de inmediato en fichas, wizard y contratos.</p>
+    <div class="config-grid">
+      ${campos.map(([k, l]) => `<div class="field"><label>${l}</label>
+        <input type="number" data-cfg="${k}" value="${cfg(k)}" style="font-variant-numeric:tabular-nums"></div>`).join('')}
+    </div>
+    <p style="font-size:12.5px;color:var(--ink-3);margin-top:16px">Plazos de financiamiento vigentes: ${cfg('plazos').join(' / ')} mensualidades, sin intereses (el contrato registra precio fijo).</p>
+  </div>`;
+}
+
 function adminContratosHTML() {
-  const propios = DB.compras.map(c => ({ folio: c.contrato.folio, titular: c.titular.nombre, espacio: c.espacioId, fecha: c.contrato.fecha.slice(0, 10), estado: 'vigente', compra: c.folio }));
+  const propios = DB.compras.map(c => ({ folio: c.contrato.folio, titular: c.titular.nombre, espacio: c.espacioId, fecha: c.contrato.fecha.slice(0, 10), estado: 'vigente', compra: c.folio, liq: c.liquidado }));
   const todos = CONTRATOS_SEED.concat(propios);
   return `<div class="table-wrap"><table class="data">
     <tr><th>Folio</th><th>Titular</th><th>Espacio</th><th>Fecha de firma</th><th>Estado</th><th></th></tr>
     ${todos.map(c => `<tr>
       <td><span class="folio">${c.folio}</span></td><td>${c.titular}</td><td>${c.espacio}</td>
-      <td>${fmtFecha(c.fecha)}</td><td><span class="tag ${c.estado}">${c.estado}</span></td>
-      <td>${c.compra ? `<button class="btn btn-outline btn-sm" onclick="verContrato('${c.compra}')">Ver PDF</button>` : '<span style="font-size:12px;color:var(--ink-3)">Archivo físico digitalizado</span>'}</td>
+      <td>${fmtFecha(c.fecha)}</td><td><span class="tag ${c.estado}">${c.estado}</span>${c.liq ? ' <span class="tag liquidado">liquidado</span>' : ''}</td>
+      <td>${c.compra ? `<button class="btn btn-outline btn-sm" onclick="verContrato('${c.compra}')">Ver PDF</button>` : '<span style="font-size:12px;color:var(--ink-3)">Archivo digitalizado</span>'}</td>
     </tr>`).join('')}
   </table></div>`;
 }
 
-/* --- Cobranza --- */
 function adminCobranzaHTML() {
   const propias = DB.compras.map(c => {
     const e = espacioById(c.espacioId);
-    return { titular: c.titular.nombre, espacio: c.espacioId, vence: c.mantenimiento.proximaRenovacion.slice(0, 10), monto: TIPOS[e.tipo].mant, estado: new Date(c.mantenimiento.proximaRenovacion) < new Date() ? 'vencido' : 'al corriente', email: c.titular.email };
+    return { titular: c.titular.nombre, espacio: c.espacioId, vence: c.mantenimiento.proximaRenovacion.slice(0, 10), monto: mantDe(e), estado: new Date(c.mantenimiento.proximaRenovacion) < new Date() ? 'vencido' : 'al corriente', email: c.titular.email };
   });
   const todas = COBRANZA_SEED.concat(propias);
   const vencidas = todas.filter(x => x.estado === 'vencido');
+  const fin = DB.compras.filter(c => c.pago.tipo === 'financiado' && !c.liquidado);
   return `
   <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
     <div class="kpi"><div class="v">${todas.length}</div><div class="l">Suscripciones de mantenimiento activas</div></div>
     <div class="kpi"><div class="v">${vencidas.length}</div><div class="l">Cuentas vencidas</div></div>
-    <div class="kpi"><div class="v">${MXN(vencidas.reduce((a, x) => a + x.monto, 0)).replace(' MXN', '')}</div><div class="l">Cartera vencida (MXN)</div></div>
+    <div class="kpi"><div class="v">${fin.length}</div><div class="l">Planes de financiamiento en curso</div></div>
   </div>
+  ${fin.length ? `<div class="chart-card"><h3>Financiamientos en curso</h3>
+  <div class="table-wrap" style="border:none"><table class="data">
+    <tr><th>Titular</th><th>Espacio</th><th>Plan</th><th>Avance</th></tr>
+    ${fin.map(c => `<tr><td>${c.titular.nombre}</td><td>${c.espacioId}</td>
+      <td>${c.pago.plazo} × ${MXN(c.pago.mensualidad)} · enganche ${c.pago.engPct}%</td>
+      <td>${c.pago.pagadas}/${c.pago.plazo} pagadas</td></tr>`).join('')}
+  </table></div></div>` : ''}
   <div class="table-wrap"><table class="data">
     <tr><th>Titular</th><th>Espacio</th><th>Renovación</th><th>Cuota anual</th><th>Estatus</th><th></th></tr>
     ${todas.map(x => `<tr>
@@ -1341,12 +1806,28 @@ function adminCobranzaHTML() {
   </table></div>`;
 }
 
-/* --- Tienda admin --- */
+function adminAliadosHTML() {
+  return `
+  <div class="chart-card"><h3>Funerarias aliadas</h3>
+  <div class="sub">Acceso especial con ${cfg('descFuneraria')}% de descuento; compran a nombre de su cliente final (nicho tras cremación o tumba con cuerpo presente).</div>
+  <div class="table-wrap" style="border:none"><table class="data">
+    <tr><th>Funeraria</th><th>Contacto</th><th>Compras acumuladas</th><th>Descuento</th><th></th></tr>
+    ${FUNERARIAS_SEED.map(f => `<tr><td><b>${f.nombre}</b></td><td>${f.contacto}</td><td>${f.compras}</td>
+      <td><span class="badge gold">−${f.desc}%</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="toast('Demo: estado de cuenta enviado a ${f.contacto}')">Estado de cuenta</button></td></tr>`).join('')}
+  </table></div></div>
+  <div class="panel">
+    <h3 style="font-size:19px;color:var(--jungle);margin-bottom:8px">Esquema de gobierno</h3>
+    <p style="font-size:14px;color:var(--ink-2)">Los convenios institucionales operan como esquema separado con condiciones y precios propios (requerimiento §3). Se gestionan directamente con la administración y se reflejan en los reportes por segmento.</p>
+    <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="toast('Demo: solicitud de convenio registrada')">Registrar convenio</button>
+  </div>`;
+}
+
 function adminTiendaHTML() {
   const pedidos = PEDIDOS_SEED.concat(DB.pedidos);
   return `
-  <div class="chart-card"><h3>Catálogo de productos</h3><div class="sub">${PRODUCTOS.length} productos activos en la florería</div>
-  <div class="table-wrap"><table class="data">
+  <div class="chart-card"><h3>Catálogo de la florería</h3><div class="sub">${PRODUCTOS.length} productos activos</div>
+  <div class="table-wrap" style="border:none"><table class="data">
     <tr><th></th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Inventario</th></tr>
     ${PRODUCTOS.map(p => `<tr>
       <td><img src="${p.img}" alt="" style="width:44px;height:44px;border-radius:8px;object-fit:cover"></td>
@@ -1354,26 +1835,34 @@ function adminTiendaHTML() {
       <td><span class="badge green">En stock</span></td>
     </tr>`).join('')}
   </table></div></div>
-  <div class="chart-card"><h3>Pedidos</h3><div class="sub">Entregas de flores y productos en los espacios</div>
-  <div class="table-wrap"><table class="data">
+  <div class="chart-card"><h3>Pedidos de flores</h3><div class="sub">Entregas en los espacios con notificación a la familia</div>
+  <div class="table-wrap" style="border:none"><table class="data">
     <tr><th>Folio</th><th>Producto</th><th>Dedicado a</th><th>De parte de</th><th>Fecha</th><th>Estado</th></tr>
     ${pedidos.map(p => { const prod = productoById(p.producto); const m = memorialById(p.destino); return `<tr>
       <td><span class="folio">${p.folio}</span></td><td>${prod.nombre}</td><td>${m ? m.nombre : p.destino}</td>
       <td>${p.de}</td><td>${fmtFecha(p.fecha)}</td>
       <td><span class="tag ${p.estado === 'entregado' ? 'alcorriente' : 'apartado'}">${p.estado}</span></td>
     </tr>`; }).join('')}
-  </table></div></div>`;
+  </table></div></div>
+  <div class="chart-card"><h3>Fábrica de placas (M8)</h3><div class="sub">Especificaciones recibidas desde el diseñador de placa</div>
+  ${DB.placas.length ? `<div class="table-wrap" style="border:none"><table class="data">
+    <tr><th>Folio</th><th>Formato</th><th>Dedicada a</th><th>Texto</th><th>Precio</th><th>Estado</th></tr>
+    ${DB.placas.map(p => `<tr><td><span class="folio">${p.folio}</span></td><td>${PLACA_FORMATOS[p.formato].nombre}</td>
+      <td>${p.nombre} (${p.fechas})</td><td>"${p.texto}"</td><td>${MXN(p.precio)}</td>
+      <td><span class="tag apartado">${p.estado}</span></td></tr>`).join('')}
+  </table></div>` : '<p style="font-size:13.5px;color:var(--ink-3)">Sin especificaciones pendientes. Las placas diseñadas por los titulares aparecen aquí.</p>'}
+  </div>`;
 }
 
-/* --- Reportes --- */
 function adminReportesHTML() {
   return `<div class="panel">
     <h2 style="font-size:22px">Exportar reportes</h2>
-    <p class="sub">Descarga la información operativa en CSV para conciliación y análisis.</p>
+    <p class="sub">Ocupación, ventas por línea y segmento, ingresos por mantenimiento y financiamiento (requerimiento M10).</p>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="exportCSV('inventario')">⬇ Inventario de espacios</button>
       <button class="btn btn-primary" onclick="exportCSV('cobranza')">⬇ Cobranza de mantenimiento</button>
       <button class="btn btn-primary" onclick="exportCSV('ventas')">⬇ Ventas por mes</button>
+      <button class="btn btn-primary" onclick="exportCSV('segmentos')">⬇ Ventas por línea y segmento</button>
     </div>
   </div>`;
 }
@@ -1381,9 +1870,9 @@ function adminReportesHTML() {
 function exportCSV(cual) {
   let csv = '';
   if (cual === 'inventario') {
-    csv = 'espacio,seccion,tipo,fila,posicion,estado,precio_mxn,difunto\n' + ESPACIOS.map(e => {
-      const m = memorialDeEspacio(e.id);
-      return [e.id, e.seccion, e.tipo, e.fila, e.col, estadoDe(e), precioDe(e), m ? `"${m.nombre}"` : ''].join(',');
+    csv = 'espacio,seccion,linea,tipo,atributo,fila,posicion,estado,precio_mxn,difunto\n' + ESPACIOS.map(e => {
+      const m = memorialDeEspacio(e.id); const s = seccionById(e.seccion);
+      return [e.id, e.seccion, e.linea, e.tipo, `"${s.atributo}"`, e.fila, e.col, estadoDe(e), precioDe(e), m ? `"${m.nombre}"` : ''].join(',');
     }).join('\n');
   }
   if (cual === 'cobranza') {
@@ -1392,7 +1881,10 @@ function exportCSV(cual) {
   if (cual === 'ventas') {
     csv = 'mes,ventas_mxn\n' + VENTAS_MES.map(v => [v.mes, v.monto].join(',')).join('\n');
   }
-  descargarArchivo(`reporte_${cual}_jardines.csv`, csv, 'text/csv;charset=utf-8');
+  if (cual === 'segmentos') {
+    csv = 'linea,publico_mxn,funerarias_mxn,gobierno_mxn\n' + VENTAS_SEGMENTO.map(v => [v.linea, v.publico, v.funerarias, v.gobierno].join(',')).join('\n');
+  }
+  descargarArchivo(`reporte_${cual}_najpixam.csv`, csv, 'text/csv;charset=utf-8');
   toast('Reporte descargado.');
 }
 
@@ -1407,12 +1899,17 @@ function bindAdminBody() {
     saveDB();
     toast(`Precio de ${inp.dataset.precio} actualizado`);
   });
+  document.querySelectorAll('[data-cfg]').forEach(inp => inp.onchange = () => {
+    DB.config[inp.dataset.cfg] = +inp.value;
+    saveDB();
+    toast(`Parámetro actualizado: ${inp.dataset.cfg} = ${inp.value}`);
+  });
   const s = document.getElementById('inv-sec'), e2 = document.getElementById('inv-est');
   if (s) s.onchange = () => { invFiltro.seccion = s.value; document.getElementById('tab-body').innerHTML = adminTabHTML(); bindAdminBody(); };
   if (e2) e2.onchange = () => { invFiltro.estado = e2.value; document.getElementById('tab-body').innerHTML = adminTabHTML(); bindAdminBody(); };
 }
 
-/* tooltip flotante para las gráficas */
+/* tooltip flotante de gráficas */
 document.addEventListener('mousemove', ev => {
   const t = ev.target.closest ? ev.target.closest('.bar-mes') : null;
   let tip = document.querySelector('.chart-tip');
@@ -1434,6 +1931,7 @@ const ROUTES = [
   [/^#\/comprar\/([\w-]+)/, (p, id) => viewComprar(p, id)],
   [/^#\/memoriales/, () => viewMemoriales()],
   [/^#\/memorial\/([\w-]+)/, (p, id) => viewMemorial(p, id)],
+  [/^#\/placa/, p => viewPlaca(p)],
   [/^#\/tienda/, p => viewTienda(p)],
   [/^#\/cuenta/, () => viewCuenta()],
   [/^#\/admin/, () => viewAdmin()],

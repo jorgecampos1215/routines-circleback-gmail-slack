@@ -73,8 +73,8 @@ const monograma = (nombre, size, font) =>
   `<div class="p" style="width:${size}px;height:${size}px;font-size:${font}px">${nombre.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>`;
 
 /* ---------- sesión y roles (C2 / M6) ---------- */
-function login(rol, nombre, email) {
-  DB.user = { rol, nombre, email };
+function login(rol, nombre, email, extra) {
+  DB.user = Object.assign({ rol, nombre, email }, extra || {});
   saveDB(); renderHeader(); router();
   toast(`Bienvenido, ${nombre.split(' ')[0]}`);
 }
@@ -86,6 +86,7 @@ function modalLogin(despues) {
     <p class="sub">Demo: elige un rol para explorar la plataforma. En producción este acceso usa correo y contraseña con recuperación.</p>
     <div class="role-cards">
       <div class="radio-card" id="rc-titular"><b>👤 Titular / comprador</b><span>Compra y administra espacios, contratos, pagos y accesos familiares.</span></div>
+      <div class="radio-card" id="rc-familiar"><b>👪 Familiar invitado</b><span>Acceso limitado: ver el memorial y enviar flores a su difunto.</span></div>
       <div class="radio-card" id="rc-funeraria"><b>🤝 Funeraria aliada</b><span>Acceso B2B con ${cfg('descFuneraria')}% de descuento; compra a nombre de su cliente final.</span></div>
       <div class="radio-card" id="rc-admin"><b>🛡️ Administrador del panteón</b><span>Inventario, precios, financiamiento, contratos, cobranza y reportes.</span></div>
     </div>
@@ -101,6 +102,11 @@ function modalLogin(despues) {
     document.querySelectorAll('.role-cards .radio-card').forEach(x => x.classList.remove('on'));
     document.getElementById('rc-titular').classList.add('on');
     document.getElementById('login-form').style.display = 'block';
+  };
+  document.getElementById('rc-familiar').onclick = () => {
+    closeModal();
+    login('familiar', 'Carmen Rivas Domínguez', 'c.rivas@example.com', { memoriales: ['mem-01', 'mem-02'] });
+    if (despues) location.hash = despues;
   };
   document.getElementById('rc-funeraria').onclick = () => {
     closeModal(); login('funeraria', 'Funeraria La Paz de Kanasín', 'ventas@lapazkanasin.mx');
@@ -320,7 +326,7 @@ function viewHome() {
       <div class="section-head">
         <div class="eyebrow">Florería del panteón</div>
         <h2>Flores frescas, entregadas con respeto</h2>
-        <p>Cualquier persona puede enviar o donar flores a un difunto; nuestro equipo las coloca en el espacio y notifica a la familia.</p>
+        <p>El titular y los familiares que él autoriza pueden enviar flores a su difunto; nuestro equipo las coloca en el espacio y notifica a la familia. Así cuidamos la privacidad de quienes descansan aquí.</p>
       </div>
       <div class="shop-grid">
         ${PRODUCTOS.slice(0, 4).map(p => `
@@ -461,7 +467,7 @@ function fichaEspacioHTML(id) {
     accion = `<button class="btn btn-outline btn-block" disabled>Apartado temporalmente</button>`;
   } else if (mem) {
     accion = `<a class="btn btn-primary btn-block" href="#/memorial/${mem.id}">Ver memorial de ${mem.nombre.split(' ')[1] || mem.nombre}</a>
-      <a class="btn btn-ghost btn-block" style="margin-top:8px" href="#/tienda?destino=${mem.id}">Enviar flores 🌹</a>`;
+      ${puedeEnviarFlores(mem.id) ? `<a class="btn btn-ghost btn-block" style="margin-top:8px" href="#/tienda?destino=${mem.id}">Enviar flores 🌹</a>` : ''}`;
   } else {
     accion = `<button class="btn btn-outline btn-block" disabled>${est === 'vendido' ? 'Vendido en preventa' : 'Espacio ocupado'}</button>`;
   }
@@ -1055,8 +1061,11 @@ function viewMemorial(params, id) {
       <div>
         <div class="sidebox">
           <h3>Enviar flores y productos</h3>
-          <p style="font-size:13.5px;color:var(--ink-2);margin-bottom:14px">Nuestro equipo los coloca directamente en el espacio y notifica a la familia.</p>
-          <a class="btn btn-gold btn-block" href="#/tienda?destino=${m.id}">Enviar flores 🌹</a>
+          ${puedeEnviarFlores(m.id)
+            ? `<p style="font-size:13.5px;color:var(--ink-2);margin-bottom:14px">Nuestro equipo los coloca directamente en el espacio y notifica a la familia.</p>
+               <a class="btn btn-gold btn-block" href="#/tienda?destino=${m.id}">Enviar flores 🌹</a>`
+            : `<p style="font-size:13.5px;color:var(--ink-2)">🔒 Por privacidad de la familia, el envío de flores está reservado a los familiares autorizados por el titular.</p>
+               ${!DB.user ? `<button class="btn btn-outline btn-sm btn-block" style="margin-top:12px" onclick="modalLogin('#/memorial/${m.id}')">Iniciar sesión como familiar</button>` : ''}`}
         </div>
         <div class="sidebox">
           <h3>Flores recibidas</h3>
@@ -1296,16 +1305,34 @@ let tiendaDestino = null;
 
 function viewTienda(params) {
   if (params.destino) tiendaDestino = params.destino;
-  const mems = todosMemoriales();
+  const mems = memorialesAutorizados();
+  if (!mems.length) {
+    return `
+    <div class="page-head"><div class="container">
+      <div class="eyebrow">Florería del panteón</div>
+      <h1>Flores y productos conmemorativos</h1>
+      <p>Por respeto a la privacidad de las familias, el envío de flores está reservado a los familiares autorizados de cada difunto.</p>
+    </div></div>
+    <section class="section"><div class="container" style="max-width:600px">
+      <div class="panel" style="text-align:center">
+        <h2>🔒 Acceso para familiares</h2>
+        <p class="sub">Solo el titular del espacio y los familiares que él invita pueden comprar y enviar flores a su difunto. Así, los nombres de las personas que descansan aquí no se exponen públicamente.</p>
+        ${DB.user
+          ? `<p style="font-size:14px;color:var(--ink-2);margin-bottom:18px">Tu cuenta aún no tiene difuntos vinculados. Si eres familiar, pide al titular del espacio que te envíe una invitación desde <i>Mi cuenta → Familiares invitados</i>.</p>`
+          : `<button class="btn btn-primary" onclick="modalLogin('#/tienda')">Iniciar sesión</button>`}
+      </div>
+    </div></section>${footerHTML()}`;
+  }
+  if (tiendaDestino && !puedeEnviarFlores(tiendaDestino)) tiendaDestino = null;
   return `
   <div class="page-head"><div class="container">
     <div class="eyebrow">Florería del panteón</div>
     <h1>Flores y productos conmemorativos</h1>
-    <p>Compra, envía o dona flores a un difunto. Cualquier visitante puede enviar; la familia recibe la notificación con foto de entrega.</p>
+    <p>Envío reservado a familiares autorizados. Nuestro equipo coloca cada pedido en el espacio y notifica a la familia con foto de entrega.</p>
   </div></div>
   <section class="section"><div class="container">
     <div class="tool" style="display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:30px;gap:10px;align-items:center;box-shadow:var(--shadow)">
-      🕊️ <b style="font-size:14px">Destinatario:</b>
+      🕊️ <b style="font-size:14px">Dedicado a (tus difuntos):</b>
       <select id="destino-sel" onchange="tiendaDestino=this.value||null" style="border:none;outline:none;font-size:14px;background:none">
         <option value="">Elegir al pagar…</option>
         ${mems.map(m => `<option value="${m.id}" ${tiendaDestino === m.id ? 'selected' : ''}>${m.nombre}</option>`).join('')}
@@ -1344,7 +1371,8 @@ function agregarCarrito(pid) {
 }
 
 function abrirCarrito() {
-  const mems = todosMemoriales();
+  const mems = memorialesAutorizados();
+  if (!mems.length) { toast('Inicia sesión como familiar autorizado para enviar flores.'); return; }
   const total = DB.carrito.reduce((a, c) => a + productoById(c.productoId).precio * c.qty, 0);
   openModal(`
     <h2>Tu pedido</h2>

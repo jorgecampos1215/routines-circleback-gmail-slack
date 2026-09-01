@@ -115,7 +115,7 @@ const seccionById = id => SECCIONES.find(s => s.id === id);
 /* ---------- memoriales (M7) ---------- */
 const MEMORIALES_SEED = [
   {
-    id: 'mem-01', nombre: 'Don Rodrigo Álvarez Peón', nac: '1938-03-11', def: '2021-11-02',
+    id: 'mem-01', titularEmail: 'mf.alvarez@example.com', nombre: 'Don Rodrigo Álvarez Peón', nac: '1938-03-11', def: '2021-11-02',
     foto: null, cover: IMG.camposanto, publico: true, espacio: 'A-03',
     epitafio: 'Sembró ceibas sabiendo que no descansaría bajo su sombra.',
     mensajes: [
@@ -125,14 +125,14 @@ const MEMORIALES_SEED = [
     flores: [ { producto: 'p1', de: 'María Álvarez', fecha: '2026-08-10' }, { producto: 'p5', de: 'Familia Cetina', fecha: '2026-07-30' } ],
   },
   {
-    id: 'mem-02', nombre: 'Sra. Guadalupe Rivas de Álvarez', nac: '1942-12-08', def: '2023-05-19',
+    id: 'mem-02', titularEmail: 'c.rivas@example.com', nombre: 'Sra. Guadalupe Rivas de Álvarez', nac: '1942-12-08', def: '2023-05-19',
     foto: null, cover: IMG.flamboyan, publico: true, espacio: 'A-04',
     epitafio: 'Su cocina olía a hogar; su abrazo, a domingo por la tarde.',
     mensajes: [ { autor: 'Sus nietos', fecha: '2026-05-19', texto: 'Tres años sin ti, abuela Lupita. Hoy hicimos tu receta de cochinita y brindamos en tu honor.' } ],
     flores: [ { producto: 'p3', de: 'Carmen Rivas', fecha: '2026-08-01' } ],
   },
   {
-    id: 'mem-03', nombre: 'Prof. Ernesto Canul May', nac: '1951-06-27', def: '2024-02-14',
+    id: 'mem-03', titularEmail: 'r.may@example.com', nombre: 'Prof. Ernesto Canul May', nac: '1951-06-27', def: '2024-02-14',
     foto: null, cover: IMG.andadores, publico: true, espacio: 'B-07',
     epitafio: 'Enseñó a leer a tres generaciones de un mismo pueblo.',
     mensajes: [
@@ -142,21 +142,21 @@ const MEMORIALES_SEED = [
     flores: [ { producto: 'p2', de: 'Exalumnos Benito Juárez', fecha: '2026-06-30' } ],
   },
   {
-    id: 'mem-04', nombre: 'Sra. Beatriz Solís Manzanero', nac: '1946-09-03', def: '2022-08-27',
+    id: 'mem-04', titularEmail: 'l.solis@example.com', nombre: 'Sra. Beatriz Solís Manzanero', nac: '1946-09-03', def: '2022-08-27',
     foto: null, cover: IMG.nichosJardin, publico: true, espacio: 'F-15',
     epitafio: 'Bordaba pájaros porque decía que así aprendían a volar.',
     mensajes: [ { autor: 'Talleres de bordado Xocén', fecha: '2026-08-27', texto: 'Cada puntada nuestra lleva su nombre.' } ],
     flores: [ { producto: 'p7', de: 'Lucía Solís', fecha: '2026-08-15' } ],
   },
   {
-    id: 'mem-05', nombre: 'Dr. Fernando Escalante Bolio', nac: '1935-01-22', def: '2019-10-05',
+    id: 'mem-05', titularEmail: 'a.escalante@example.com', nombre: 'Dr. Fernando Escalante Bolio', nac: '1935-01-22', def: '2019-10-05',
     foto: null, cover: IMG.capillaInterior, publico: true, espacio: 'C-05',
     epitafio: 'Curó cuerpos; acompañó almas.',
     mensajes: [ { autor: 'Colegio Médico de Yucatán', fecha: '2026-10-05', texto: 'En memoria de un médico que nunca negó una consulta.' } ],
     flores: [],
   },
   {
-    id: 'mem-06', nombre: 'Srita. Amelia Pech Cauich', nac: '1958-04-15', def: '2025-12-24',
+    id: 'mem-06', titularEmail: 'j.pech@example.com', nombre: 'Srita. Amelia Pech Cauich', nac: '1958-04-15', def: '2025-12-24',
     foto: null, cover: IMG.capilla, publico: true, espacio: 'E-12',
     epitafio: 'Se fue en Nochebuena, como quien no quiere perderse la fiesta del cielo.',
     mensajes: [ { autor: 'Coro de la Parroquia', fecha: '2026-01-06', texto: 'Tu voz de soprano ya canta en otro coro. Te extrañamos, Meli.' } ],
@@ -262,6 +262,21 @@ function precioDe(esp) { return DB.precioOverrides[esp.id] || esp.precio; }
 function mantDe(esp) { return esp.linea === 'tumba' ? cfg('mantTumba') : cfg('mantNicho'); }
 
 function todosMemoriales() { return MEMORIALES_SEED.concat(DB.memorialesNuevos); }
+
+/* Privacidad (M9): las flores solo las compran familiares autorizados.
+   Cada usuario ve únicamente los difuntos que le corresponden. */
+function memorialesAutorizados() {
+  if (!DB.user) return [];
+  if (DB.user.rol === 'admin') return todosMemoriales();
+  if (DB.user.rol === 'familiar') {
+    return todosMemoriales().filter(m => (DB.user.memoriales || []).includes(m.id));
+  }
+  const email = (DB.user.email || '').toLowerCase();
+  const propios = DB.compras.filter(c => c.memorialId).map(c => memorialById(c.memorialId)).filter(Boolean);
+  const semilla = MEMORIALES_SEED.filter(m => m.titularEmail && m.titularEmail.toLowerCase() === email);
+  return [...new Map(semilla.concat(propios).map(m => [m.id, m])).values()];
+}
+function puedeEnviarFlores(memId) { return memorialesAutorizados().some(m => m.id === memId); }
 function memorialById(id) { return todosMemoriales().find(m => m.id === id); }
 function memorialDeEspacio(espId) { return todosMemoriales().find(m => m.espacio === espId); }
 function mensajesDe(m) { return (m.mensajes || []).concat(DB.mensajesExtra[m.id] || []); }

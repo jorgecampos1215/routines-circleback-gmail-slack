@@ -31,7 +31,7 @@ Abrir **http://localhost:8080**.
 | **M6 · Funerarias y gobierno** | Rol funeraria con descuento de aliado y compra a nombre del cliente final; segmentación en landing; panel de aliados en administración |
 | **M7 · Memorial del difunto** | Página conmemorativa con muro de recuerdos, flores recibidas, QR y ubicación en el mapa |
 | **M8 · Diseñador de placa** | `#/placa` — formatos del reglamento (lápida de caliza, placa de bronce, placa familiar), vista previa en vivo en SVG, ornamentos, QR y especificación para la fábrica del panteón |
-| **M9 · Florería** | Catálogo con carrito, envío/donación dedicada a un difunto y notificación a la familia |
+| **M9 · Florería** | Catálogo con carrito; el envío está **reservado a familiares autorizados** (titular + invitados) y cada quien solo ve a sus difuntos, cuidando la privacidad de los nombres |
 | **M10 · Panel administrativo** | Dashboard con KPIs y gráficas accesibles, inventario editable reflejado en el mapa, **configuración de precios y financiamiento**, contratos, cobranza (mantenimiento + financiamientos), funerarias/gobierno, fábrica de placas y reportes CSV por línea y segmento |
 
 ## Cuentas demo

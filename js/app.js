@@ -371,24 +371,7 @@ function viewHome() {
     </div>
   </section>
 
-  <section class="section tinted" style="padding-bottom:0">
-    <div class="container split" style="padding-bottom:84px">
-      <div>
-        <div class="section-head" style="margin-bottom:14px">
-          <div class="eyebrow">Apps móviles</div>
-          <h2>La relación continúa en tu teléfono</h2>
-          <p>Memorial, placa, flores, ubicación del espacio en tus visitas, recordatorios de mensualidades y pago del mantenimiento — iOS y Android.</p>
-        </div>
-        <div class="store-badges">
-          <a class="store-badge" href="#/" onclick="toast('Demo: la app iOS se publica junto con la plataforma')"><span style="font-size:26px"></span><span><small>Descárgala en el</small><b>App Store</b></span></a>
-          <a class="store-badge" href="#/" onclick="toast('Demo: la app Android se publica junto con la plataforma')"><span style="font-size:24px">▶</span><span><small>Disponible en</small><b>Google Play</b></span></a>
-        </div>
-      </div>
-      <div class="img-stack"><img src="${IMG.porticoAcceso}" alt="Pórtico de acceso"></div>
-    </div>
-  </section>
-
-  <section class="section" style="padding-top:64px">
+  <section class="section" style="padding-top:0">
     <div class="container">
       <div class="panel" style="background:var(--jungle);color:#fff;text-align:center;border:none">
         <h2 style="color:#fdf9ee;font-size:34px">La previsión es un acto de amor</h2>

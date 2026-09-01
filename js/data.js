@@ -223,7 +223,11 @@ const CONTRATOS_SEED = [
 const FUNERARIAS_SEED = [
   { nombre: 'Funeraria La Paz de Kanasín', contacto: 'ventas@lapazkanasin.mx', compras: 14, desc: 12 },
   { nombre: 'Grupo Funerario Montejo', contacto: 'alianzas@gfmontejo.mx', compras: 9, desc: 12 },
-  { nombre: 'Servicios Funerarios del Mayab', contacto: 'direccion@sfmayab.mx', compras: 5, desc: 12 },
+  { nombre: 'Servicios Funerarios del Mayab', contacto: 'direccion@sfmayab.mx', compras: 5, desc: 10 },
+];
+
+const CONVENIOS_SEED = [
+  { dependencia: 'DIF Municipal de Kanasín', contacto: 'convenios@kanasin.gob.mx', desc: 20, condiciones: 'Espacios de campo santo sección Jardín; hasta 40 espacios anuales', desde: '2026-03-01', estado: 'activo' },
 ];
 
 const PEDIDOS_SEED = [
@@ -247,6 +251,9 @@ const DB = Object.assign({
   pedidos: [],
   placas: [],                 // especificaciones enviadas a fábrica (M8)
   productoImgs: {},           // fotos personalizadas del catálogo { productoId: dataURI }
+  funerarias: [],             // funerarias aliadas dadas de alta desde el panel (M6)
+  funerariaDesc: {},          // override de descuento por nombre de funeraria
+  convenios: [],              // convenios de gobierno dados de alta (M6)
   mensajesExtra: {},
   floresExtra: {},
   memorialesNuevos: [],
@@ -282,10 +289,32 @@ function memorialDeEspacio(espId) { return todosMemoriales().find(m => m.espacio
 function mensajesDe(m) { return (m.mensajes || []).concat(DB.mensajesExtra[m.id] || []); }
 function floresDe(m) { return (m.flores || []).concat(DB.floresExtra[m.id] || []); }
 
+/* aliados y convenios (M6) */
+function funerariasTodas() {
+  return FUNERARIAS_SEED.map(f => ({ ...f, desc: DB.funerariaDesc[f.nombre] !== undefined ? DB.funerariaDesc[f.nombre] : f.desc }))
+    .concat(DB.funerarias);
+}
+function conveniosTodos() { return CONVENIOS_SEED.concat(DB.convenios); }
+
+/* % de descuento del usuario en sesión según su segmento */
+function pctDescuentoUsuario() {
+  if (!DB.user) return 0;
+  if (DB.user.rol === 'funeraria') {
+    const f = funerariasTodas().find(x => x.nombre === DB.user.nombre);
+    return f ? f.desc : cfg('descFuneraria');
+  }
+  if (DB.user.rol === 'gobierno') {
+    const c = conveniosTodos().find(x => x.dependencia === DB.user.nombre && x.estado === 'activo');
+    return c ? c.desc : 0;
+  }
+  return 0;
+}
+
 /* desglose de precio (M2/M4): modalidad 'necesidad' | 'prevision' */
 function desglose(esp, modalidad, rol) {
   const precioEspacio = precioDe(esp);
-  const descuento = rol === 'funeraria' ? Math.round(precioEspacio * cfg('descFuneraria') / 100) : 0;
+  const pct = (rol === 'funeraria' || rol === 'gobierno') ? pctDescuentoUsuario() : 0;
+  const descuento = Math.round(precioEspacio * pct / 100);
   const excavacion = (esp.linea === 'tumba' && modalidad === 'necesidad') ? cfg('excavacion') : 0;
   const maniobras = modalidad === 'necesidad' ? cfg('maniobras') : 0;
   const subtotal = precioEspacio - descuento + excavacion;

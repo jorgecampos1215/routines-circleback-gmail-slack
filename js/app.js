@@ -70,7 +70,7 @@ window.addEventListener('error', e => {
 }, true);
 
 const monograma = (nombre, size, font) =>
-  `<div class="p" style="width:${size}px;height:${size}px;font-size:${font}px">${nombre.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>`;
+  `<div class="p" style="width:${size}px;height:${size}px;font-size:${font}px;border-radius:50%;background:var(--sand);border:3px solid var(--stone);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);color:var(--copper);flex:none;margin:0 auto">${nombre.split(' ').slice(0, 2).map(w => w[0]).join('')}</div>`;
 
 /* ---------- sesión y roles (C2 / M6) ---------- */
 function login(rol, nombre, email, extra) {
@@ -87,7 +87,8 @@ function modalLogin(despues) {
     <div class="role-cards">
       <div class="radio-card" id="rc-titular"><b>👤 Titular / comprador</b><span>Compra y administra espacios, contratos, pagos y accesos familiares.</span></div>
       <div class="radio-card" id="rc-familiar"><b>👪 Familiar invitado</b><span>Acceso limitado: ver el memorial y enviar flores a su difunto.</span></div>
-      <div class="radio-card" id="rc-funeraria"><b>🤝 Funeraria aliada</b><span>Acceso B2B con ${cfg('descFuneraria')}% de descuento; compra a nombre de su cliente final.</span></div>
+      <div class="radio-card" id="rc-funeraria"><b>🤝 Funeraria aliada</b><span>Acceso B2B con descuento de aliado; compra a nombre de su cliente final.</span></div>
+      <div class="radio-card" id="rc-gobierno"><b>🏛️ Gobierno · convenio</b><span>Esquema separado con precios de convenio institucional.</span></div>
       <div class="radio-card" id="rc-admin"><b>🛡️ Administrador del panteón</b><span>Inventario, precios, financiamiento, contratos, cobranza y reportes.</span></div>
     </div>
     <div id="login-form" style="margin-top:18px;display:none">
@@ -110,6 +111,10 @@ function modalLogin(despues) {
   };
   document.getElementById('rc-funeraria').onclick = () => {
     closeModal(); login('funeraria', 'Funeraria La Paz de Kanasín', 'ventas@lapazkanasin.mx');
+  };
+  document.getElementById('rc-gobierno').onclick = () => {
+    closeModal(); login('gobierno', 'DIF Municipal de Kanasín', 'convenios@kanasin.gob.mx');
+    location.hash = '#/mapa';
   };
   document.getElementById('rc-admin').onclick = () => {
     closeModal(); login('admin', 'Administración NAJ PIXAM', 'admin@najpixam.mx');
@@ -141,7 +146,7 @@ function renderHeader() {
       </nav>
       <div class="header-cta">
         ${DB.user
-          ? `<span class="userchip">${DB.user.rol === 'admin' ? '🛡️' : DB.user.rol === 'funeraria' ? '🤝' : '👤'} <b>${DB.user.nombre.split(' ')[0]}</b>${DB.user.rol === 'funeraria' ? ` · aliado −${cfg('descFuneraria')}%` : ''}</span>
+          ? `<span class="userchip">${DB.user.rol === 'admin' ? '🛡️' : DB.user.rol === 'funeraria' ? '🤝' : DB.user.rol === 'gobierno' ? '🏛️' : '👤'} <b>${DB.user.nombre.split(' ')[0]}</b>${pctDescuentoUsuario() ? ` · convenio −${pctDescuentoUsuario()}%` : ''}</span>
              <button class="btn btn-ghost btn-sm" onclick="logout()">Salir</button>`
           : `<button class="btn btn-outline btn-sm" onclick="modalLogin()">Iniciar sesión</button>`}
       </div>
@@ -354,13 +359,13 @@ function viewHome() {
         </div>
         <div class="card seg-card">
           <h3>Funerarias aliadas</h3>
-          <ul><li>${cfg('descFuneraria')}% de descuento de aliado</li><li>Compra a nombre del cliente final</li><li>Nicho tras cremación o tumba con cuerpo presente</li></ul>
+          <ul><li>Descuento de aliado por funeraria</li><li>Compra a nombre del cliente final</li><li>Nicho tras cremación o tumba con cuerpo presente</li></ul>
           <button class="btn btn-outline btn-sm" onclick="modalLogin()">Acceso de aliado</button>
         </div>
         <div class="card seg-card">
           <h3>Gobierno</h3>
-          <ul><li>Esquema y condiciones propias</li><li>Convenios institucionales</li><li>Atención directa con la administración</li></ul>
-          <button class="btn btn-ghost btn-sm" onclick="toast('Demo: los convenios de gobierno se gestionan con la administración')">Solicitar convenio</button>
+          <ul><li>Convenios con precio institucional</li><li>Condiciones y cupos propios</li><li>Alta y gestión desde el panel administrativo</li></ul>
+          <button class="btn btn-outline btn-sm" onclick="modalLogin()">Entrar con convenio</button>
         </div>
       </div>
     </div>
@@ -482,7 +487,7 @@ function fichaEspacioHTML(id) {
       ${est === 'disponible' || est === 'apartado' ? `
       <table class="price-table">
         <tr><td>Espacio (${TIPOS[e.tipo].nombre.toLowerCase()})</td><td>${MXN(precioDe(e))}</td></tr>
-        ${rol === 'funeraria' ? `<tr><td>Descuento aliado (−${cfg('descFuneraria')}%)</td><td>−${MXN(d.descuento)}</td></tr>` : ''}
+        ${d.descuento ? `<tr><td>${rol === 'gobierno' ? 'Precio de convenio gobierno' : 'Descuento aliado'} (−${pctDescuentoUsuario()}%)</td><td>−${MXN(d.descuento)}</td></tr>` : ''}
         ${e.linea === 'tumba' ? `<tr><td>Excavación (a necesidad, aparte)</td><td>${MXN(cfg('excavacion'))}</td></tr>` : `<tr><td>Apertura/cierre por urna</td><td>${MXN(cfg('aperturaCierreNicho'))}</td></tr>`}
         <tr><td>Mantenimiento anual</td><td>${MXN(mantDe(e))}/año</td></tr>
         <tr class="sub"><td colspan="2">Extras normativos por cuenta del consumidor: IVA ${cfg('ivaPct')}%, derechos municipales, Registro Civil y maniobras — se desglosan al comprar.</td></tr>
@@ -578,7 +583,7 @@ function wizardHTML(e) {
       <img src="${sec.img}" alt="${sec.nombre}" style="border-radius:12px;height:230px;width:100%;object-fit:cover;margin-bottom:18px">
       <table class="price-table">
         <tr><td>Espacio (${TIPOS[e.tipo].nombre.toLowerCase()})</td><td>${MXN(precioDe(e))}</td></tr>
-        ${rol === 'funeraria' ? `<tr><td>Descuento aliado (−${cfg('descFuneraria')}%)</td><td>−${MXN(d.descuento)}</td></tr>` : ''}
+        ${d.descuento ? `<tr><td>${rol === 'gobierno' ? 'Precio de convenio gobierno' : 'Descuento aliado'} (−${pctDescuentoUsuario()}%)</td><td>−${MXN(d.descuento)}</td></tr>` : ''}
         ${e.linea === 'tumba' ? `<tr><td>Excavación (solo compra a necesidad)</td><td>${MXN(cfg('excavacion'))}</td></tr>` : ''}
         <tr><td>Mantenimiento anual (recurrente)</td><td>${MXN(mantDe(e))}/año</td></tr>
         <tr class="sub"><td colspan="2">Más extras normativos por cuenta del consumidor (IVA ${cfg('ivaPct')}%, derechos municipales de Kanasín, Registro Civil y maniobras) — se desglosan en el paso de pago según la modalidad.</td></tr>
@@ -682,7 +687,7 @@ function wizardHTML(e) {
       </div>
       <h3 class="ft">Desglose</h3>
       <table class="price-table">
-        <tr><td>Espacio ${e.id}${d.descuento ? ` (con descuento de aliado −${cfg('descFuneraria')}%)` : ''}</td><td>${MXN(d.precioEspacio - d.descuento)}</td></tr>
+        <tr><td>Espacio ${e.id}${d.descuento ? ` (con descuento de convenio −${pctDescuentoUsuario()}%)` : ''}</td><td>${MXN(d.precioEspacio - d.descuento)}</td></tr>
         ${d.excavacion ? `<tr><td>Excavación (tumba, a necesidad)</td><td>${MXN(d.excavacion)}</td></tr>` : ''}
         <tr><td>IVA ${cfg('ivaPct')}% (extra normativo)</td><td>${MXN(d.iva)}</td></tr>
         <tr><td>Derechos municipales de Kanasín</td><td>${MXN(d.derechos)}</td></tr>
@@ -1447,6 +1452,7 @@ function viewCuenta() {
       <button data-tab="espacios" class="${cuentaTab === 'espacios' ? 'active' : ''}">🌿 Mis espacios y pagos</button>
       <button data-tab="contratos" class="${cuentaTab === 'contratos' ? 'active' : ''}">📜 Contratos</button>
       <button data-tab="pagos" class="${cuentaTab === 'pagos' ? 'active' : ''}">💳 Recibos</button>
+      <button data-tab="floreria" class="${cuentaTab === 'floreria' ? 'active' : ''}">🌹 Florería y pedidos</button>
       <button data-tab="placas" class="${cuentaTab === 'placas' ? 'active' : ''}">✦ Mis placas</button>
       <button data-tab="familia" class="${cuentaTab === 'familia' ? 'active' : ''}">👪 Familiares invitados</button>
     </nav>
@@ -1488,6 +1494,7 @@ function cuentaTabHTML() {
         <div style="display:flex;flex-direction:column;gap:8px">
           <a class="btn btn-outline btn-sm" href="#/mapa?sel=${e.id}">Ver en mapa</a>
           ${c.memorialId ? `<a class="btn btn-primary btn-sm" href="#/memorial/${c.memorialId}">Memorial</a>
+          <a class="btn btn-ghost btn-sm" href="#/tienda?destino=${c.memorialId}">Enviar flores 🌹</a>
           <a class="btn btn-ghost btn-sm" href="#/placa?mem=${c.memorialId}">Diseñar placa ✦</a>` : ''}
           ${fin && !c.liquidado ? `<button class="btn btn-gold btn-sm" onclick="pagarMensualidad('${c.folio}')">Pagar mensualidad</button>` : ''}
           ${c.liquidado ? `<button class="btn btn-gold btn-sm" onclick="descargarTitulo('${c.folio}')">Título de derechos</button>` : ''}
@@ -1520,6 +1527,49 @@ function cuentaTabHTML() {
         <td><button class="btn btn-ghost btn-sm" onclick="descargarRecibo(${i})">Recibo ⬇</button></td>
       </tr>`).join('')}
     </table></div>`;
+  }
+  if (cuentaTab === 'floreria') {
+    const mems = memorialesAutorizados();
+    const misPedidos = DB.pedidos;
+    return `
+    ${mems.length ? `<div class="chart-card">
+      <h3>Enviar flores a tus difuntos</h3>
+      <div class="sub">Como ${DB.user.rol === 'familiar' ? 'familiar autorizado' : 'titular'}, puedes enviar flores y productos a estos memoriales.</div>
+      ${mems.map(m => {
+        const e = espacioById(m.espacio);
+        return `<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap">
+          ${monograma(m.nombre, 46, 17)}
+          <div style="flex:1;min-width:180px"><b style="color:var(--jungle)">${m.nombre}</b>
+            <div style="font-size:12.5px;color:var(--ink-3)">${e ? TIPOS[e.tipo].nombre + ' ' + e.id + ' · ' + seccionById(e.seccion).nombre : ''}</div></div>
+          <a class="btn btn-gold btn-sm" href="#/tienda?destino=${m.id}">Enviar flores 🌹</a>
+          <a class="btn btn-ghost btn-sm" href="#/memorial/${m.id}">Ver memorial</a>
+        </div>`;
+      }).join('')}
+    </div>` : `<div class="panel"><p style="color:var(--ink-2)">Aún no tienes difuntos vinculados a tu cuenta. Al comprar un espacio con registro del difunto, o al recibir una invitación familiar, aparecerán aquí.</p></div>`}
+    <div class="chart-card">
+      <h3>Catálogo de la florería</h3>
+      <div class="sub">Los pedidos se entregan el mismo día en el espacio, con foto de entrega para la familia.</div>
+      <div class="shop-grid" style="grid-template-columns:repeat(4,1fr)">
+        ${PRODUCTOS.slice(0, 4).map(p => `
+          <a class="card product" href="#/tienda${mems.length ? '?destino=' + mems[0].id : ''}">
+            <div class="card-img" style="height:130px"><img src="${prodImg(p)}" alt="${p.nombre}" loading="lazy"></div>
+            <div class="card-body" style="padding:14px"><h3 style="font-size:15px">${p.nombre}</h3>
+            <span class="price" style="font-size:15px">${MXN(p.precio)}</span></div>
+          </a>`).join('')}
+      </div>
+      <div style="text-align:center;margin-top:18px"><a class="btn btn-outline btn-sm" href="#/tienda">Ver toda la florería</a></div>
+    </div>
+    <div class="chart-card">
+      <h3>Mis pedidos</h3>
+      <div class="sub">Historial de flores y productos enviados desde esta cuenta.</div>
+      ${misPedidos.length ? `<div class="table-wrap" style="border:none"><table class="data">
+        <tr><th>Folio</th><th>Producto</th><th>Dedicado a</th><th>Fecha</th><th>Estado</th></tr>
+        ${misPedidos.map(p => { const prod = productoById(p.producto); const m = memorialById(p.destino); return `<tr>
+          <td><span class="folio">${p.folio}</span></td><td>${prod.nombre}</td><td>${m ? m.nombre : p.destino}</td>
+          <td>${fmtFecha(p.fecha)}</td><td><span class="tag ${p.estado === 'entregado' ? 'alcorriente' : 'apartado'}">${p.estado}</span></td>
+        </tr>`; }).join('')}
+      </table></div>` : '<p style="font-size:13.5px;color:var(--ink-3)">Aún no has hecho pedidos.</p>'}
+    </div>`;
   }
   if (cuentaTab === 'placas') {
     return `<div class="panel">
@@ -1881,18 +1931,64 @@ function adminCobranzaHTML() {
 function adminAliadosHTML() {
   return `
   <div class="chart-card"><h3>Funerarias aliadas</h3>
-  <div class="sub">Acceso especial con ${cfg('descFuneraria')}% de descuento; compran a nombre de su cliente final (nicho tras cremación o tumba con cuerpo presente).</div>
+  <div class="sub">Cada aliado tiene su propio descuento (precio accesible) que se aplica automáticamente al comprar a nombre de su cliente final. Edita el % y se refleja al instante en fichas, wizard y contrato.</div>
   <div class="table-wrap" style="border:none"><table class="data">
-    <tr><th>Funeraria</th><th>Contacto</th><th>Compras acumuladas</th><th>Descuento</th><th></th></tr>
-    ${FUNERARIAS_SEED.map(f => `<tr><td><b>${f.nombre}</b></td><td>${f.contacto}</td><td>${f.compras}</td>
-      <td><span class="badge gold">−${f.desc}%</span></td>
+    <tr><th>Funeraria</th><th>Contacto</th><th>Compras</th><th>Descuento %</th><th></th></tr>
+    ${funerariasTodas().map(f => `<tr><td><b>${f.nombre}</b></td><td>${f.contacto}</td><td>${f.compras}</td>
+      <td><input type="number" min="0" max="60" value="${f.desc}" data-descfun="${f.nombre}" style="width:74px;border:1px solid var(--line);border-radius:8px;padding:6px 8px"></td>
       <td><button class="btn btn-ghost btn-sm" onclick="toast('Demo: estado de cuenta enviado a ${f.contacto}')">Estado de cuenta</button></td></tr>`).join('')}
-  </table></div></div>
-  <div class="panel">
-    <h3 style="font-size:19px;color:var(--jungle);margin-bottom:8px">Esquema de gobierno</h3>
-    <p style="font-size:14px;color:var(--ink-2)">Los convenios institucionales operan como esquema separado con condiciones y precios propios (requerimiento §3). Se gestionan directamente con la administración y se reflejan en los reportes por segmento.</p>
-    <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="toast('Demo: solicitud de convenio registrada')">Registrar convenio</button>
+  </table></div>
+  <h3 style="font-size:15px;color:var(--jungle);margin:18px 0 10px;font-family:var(--font-body);font-weight:600">➕ Dar de alta funeraria aliada</h3>
+  <div class="invite-row">
+    <input id="fun-nombre" placeholder="Nombre de la funeraria">
+    <input id="fun-contacto" type="email" placeholder="correo@funeraria.mx">
+    <input id="fun-desc" type="number" min="0" max="60" value="${cfg('descFuneraria')}" placeholder="% desc." style="max-width:110px">
+    <button class="btn btn-primary" onclick="agregarFuneraria()">Dar de alta</button>
+  </div>
+  <p style="font-size:12px;color:var(--ink-3)">Prueba cómo lo ve el aliado: cierra sesión e ingresa con el rol <b>Funeraria aliada</b>; el descuento aparece en el mapa y en toda la compra.</p>
+  </div>
+  <div class="chart-card"><h3>Convenios de gobierno</h3>
+  <div class="sub">Esquema separado con condiciones y precios propios (requerimiento §3). El precio de convenio se aplica a las cuentas de gobierno al comprar; prueba con el rol <b>🏛️ Gobierno</b> del login.</div>
+  ${conveniosTodos().length ? `<div class="table-wrap" style="border:none"><table class="data">
+    <tr><th>Dependencia</th><th>Contacto</th><th>Descuento</th><th>Condiciones</th><th>Desde</th><th>Estado</th></tr>
+    ${conveniosTodos().map(c => `<tr><td><b>${c.dependencia}</b></td><td>${c.contacto}</td>
+      <td><span class="badge gold">−${c.desc}%</span></td><td style="max-width:260px">${c.condiciones}</td>
+      <td>${fmtFecha(c.desde)}</td><td><span class="tag vigente">${c.estado}</span></td></tr>`).join('')}
+  </table></div>` : ''}
+  <h3 style="font-size:15px;color:var(--jungle);margin:18px 0 10px;font-family:var(--font-body);font-weight:600">➕ Registrar convenio</h3>
+  <div class="invite-row">
+    <input id="conv-dep" placeholder="Dependencia u organismo">
+    <input id="conv-contacto" type="email" placeholder="correo@dependencia.gob.mx">
+    <input id="conv-desc" type="number" min="0" max="80" value="20" placeholder="% desc." style="max-width:110px">
+    <button class="btn btn-primary" onclick="agregarConvenio()">Registrar</button>
+  </div>
+  <div class="field"><input id="conv-cond" placeholder="Condiciones del convenio (secciones, cupo anual, vigencia…)"></div>
   </div>`;
+}
+
+function agregarFuneraria() {
+  const nombre = document.getElementById('fun-nombre').value.trim();
+  const contacto = document.getElementById('fun-contacto').value.trim();
+  const desc = +document.getElementById('fun-desc').value || cfg('descFuneraria');
+  if (!nombre || !contacto) { toast('Escribe nombre y contacto de la funeraria.'); return; }
+  DB.funerarias.push({ nombre, contacto, compras: 0, desc });
+  saveDB();
+  document.getElementById('tab-body').innerHTML = adminTabHTML();
+  bindAdminBody();
+  toast(`Funeraria "${nombre}" dada de alta con −${desc}% de aliado 🤝`);
+}
+
+function agregarConvenio() {
+  const dependencia = document.getElementById('conv-dep').value.trim();
+  const contacto = document.getElementById('conv-contacto').value.trim();
+  const desc = +document.getElementById('conv-desc').value || 0;
+  const condiciones = document.getElementById('conv-cond').value.trim() || 'Por definir con la administración';
+  if (!dependencia || !contacto) { toast('Escribe dependencia y contacto del convenio.'); return; }
+  DB.convenios.push({ dependencia, contacto, desc, condiciones, desde: new Date().toISOString(), estado: 'activo' });
+  saveDB();
+  document.getElementById('tab-body').innerHTML = adminTabHTML();
+  bindAdminBody();
+  toast(`Convenio con ${dependencia} registrado (−${desc}%) 🏛️`);
 }
 
 function adminTiendaHTML() {
@@ -1974,6 +2070,13 @@ function bindAdminBody() {
     DB.precioOverrides[inp.dataset.precio] = +inp.value || precioDe(espacioById(inp.dataset.precio));
     saveDB();
     toast(`Precio de ${inp.dataset.precio} actualizado`);
+  });
+  document.querySelectorAll('[data-descfun]').forEach(inp => inp.onchange = () => {
+    const nombre = inp.dataset.descfun;
+    const nueva = DB.funerarias.find(f => f.nombre === nombre);
+    if (nueva) nueva.desc = +inp.value || 0; else DB.funerariaDesc[nombre] = +inp.value || 0;
+    saveDB();
+    toast(`Descuento de ${nombre}: −${inp.value}%`);
   });
   document.querySelectorAll('[data-cfg]').forEach(inp => inp.onchange = () => {
     DB.config[inp.dataset.cfg] = +inp.value;

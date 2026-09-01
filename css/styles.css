@@ -251,13 +251,15 @@ h1,h2,h3,.display{font-family:var(--font-display);font-weight:400;line-height:1.
 .panel h3.ft{font-size:17px;margin:24px 0 12px;color:var(--jungle);font-family:var(--font-body);font-weight:600}
 
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.field{display:flex;flex-direction:column;gap:6px}
+.form-grid>*,.fin-grid>*,.config-grid>*,.placa-layout>*{min-width:0}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field.full{grid-column:1/-1}
 .field label{font-size:13px;font-weight:600;color:var(--ink-2)}
 .field input,.field select,.field textarea{
   border:1px solid var(--line);border-radius:10px;padding:11px 14px;background:#fefcf5;outline:none;
-  transition:border .15s ease;
+  transition:border .15s ease;width:100%;min-width:0;max-width:100%;
 }
+.panel{min-width:0}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--jungle)}
 .field .hint{font-size:12px;color:var(--ink-3)}
 .radio-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}

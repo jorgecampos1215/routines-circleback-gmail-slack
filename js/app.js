@@ -26,7 +26,25 @@ function openModal(html) {
 }
 function closeModal() { document.querySelectorAll('.modal-back').forEach(m => m.remove()); }
 
+function enSandbox() {
+  try { return window.self !== window.top; } catch (e) { return true; }
+}
+
 function descargarArchivo(nombre, contenido, mime) {
+  // El visor de la demo (iframe) bloquea descargas y navegaría al blob:
+  // ahí mostramos el documento en pantalla en lugar de descargar.
+  if (enSandbox()) {
+    const esHTML = (mime || '').includes('html');
+    openModal(`
+      <h2>📄 ${nombre}</h2>
+      <p class="sub">Vista del documento. En el sitio real este archivo se descarga a tu equipo.</p>
+      ${esHTML
+        ? `<div class="contract-box" style="height:380px">${contenido.replace(/^[\s\S]*?<body>/, '').replace(/<\/body>[\s\S]*$/, '')}</div>`
+        : `<pre style="background:#fdfaf0;border:1px solid var(--line);border-radius:12px;padding:20px;font-size:12.5px;overflow:auto;max-height:380px;white-space:pre-wrap">${contenido.replace(/</g, '&lt;')}</pre>`}
+      <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="closeModal()">Entendido</button>
+    `);
+    return;
+  }
   const blob = new Blob([contenido], { type: mime || 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = nombre;
@@ -1227,6 +1245,33 @@ function generarPlaca() {
   };
   DB.placas.push(spec);
   saveDB();
+  openModal(`
+    <div class="confirm-hero">
+      <div class="bigcheck">✓</div>
+      <h2>¡Pago realizado y especificación enviada!</h2>
+      <p class="sub">La fábrica de nichos y tumbas de NAJ PIXAM validará la especificación y programará la instalación.</p>
+    </div>
+    <table class="price-table">
+      <tr><td>Folio de fabricación</td><td><span class="folio">${folio}</span></td></tr>
+      <tr><td>Formato</td><td>${f.nombre} · ${f.medidas}</td></tr>
+      <tr><td>Dedicada a</td><td>${spec.nombre} (${spec.fechas})</td></tr>
+      <tr><td>Texto</td><td>"${spec.texto}"</td></tr>
+      <tr><td>Ornamento / QR</td><td>${PLACA_ORNAMENTOS[spec.ornamento]} · ${spec.qr ? 'con QR al memorial' : 'sin QR'}</td></tr>
+      <tr class="total"><td>Pagado (demo)</td><td>${MXN(f.precio)}</td></tr>
+    </table>
+    <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-outline" onclick="descargarEspecPlaca('${folio}')">Ver / descargar especificación</button>
+      <a class="btn btn-primary" href="#/cuenta" onclick="closeModal();cuentaTab='placas'">Ir a mis placas</a>
+      <button class="btn btn-ghost" onclick="closeModal()">Cerrar</button>
+    </div>
+  `);
+  toast(`Especificación ${folio} enviada a la fábrica ✦`);
+}
+
+function descargarEspecPlaca(folio) {
+  const spec = DB.placas.find(p => p.folio === folio);
+  if (!spec) return;
+  const f = PLACA_FORMATOS[spec.formato];
   descargarArchivo(`Especificacion_placa_${folio}.txt`,
 `NAJ PIXAM — ESPECIFICACIÓN PARA FÁBRICA DE NICHOS Y TUMBAS
 ===========================================================
@@ -1242,7 +1287,6 @@ Precio:     ${MXN(f.precio)}
 ===========================================================
 Conforme al reglamento del panteón: placa, florero y cruz
 permitidos según medidas del formato.`);
-  toast(`Especificación ${folio} enviada a la fábrica ✦`);
 }
 
 /* ============================================================

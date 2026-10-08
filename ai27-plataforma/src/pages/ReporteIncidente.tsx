@@ -1,9 +1,11 @@
 import { Logo } from '../components/Logo'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Nav } from '../components/Nav'
 import { ROUTES } from '../lib/routes'
 import { sx } from '../lib/sx'
+import { useToast } from '../components/ui'
+import { casoPorId, fmt } from '../data/reaccion'
 
 const CSS = `
 a{color:#B36B00}a:hover{color:#8A5300}
@@ -22,7 +24,7 @@ a{color:#B36B00}a:hover{color:#8A5300}
 }
 `
 
-const TL = [
+const TL0 = [
   { t: '14:30', x: 'Alerta automática de desvío de ruta (Samsara)' },
   { t: '14:31', x: 'Incidente abierto por el monitorista; custodio reporta cierre del paso' },
   { t: '14:34', x: 'Aviso a Guardia Nacional y C5 Edomex' },
@@ -30,12 +32,28 @@ const TL = [
   { t: '14:47', x: 'Unidad de reacción R-03 y autoridades en sitio' },
   { t: '15:40', x: 'Carga inspeccionada y servicio reanudado' },
 ]
+const EVID0 = ['Foto de sellos', 'Recorrido del replay', 'Acta del MP']
 const EVID = 'aspect-ratio:4/3;background:#F3F5F8;border:1px dashed #C3CBD5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#5F6B7A'
 const H3 = "margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600"
 
 export default function ReporteIncidente() {
-  const [sent, setSent] = useState(false)
-  const sendLabel = sent ? 'Enviado al portal y correo de Alpura' : 'Enviar al cliente'
+  const toast = useToast()
+  const [search] = useSearchParams()
+  const caso = casoPorId(search.get('inc'))
+  const [sent, setSent] = useState<Record<string, boolean>>({})
+  const [evid, setEvid] = useState<Record<string, string[]>>({})
+  const [firma, setFirma] = useState('')
+  const [tel, setTel] = useState('')
+  const evidRef = useRef<HTMLInputElement>(null)
+  const evidIdx = useRef(0)
+  const enviado = !!sent[caso.id]
+  const sendLabel = enviado ? `Enviado al portal y correo de ${caso.cliente}` : 'Enviar al cliente'
+  const volverTo = caso.esPrincipal ? ROUTES.Reaccion : `${ROUTES.Reaccion}?inc=${caso.id}`
+  // Línea de tiempo: la del diseño para el caso principal; para los demás, la bitácora completa del caso (hasta 7 hitos)
+  const TL = caso.esPrincipal ? TL0 : [...caso.log, ...(caso.log.length < 7 ? [caso.stepLog[4]] : [])].filter(Boolean).slice(0, 8).map(l => ({ t: l.t, x: l.text }))
+  const evids = evid[caso.id] ?? EVID0
+  const enviar = () => { setSent(s => ({ ...s, [caso.id]: true })); toast(`Reporte ${caso.id} enviado al portal y por correo a ${caso.cliente}`) }
+  const descargar = () => { toast(`Generando PDF del reporte ${caso.id}…`, 'info'); setTimeout(() => window.print(), 150) }
 
   return (
     <div className="ri-wrap" style={sx("font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap")}>
@@ -50,9 +68,9 @@ export default function ReporteIncidente() {
             <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Reporte post-incidente</h1>
           </div>
           <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
-            <Link className="btn" to={ROUTES.Reaccion}>Volver al incidente</Link>
-            <button type="button" className="btn" onClick={() => window.print()}>Descargar PDF</button>
-            <button type="button" className="btn btn-pri" onClick={() => setSent(true)}>{sendLabel}</button>
+            <Link className="btn" to={volverTo}>Volver al incidente</Link>
+            <button type="button" className="btn" onClick={descargar}>Descargar PDF</button>
+            <button type="button" className="btn btn-pri" onClick={enviar} disabled={enviado} style={enviado ? sx('cursor:default') : undefined}>{sendLabel}</button>
           </div>
         </header>
 
@@ -63,49 +81,53 @@ export default function ReporteIncidente() {
               <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:22px")}>AI27</span>
             </div>
             <div style={sx('display:flex;flex-direction:column;gap:2px;text-align:right;font-size:13px;color:#3E4A59')}>
-              <span className="mono">INC-0412 · SRV-24817</span><span>Emitido 7 oct 2026, 18:20</span>
+              <span className="mono">{caso.id} · {caso.servicio}</span><span>Emitido {caso.cerrado}</span>
             </div>
           </div>
           <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:26px;font-weight:600;text-wrap:balance")}>Intento de robo controlado · carga recuperada al 100%</h2>
-            <span style={sx('font-size:15px;color:#3E4A59')}>Para: Alpura · Gerencia de logística y seguridad corporativa</span>
+            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:26px;font-weight:600;text-wrap:balance")}>{caso.tituloReporte}</h2>
+            <span style={sx('font-size:15px;color:#3E4A59')}>Para: {caso.cliente} · Gerencia de logística y seguridad corporativa</span>
           </div>
           <dl style={sx('margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:16px;background:#F7F9FB;border-radius:8px;padding:18px')}>
-            <div><dt className="lbl">Ruta</dt><dd style={sx('margin:4px 0 0')}>Cuautitlán → El Salto</dd></div>
-            <div><dt className="lbl">Ubicación</dt><dd style={sx('margin:4px 0 0')}>Méx–Qro km 142</dd></div>
-            <div><dt className="lbl">Valor de la carga</dt><dd className="mono" style={sx('margin:4px 0 0')}>$2,400,000</dd></div>
-            <div><dt className="lbl">Recuperado</dt><dd className="mono" style={sx('margin:4px 0 0;color:#17784A')}>$2,400,000</dd></div>
-            <div><dt className="lbl">Respuesta en sitio</dt><dd style={sx('margin:4px 0 0')}>17 minutos</dd></div>
-            <div><dt className="lbl">Denuncia</dt><dd className="mono" style={sx('margin:4px 0 0')}>FGJEM/CUA/1184/2026</dd></div>
+            <div><dt className="lbl">Ruta</dt><dd style={sx('margin:4px 0 0')}>{caso.ruta}</dd></div>
+            <div><dt className="lbl">Ubicación</dt><dd style={sx('margin:4px 0 0')}>{caso.ubicacion}</dd></div>
+            <div><dt className="lbl">Valor de la carga</dt><dd className="mono" style={sx('margin:4px 0 0')}>{fmt(caso.valor)}</dd></div>
+            <div><dt className="lbl">Recuperado</dt><dd className="mono" style={sx('margin:4px 0 0;color:' + (caso.recuperado > 0 ? '#17784A' : '#B42318'))}>{fmt(caso.recuperado)}</dd></div>
+            <div><dt className="lbl">Respuesta en sitio</dt><dd style={sx('margin:4px 0 0')}>{caso.minutos.sitio} minutos</dd></div>
+            <div><dt className="lbl">Denuncia</dt><dd className="mono" style={sx('margin:4px 0 0')}>{caso.denuncia}</dd></div>
           </dl>
           <section style={sx('display:flex;flex-direction:column;gap:10px')}>
             <h3 style={sx(H3)}>Resumen</h3>
-            <p style={sx('margin:0;font-size:16px;line-height:1.6;text-wrap:pretty')}>A las 14:30 la telemetría de Samsara detectó un desvío de 1.6 km del tráiler TR-88213 hacia un camino de terracería. El monitorista abrió el incidente en un minuto, se dio aviso a Guardia Nacional y C5 Edomex, y la unidad de reacción R-03 llegó al sitio a las 14:47. Los agresores huyeron; la carga se inspeccionó con sellos íntegros y el servicio se reanudó a las 15:40.</p>
+            <p style={sx('margin:0;font-size:16px;line-height:1.6;text-wrap:pretty')}>{caso.resumen}</p>
           </section>
           <section style={sx('display:flex;flex-direction:column;gap:10px')}>
             <h3 style={sx(H3)}>Línea de tiempo</h3>
             <table style={sx('width:100%;border-collapse:collapse;font-size:15px')}>
               <tbody>
-                {TL.map(t => (
-                  <tr key={t.t}><td className="mono" style={sx('padding:9px 16px 9px 0;border-bottom:1px solid #E4E8ED;width:70px;color:#3E4A59;vertical-align:top')}>{t.t}</td><td style={sx('padding:9px 0;border-bottom:1px solid #E4E8ED')}>{t.x}</td></tr>
+                {TL.map((t, i) => (
+                  <tr key={t.t + i}><td className="mono" style={sx('padding:9px 16px 9px 0;border-bottom:1px solid #E4E8ED;width:70px;color:#3E4A59;vertical-align:top')}>{t.t}</td><td style={sx('padding:9px 0;border-bottom:1px solid #E4E8ED')}>{t.x}</td></tr>
                 ))}
               </tbody>
             </table>
           </section>
           <section style={sx('display:flex;flex-direction:column;gap:10px')}>
             <h3 style={sx(H3)}>Evidencias</h3>
+            <input ref={evidRef} type="file" accept="image/*,application/pdf" className="ri-noprint" style={sx('display:none')} onChange={e => { const f = e.target.files?.[0]; if (f) { const ev = evids.slice(); ev[evidIdx.current] = f.name; setEvid(x => ({ ...x, [caso.id]: ev })); toast(`Evidencia agregada al reporte: ${f.name}`) }; e.target.value = '' }} />
             <div style={sx('display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px')}>
-              <div style={sx(EVID)}>Foto de sellos</div>
-              <div style={sx(EVID)}>Recorrido del replay</div>
-              <div style={sx(EVID)}>Acta del MP</div>
+              {evids.map((e, i) => (
+                <button key={i} type="button" title="Adjuntar o reemplazar evidencia" onClick={() => { evidIdx.current = i; evidRef.current?.click() }} style={sx(EVID + ';cursor:pointer;font-family:inherit;padding:8px;overflow:hidden;word-break:break-word;text-align:center' + (EVID0.includes(e) ? '' : ';background:#E3F6EC;border-style:solid'))}>{e}</button>
+              ))}
             </div>
           </section>
           <section style={sx('display:flex;flex-direction:column;gap:10px')}>
             <h3 style={sx(H3)}>Recomendaciones</h3>
-            <p style={sx('margin:0;font-size:16px;line-height:1.6;text-wrap:pretty')}>Para salidas de Cuautitlán entre 13:00 y 16:00 hacia Querétaro, asignar dos custodios y una geocerca de alerta temprana a 500 m de la ruta. AI27 actualiza el factor de riesgo del tramo km 120–150 en su cotizador.</p>
+            <p style={sx('margin:0;font-size:16px;line-height:1.6;text-wrap:pretty')}>{caso.recomendacion}</p>
           </section>
           <div style={sx('display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid #E4E8ED;padding-top:18px;font-size:14px;color:#3E4A59')}>
-            <span>Coordinación de Reacción AI27 · [NOMBRE Y FIRMA]</span><span>Contacto 24/7: [TELÉFONO]</span>
+            <span style={sx('display:flex;gap:6px;align-items:center;flex-wrap:wrap')}>Coordinación de Reacción AI27 ·
+              <input value={firma} onChange={e => setFirma(e.target.value)} placeholder="[NOMBRE Y FIRMA]" aria-label="Nombre y firma" style={sx("border:0;border-bottom:1px dashed #C3CBD5;background:transparent;font:inherit;color:inherit;padding:0 2px;min-width:160px")} /></span>
+            <span style={sx('display:flex;gap:6px;align-items:center')}>Contacto 24/7:
+              <input value={tel} onChange={e => setTel(e.target.value)} placeholder="[TELÉFONO]" aria-label="Teléfono de contacto" style={sx("border:0;border-bottom:1px dashed #C3CBD5;background:transparent;font:inherit;color:inherit;padding:0 2px;min-width:120px")} /></span>
           </div>
         </article>
 

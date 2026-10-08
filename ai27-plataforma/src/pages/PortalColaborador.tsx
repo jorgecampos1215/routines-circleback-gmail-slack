@@ -1,9 +1,11 @@
 import { Logo } from '../components/Logo'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { sx } from '../lib/sx'
 import { ROUTES } from '../lib/routes'
 import { useStore, actions } from '../lib/store'
+import { useToast } from '../components/ui'
+import { YO, recibos, money, descargarReciboPDF, descargarReciboXML, descargarConstancia } from '../data/portal'
 
 const CSS = `
 a{color:#B36B00}a:hover{color:#8A5300}
@@ -22,7 +24,6 @@ a{color:#B36B00}a:hover{color:#8A5300}
 .field textarea{padding:10px 12px;resize:vertical}
 `
 
-const YO = { nombre: 'Luis Herrera', area: 'Monitoreo' }
 const T: [string, string][] = [['home', 'Inicio'], ['vac', 'Vacaciones y permisos'], ['pay', 'Recibos'], ['docs', 'Documentos']]
 const TYPES = ['Vacaciones', 'Permiso con goce', 'Permiso sin goce', 'Incapacidad']
 const BASE = [
@@ -30,8 +31,9 @@ const BASE = [
   { id: 'b2', t: 'Permiso con goce', d: '2 sep 2026 · cita médica', n: '1 día', s: 'Aprobada', cls: 'pill p-ok' },
   { id: 'b3', t: 'Vacaciones', d: '6–7 jul 2026', n: '2 días', s: 'Aprobada', cls: 'pill p-ok' },
 ]
-const PAY = [['Quincena 18 · septiembre', '30 sep'], ['Quincena 17 · septiembre', '15 sep'], ['Quincena 16 · agosto', '29 ago'], ['Quincena 15 · agosto', '15 ago'], ['Quincena 14 · julio', '31 jul']].map(([p, d]) => ({ p, d, ded: '$1,148.60', net: '$6,851.40' }))
-const DOCS = [['Contrato individual de trabajo', 'Vigente', 'pill p-ok'], ['INE', 'Vigente', 'pill p-ok'], ['Comprobante de domicilio', 'Vence en 2 meses', 'pill p-warn'], ['Constancia de situación fiscal', 'Vigente', 'pill p-ok'], ['Certificado de capacitación en monitoreo', 'Vigente', 'pill p-ok']].map(([n, s, cls]) => ({ n, s, cls }))
+const DOCS0 = [['Contrato individual de trabajo', 'Vigente', 'pill p-ok'], ['INE', 'Vigente', 'pill p-ok'], ['Comprobante de domicilio', 'Vence en 2 meses', 'pill p-warn'], ['Constancia de situación fiscal', 'Vigente', 'pill p-ok'], ['Certificado de capacitación en monitoreo', 'Vigente', 'pill p-ok']].map(([n, s, cls]) => ({ n, s, cls }))
+const TRAMITES = ['Constancia laboral', 'Constancia de percepciones', 'Carta de recomendación', 'Cambio de datos bancarios']
+const AVISOS: [string, string][] = [['Capacitación de protocolo de reacción', 'Jueves 16 oct · 10:00 · sala de monitoreo'], ['Actualiza tu contacto de emergencia', 'Antes del 31 de octubre']]
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
 const parse = (s: string) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1) }
@@ -52,7 +54,17 @@ function rango(desde: string, hasta: string) {
 const cls = (s: string) => (s === 'Aprobada' ? 'pill p-ok' : s === 'Rechazada' ? 'pill p-bad' : 'pill p-warn')
 
 export default function PortalColaborador() {
+  const toast = useToast()
   const [tab, setTab] = useState('home')
+  const [docs, setDocs] = useState(DOCS0)
+  const [adjunto, setAdjunto] = useState('')
+  const [tramite, setTramite] = useState(TRAMITES[0])
+  const [paraQue, setParaQue] = useState('')
+  const [avisosOk, setAvisosOk] = useState<Record<number, boolean>>({})
+  const incRef = useRef<HTMLInputElement>(null)
+  const docRef = useRef<HTMLInputElement>(null)
+  const tramitesTodos = useStore(s => s.tramites) ?? []
+  const tramites = tramitesTodos.filter(x => x.colaborador === YO.nombre)
   const [type, setType] = useState('Vacaciones')
   const [sent, setSent] = useState(false)
   const [desde, setDesde] = useState('2026-10-27')
@@ -64,7 +76,9 @@ export default function PortalColaborador() {
 
   const dias = diasHabiles(desde, hasta)
   const valido = dias > 0 && desde <= hasta
-  const used = 4, left = 14 - used
+  // Días de vacaciones usados: los aprobados del historial base (2 + 2) más los aprobados en el demo
+  const used = BASE.filter(b => b.t === 'Vacaciones' && b.s === 'Aprobada').reduce((a, b) => a + parseInt(b.n), 0) + mias.filter(v => v.estatus === 'Aprobada' && (v.motivo || 'Vacaciones').startsWith('Vacaciones')).reduce((a, v) => a + v.dias, 0)
+  const left = Math.max(0, 14 - used)
   const pending = mias.filter(v => v.estatus === 'Pendiente').length
   const reqs = [
     ...mias.map(v => ({ id: v.id, t: (v.motivo || 'Vacaciones').split(' · ')[0], d: rango(v.desde, v.hasta), n: v.dias + (v.dias === 1 ? ' día' : ' días'), s: v.estatus, cls: cls(v.estatus) })),
@@ -74,9 +88,22 @@ export default function PortalColaborador() {
   const submit = () => {
     if (!valido) return
     const quien = cubre === 'Lo asigna mi jefe' ? 'Cubre: lo asigna el jefe' : 'Cubre: ' + cubre.split(' · ')[0]
-    actions.solicitarVacaciones({ colaborador: YO.nombre, area: YO.area, desde, hasta, dias, motivo: [type, quien, coment.trim()].filter(Boolean).join(' · ') })
+    if (type === 'Incapacidad' && !adjunto) { toast('Adjunta tu incapacidad del IMSS para enviar la solicitud', 'warn'); return }
+    const id = actions.solicitarVacaciones({ colaborador: YO.nombre, area: YO.area, desde, hasta, dias, motivo: [type, quien, coment.trim(), adjunto && 'Adjunto: ' + adjunto].filter(Boolean).join(' · ') })
     setSent(true)
     setComent('')
+    setAdjunto('')
+    toast(`Solicitud ${id} enviada a ${YO.jefe} · ${type} · ${dias} ${dias === 1 ? 'día' : 'días'}`)
+  }
+  const enviarTramite = () => {
+    const id = actions.solicitarTramite({ colaborador: YO.nombre, area: YO.area, tramite, motivo: paraQue.trim() })
+    toast(`Trámite ${id} enviado a RH: ${tramite}. Respuesta en 1 día hábil.`)
+    setParaQue('')
+  }
+  const subirDoc = (f: File) => {
+    const n = f.name.replace(/\.[^.]+$/, '')
+    setDocs(d => [...d, { n, s: 'En revisión', cls: 'pill p-warn' }])
+    toast(`Documento "${f.name}" subido · RH lo revisará`)
   }
 
   const tabStyle = (on: boolean) => "min-height:40px;padding:0 14px;border-radius:8px;border:0;cursor:pointer;font:500 14px 'IBM Plex Sans',sans-serif;" + (on ? 'background:#FFF1DB;color:#8A5300' : 'background:transparent;color:#3E4A59')
@@ -133,8 +160,12 @@ export default function PortalColaborador() {
               </div>
               <div className="card" style={sx('display:flex;flex-direction:column;gap:10px')}>
                 <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Avisos de RH</h2>
-                <div style={sx('padding:10px 0;border-top:1px solid #EEF1F4;font-size:14px;display:flex;flex-direction:column;gap:2px')}><span style={sx('font-weight:500')}>Capacitación de protocolo de reacción</span><span style={sx('color:#5F6B7A')}>Jueves 16 oct · 10:00 · sala de monitoreo</span></div>
-                <div style={sx('padding:10px 0;border-top:1px solid #EEF1F4;font-size:14px;display:flex;flex-direction:column;gap:2px')}><span style={sx('font-weight:500')}>Actualiza tu contacto de emergencia</span><span style={sx('color:#5F6B7A')}>Antes del 31 de octubre</span></div>
+                {AVISOS.map(([t, d], i) => (
+                  <button key={t} type="button" aria-pressed={!!avisosOk[i]} onClick={() => { setAvisosOk(a => ({ ...a, [i]: !a[i] })); toast(avisosOk[i] ? 'Aviso marcado como pendiente' : i === 0 ? 'Asistencia confirmada · recordatorio agregado a tu calendario' : 'Aviso marcado como atendido') }}
+                    style={sx('padding:10px 0;border:0;border-top:1px solid #EEF1F4;font-size:14px;display:flex;flex-direction:column;gap:2px;background:none;cursor:pointer;font-family:inherit;color:inherit;text-align:left')}>
+                    <span style={sx('font-weight:500' + (avisosOk[i] ? ';text-decoration:line-through;color:#5F6B7A' : ''))}>{t}</span><span style={sx('color:#5F6B7A')}>{d}{avisosOk[i] ? ' · atendido' : ''}</span>
+                  </button>
+                ))}
               </div>
             </section>
           </div>
@@ -157,7 +188,10 @@ export default function PortalColaborador() {
               <label className="field">¿Quién te cubre?<select value={cubre} onChange={e => setCubre(e.target.value)}><option>Sofía Campos · Monitorista</option><option>Pedro Ruiz · Monitorista</option><option>Lo asigna mi jefe</option></select></label>
               <label className="field">Comentario (opcional)<textarea rows={3} placeholder="Ej. viaje familiar" value={coment} onChange={e => setComent(e.target.value)}></textarea></label>
               {type === 'Incapacidad' && (
-                <div style={sx('border:1px dashed #C3CBD5;border-radius:8px;padding:16px;text-align:center;font-size:14px;color:#3E4A59')}>Adjunta tu incapacidad del IMSS (PDF o foto)</div>
+                <>
+                  <input ref={incRef} type="file" accept="application/pdf,image/*" style={sx('display:none')} onChange={e => { const f = e.target.files?.[0]; if (f) { setAdjunto(f.name); toast(`Incapacidad adjuntada: ${f.name}`) }; e.target.value = '' }} />
+                  <button type="button" onClick={() => incRef.current?.click()} style={sx('border:1px dashed #C3CBD5;border-radius:8px;padding:16px;text-align:center;font-size:14px;color:#3E4A59;background:#FFFFFF;cursor:pointer;font-family:inherit')}>{adjunto ? `Adjunto: ${adjunto} · cambiar` : 'Adjunta tu incapacidad del IMSS (PDF o foto)'}</button>
+                </>
               )}
               <span style={sx('font-size:13px;color:#5F6B7A')}>Tu solicitud llega a Jorge Pérez (jefe directo) y después a RH. Te avisamos por correo y WhatsApp.</span>
               <button type="button" className="btn btn-pri" onClick={submit} disabled={!valido} style={sx(valido ? '' : 'opacity:.5;cursor:not-allowed')}>Enviar solicitud</button>
@@ -190,9 +224,9 @@ export default function PortalColaborador() {
               <table className="tbl">
                 <thead><tr><th>Periodo</th><th>Fecha de pago</th><th style={sx('text-align:right')}>Percepciones</th><th style={sx('text-align:right')}>Deducciones</th><th style={sx('text-align:right')}>Neto</th><th>Descargar</th></tr></thead>
                 <tbody>
-                  {PAY.map(p => (
-                    <tr key={p.p}><td>{p.p}</td><td className="mono">{p.d}</td><td className="mono" style={sx('text-align:right')}>$8,000.00</td><td className="mono" style={sx('text-align:right')}>{p.ded}</td><td className="mono" style={sx('text-align:right;font-weight:500')}>{p.net}</td>
-                      <td><span style={sx('display:flex;gap:8px')}><button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')}>PDF</button><button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')}>XML</button></span></td></tr>
+                  {recibos.map(p => (
+                    <tr key={p.periodo}><td>{p.periodo}</td><td className="mono">{p.pago}</td><td className="mono" style={sx('text-align:right')}>{money(p.percepciones)}</td><td className="mono" style={sx('text-align:right')}>{money(p.deducciones)}</td><td className="mono" style={sx('text-align:right;font-weight:500')}>{money(p.neto)}</td>
+                      <td><span style={sx('display:flex;gap:8px')}><button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={() => { descargarReciboPDF(p); toast(`Recibo PDF descargado · ${p.periodo}`) }}>PDF</button><button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={() => { descargarReciboXML(p); toast(`CFDI XML descargado · ${p.periodo}`) }}>XML</button></span></td></tr>
                   ))}
                 </tbody>
               </table>
@@ -204,17 +238,32 @@ export default function PortalColaborador() {
           <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px')}>
             <section className="card" style={sx('display:flex;flex-direction:column;gap:10px')}>
               <h1 style={sx("margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:22px;font-weight:600")}>Mis documentos</h1>
-              {DOCS.map(d => (
-                <div key={d.n} style={sx('display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #EEF1F4;font-size:14px')}><span>{d.n}</span><span className={d.cls}>{d.s}</span></div>
+              {docs.map(d => (
+                <button key={d.n} type="button" title="Descargar" onClick={() => { descargarConstancia(d.n, ''); toast(`Descargando ${d.n} (PDF)`, 'info') }} style={sx('display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border:0;border-top:1px solid #EEF1F4;font-size:14px;background:none;cursor:pointer;font-family:inherit;color:inherit;text-align:left')}><span>{d.n}</span><span className={d.cls}>{d.s}</span></button>
               ))}
-              <button type="button" className="btn" style={sx('align-self:flex-start')}>Subir documento</button>
+              <input ref={docRef} type="file" accept="application/pdf,image/*" style={sx('display:none')} onChange={e => { const f = e.target.files?.[0]; if (f) subirDoc(f); e.target.value = '' }} />
+              <button type="button" className="btn" style={sx('align-self:flex-start')} onClick={() => docRef.current?.click()}>Subir documento</button>
             </section>
             <section className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
               <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:20px;font-weight:600")}>Solicitar a RH</h2>
-              <label className="field">Trámite<select><option>Constancia laboral</option><option>Constancia de percepciones</option><option>Carta de recomendación</option><option>Cambio de datos bancarios</option></select></label>
-              <label className="field">Para qué la necesitas<input type="text" placeholder="Ej. trámite de crédito Infonavit" /></label>
-              <button type="button" className="btn btn-pri" style={sx('align-self:flex-start')}>Enviar a RH</button>
+              <label className="field">Trámite<select value={tramite} onChange={e => setTramite(e.target.value)}>{TRAMITES.map(x => <option key={x}>{x}</option>)}</select></label>
+              <label className="field">Para qué la necesitas<input type="text" placeholder="Ej. trámite de crédito Infonavit" value={paraQue} onChange={e => setParaQue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') enviarTramite() }} /></label>
+              <button type="button" className="btn btn-pri" style={sx('align-self:flex-start')} onClick={enviarTramite}>Enviar a RH</button>
               <span style={sx('font-size:13px;color:#5F6B7A')}>Tiempo de respuesta habitual: 1 día hábil.</span>
+              {tramites.length > 0 && (
+                <div style={sx('display:flex;flex-direction:column;gap:4px;border-top:1px solid #EEF1F4;padding-top:12px')}>
+                  <span className="lbl">Mis trámites</span>
+                  {tramites.map(t => (
+                    <div key={t.id} style={sx('display:flex;justify-content:space-between;gap:12px;align-items:center;padding:8px 0;border-top:1px solid #EEF1F4;font-size:14px;flex-wrap:wrap')}>
+                      <span style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('font-weight:500')}>{t.tramite}</span><span style={sx('color:#5F6B7A;font-size:13px')}>{t.id} · {t.motivo || 'sin comentario'}</span></span>
+                      <span style={sx('display:flex;gap:8px;align-items:center')}>
+                        <span className={cls(t.estatus === 'Entregado' ? 'Aprobada' : t.estatus === 'Rechazado' ? 'Rechazada' : 'Pendiente')}>{t.estatus}</span>
+                        {t.estatus === 'Entregado' && t.tramite.startsWith('Constancia') && <button type="button" className="btn" style={sx('min-height:34px;padding:0 12px')} onClick={() => { descargarConstancia(t.tramite, t.motivo); toast(`${t.tramite} descargada (PDF)`) }}>Descargar</button>}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           </div>
         )}

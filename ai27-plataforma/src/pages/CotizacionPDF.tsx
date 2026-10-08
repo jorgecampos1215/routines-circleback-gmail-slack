@@ -1,1 +1,168 @@
-export default function CotizacionPDF() { return <div>CotizacionPDF · pendiente</div> }
+import { useMemo } from 'react'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { ROUTES } from '../lib/routes'
+import { sx } from '../lib/sx'
+
+/** Valores que el Cotizador manda a esta hoja (por query string `?d=` y por location.state). */
+export type CotizacionPayload = {
+  modelo: string
+  info: [string, string][]
+  items: { t: string; s: string; q: number; v: number | null }[]
+  subtotal: number
+  formato?: string
+}
+
+/** Valores del diseño (COT-1182 · Marsh · Méx–SLP nocturno). */
+const DISENO: CotizacionPayload = {
+  modelo: 'Custodia por evento',
+  info: [
+    ['Ruta', 'Tepotzotlán → San Luis Potosí'],
+    ['Distancia y tiempo', '382 km · 4 h 40'],
+    ['Salida', '8 oct 2026 · 22:00'],
+    ['Nivel de riesgo', 'Alto · horario nocturno'],
+  ],
+  items: [
+    { t: 'Custodios armados certificados', s: 'Turno nocturno, portación vigente y evaluación de confianza', q: 2, v: 15785 },
+    { t: 'Unidad de custodia con GPS', s: 'Incluye combustible del trayecto', q: 1, v: 2685 },
+    { t: 'Casetas de peaje', s: '6 casetas en ruta', q: 1, v: 2830 },
+    { t: 'Monitoreo 24/7 desde centro de control', s: 'Seguimiento en vivo, alertas y protocolo de reacción', q: 1, v: null },
+  ],
+  subtotal: 21300,
+}
+
+const CSS = `
+body{margin:0;background:#FFFFFF}
+a{color:#8A5300}a:hover{color:#5A3600}
+.pdf-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;width:816px;max-width:100%;box-sizing:border-box;margin:0 auto;padding:16px 0}
+.pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{color:#121821}
+.pdf-btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.pdf-sheet{margin:0 auto 40px;box-shadow:0 1px 3px rgba(18,24,33,.08),0 8px 24px rgba(18,24,33,.08);border:1px solid #E4E8ED}
+@page{size:letter;margin:0}
+@media print{
+  html,body{background:#FFFFFF !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pdf-bar{display:none !important}
+  .pdf-wrap{background:#FFFFFF !important;padding:0 !important;min-height:0 !important}
+  .pdf-sheet{margin:0 !important;box-shadow:none !important;border:0 !important;page-break-after:avoid;break-inside:avoid}
+}
+`
+
+const money = (n: number) => '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+function leer(search: URLSearchParams, state: unknown): CotizacionPayload | null {
+  const ok = (p: unknown): p is CotizacionPayload =>
+    !!p && typeof p === 'object' && Array.isArray((p as CotizacionPayload).items) && Array.isArray((p as CotizacionPayload).info) && typeof (p as CotizacionPayload).subtotal === 'number'
+  if (ok(state)) return state
+  const d = search.get('d')
+  if (d) {
+    try { const p = JSON.parse(d); if (ok(p)) return p } catch { /* query inválido: se usan los valores del diseño */ }
+  }
+  return null
+}
+
+export default function CotizacionPDF() {
+  const [search] = useSearchParams()
+  const location = useLocation()
+  const p = useMemo(() => leer(search, location.state) ?? DISENO, [search, location.state])
+  const iva = Math.round(p.subtotal * 0.16 * 100) / 100
+  const total = p.subtotal + iva
+  const td = 'padding:12px;border-bottom:1px solid #D5DBE3'
+  const tdNum = "padding:12px;border-bottom:1px solid #D5DBE3;text-align:right;font-family:'IBM Plex Mono',monospace"
+
+  return (
+    <div className="pdf-wrap" style={sx('background:#F6F7F9;min-height:100vh;padding:0 16px;box-sizing:border-box')}>
+      <style>{CSS}</style>
+      <div className="pdf-bar">
+        <Link className="pdf-btn" to={ROUTES.Cotizador}>← Volver al cotizador</Link>
+        <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
+          {p.formato && <span style={sx("font:400 13px 'IBM Plex Sans',sans-serif;color:#5F6B7A")}>Formato: {p.formato}</span>}
+          <button type="button" className="pdf-btn pdf-btn-pri" onClick={() => window.print()}>Imprimir / descargar PDF</button>
+        </div>
+      </div>
+
+      <div className="pdf-sheet" style={sx("width:816px;height:1056px;box-sizing:border-box;padding:56px 72px 48px;background:#FFFFFF;color:#121821;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;display:flex;flex-direction:column;gap:22px")}>
+        <header style={sx('display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:18px;border-bottom:3px solid #D08A1C')}>
+          <div style={sx('display:flex;align-items:center;gap:10px')}>
+            <svg width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#D08A1C" strokeWidth="2"></path><path d="M10 17l4 4 8-9" stroke="#D08A1C" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+            <div style={sx('display:flex;flex-direction:column;line-height:1.2')}>
+              <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:24px")}>AI27</span>
+              <span style={sx('font-size:12px;color:#5F6B7A')}>Seguridad y custodia de carga en tránsito</span>
+            </div>
+          </div>
+          <div style={sx('display:flex;flex-direction:column;align-items:flex-end;gap:2px')}>
+            <span style={sx("font-family:'Archivo',sans-serif;font-size:22px;font-weight:600;letter-spacing:.04em")}>COTIZACIÓN</span>
+            <span style={sx("font-family:'IBM Plex Mono',monospace;font-size:13px")}>COT-1182</span>
+          </div>
+        </header>
+
+        <section style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px')}>
+          <div style={sx('display:flex;flex-direction:column;gap:2px')}>
+            <span style={sx('font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A')}>Cliente</span>
+            <span style={sx('font-weight:600;font-size:16px')}>Marsh</span>
+            <span>Atención: [NOMBRE DEL CONTACTO]</span>
+            <span>[CORREO] · [TELÉFONO]</span>
+          </div>
+          <div style={sx('display:grid;grid-template-columns:auto 1fr;gap:2px 16px;align-content:start')}>
+            <span style={sx('color:#5F6B7A')}>Fecha</span><span>7 de octubre de 2026</span>
+            <span style={sx('color:#5F6B7A')}>Vigencia</span><span>15 días naturales</span>
+            <span style={sx('color:#5F6B7A')}>Modelo</span><span>{p.modelo}</span>
+            <span style={sx('color:#5F6B7A')}>Ejecutivo</span><span>[NOMBRE DEL EJECUTIVO]</span>
+          </div>
+        </section>
+
+        <section style={sx('background:#F7F9FB;border:1px solid #E4E8ED;border-radius:8px;padding:14px 16px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px')}>
+          {p.info.map(([k, v]) => (
+            <div key={k} style={sx('display:flex;flex-direction:column')}><span style={sx('font-size:12px;color:#5F6B7A')}>{k}</span><span style={sx('font-weight:500')}>{v}</span></div>
+          ))}
+        </section>
+
+        <table style={sx('width:100%;border-collapse:collapse')}>
+          <thead>
+            <tr style={sx('background:#121821;color:#FFFFFF')}>
+              <th style={sx('text-align:left;padding:10px 12px;font-weight:500;font-size:13px')}>Concepto</th>
+              <th style={sx('text-align:right;padding:10px 12px;font-weight:500;font-size:13px')}>Cant.</th>
+              <th style={sx('text-align:right;padding:10px 12px;font-weight:500;font-size:13px')}>Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            {p.items.map(it => (
+              <tr key={it.t}><td style={sx(td)}><b style={sx('font-weight:600')}>{it.t}</b><br /><span style={sx('color:#3E4A59')}>{it.s}</span></td><td style={sx(tdNum)}>{it.q}</td><td style={sx(tdNum)}>{it.v == null ? 'Incluido' : money(it.v)}</td></tr>
+            ))}
+          </tbody>
+        </table>
+
+        <section style={sx('display:flex;justify-content:flex-end')}>
+          <div style={sx("width:300px;display:grid;grid-template-columns:1fr auto;gap:6px 16px;font-family:'IBM Plex Mono',monospace")}>
+            <span style={sx("font-family:'IBM Plex Sans',sans-serif;color:#3E4A59")}>Subtotal</span><span style={sx('text-align:right')}>{money(p.subtotal)}</span>
+            <span style={sx("font-family:'IBM Plex Sans',sans-serif;color:#3E4A59")}>IVA 16%</span><span style={sx('text-align:right')}>{money(iva)}</span>
+            <span style={sx("font-family:'Archivo',sans-serif;font-weight:600;font-size:18px;border-top:2px solid #121821;padding-top:8px")}>Total MXN</span><span style={sx('text-align:right;font-weight:600;font-size:18px;border-top:2px solid #121821;padding-top:8px')}>{money(total)}</span>
+          </div>
+        </section>
+
+        <section style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px')}>
+          <div style={sx('display:flex;flex-direction:column;gap:4px')}>
+            <span style={sx("font-family:'Archivo',sans-serif;font-weight:600;font-size:15px")}>Incluye</span>
+            <span>Bitácora del servicio con evidencias fotográficas</span>
+            <span>Acceso al portal para ver el servicio en vivo</span>
+            <span>Reporte post-incidente en caso de evento</span>
+          </div>
+          <div style={sx('display:flex;flex-direction:column;gap:4px')}>
+            <span style={sx("font-family:'Archivo',sans-serif;font-weight:600;font-size:15px")}>Condiciones</span>
+            <span>Precios en pesos mexicanos más IVA</span>
+            <span>Forma de pago: [CONDICIONES DE PAGO]</span>
+            <span>Cancelación: [POLÍTICA DE CANCELACIÓN]</span>
+          </div>
+        </section>
+
+        <section style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px;margin-top:auto')}>
+          <div style={sx('display:flex;flex-direction:column;gap:4px;border-top:1px solid #121821;padding-top:8px')}><span style={sx('font-weight:600')}>Acepta por el cliente</span><span style={sx('color:#3E4A59')}>Nombre, firma y fecha</span></div>
+          <div style={sx('display:flex;flex-direction:column;gap:4px;border-top:1px solid #121821;padding-top:8px')}><span style={sx('font-weight:600')}>Por AI27</span><span style={sx('color:#3E4A59')}>[NOMBRE Y CARGO]</span></div>
+        </section>
+
+        <footer style={sx('display:flex;justify-content:space-between;gap:16px;font-size:12px;color:#5F6B7A;border-top:1px solid #E4E8ED;padding-top:10px')}>
+          <span>AI27 · [DIRECCIÓN FISCAL]</span><span>[TELÉFONO] · ai27.com</span><span>Página 1 de 1</span>
+        </footer>
+      </div>
+    </div>
+  )
+}

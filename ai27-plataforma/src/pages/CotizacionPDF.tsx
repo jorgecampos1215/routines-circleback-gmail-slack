@@ -1,3 +1,4 @@
+import { Logo } from '../components/Logo'
 import { useMemo } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { ROUTES } from '../lib/routes'
@@ -83,7 +84,7 @@ export default function CotizacionPDF() {
       <div className="pdf-sheet" style={sx("width:816px;height:1056px;box-sizing:border-box;padding:56px 72px 48px;background:#FFFFFF;color:#121821;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;display:flex;flex-direction:column;gap:22px")}>
         <header style={sx('display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:18px;border-bottom:3px solid #D08A1C')}>
           <div style={sx('display:flex;align-items:center;gap:10px')}>
-            <svg width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#D08A1C" strokeWidth="2"></path><path d="M10 17l4 4 8-9" stroke="#D08A1C" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+            <Logo size={36} />
             <div style={sx('display:flex;flex-direction:column;line-height:1.2')}>
               <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:24px")}>AI27</span>
               <span style={sx('font-size:12px;color:#5F6B7A')}>Seguridad y custodia de carga en tránsito</span>

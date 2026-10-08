@@ -1,3 +1,4 @@
+import { Logo } from '../components/Logo'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { sx } from '../lib/sx'
@@ -86,7 +87,7 @@ export default function PortalColaborador() {
       <header style={sx('background:#FFFFFF;border-bottom:1px solid #E4E8ED')}>
         <div style={sx('max-width:1120px;margin:0 auto;padding:14px 24px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between')}>
           <div style={sx('display:flex;align-items:center;gap:10px')}>
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#D08A1C" strokeWidth="2"></path><path d="M10 17l4 4 8-9" stroke="#D08A1C" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+            <Logo size={28} />
             <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:19px")}>AI27</span>
             <span style={sx('font-size:14px;color:#5F6B7A;padding-left:10px;border-left:1px solid #E4E8ED')}>Mi portal</span>
           </div>

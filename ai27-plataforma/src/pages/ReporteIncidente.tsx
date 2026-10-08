@@ -1,3 +1,4 @@
+import { Logo } from '../components/Logo'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Nav } from '../components/Nav'
@@ -58,7 +59,7 @@ export default function ReporteIncidente() {
         <article className="ri-doc" style={sx('background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;max-width:880px;width:100%;box-sizing:border-box;padding:56px 64px;display:flex;flex-direction:column;gap:28px;align-self:center')}>
           <div style={sx('display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;border-bottom:2px solid #121821;padding-bottom:20px')}>
             <div style={sx('display:flex;align-items:center;gap:10px')}>
-              <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#D08A1C" strokeWidth="2"></path><path d="M10 17l4 4 8-9" stroke="#D08A1C" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+              <Logo size={30} />
               <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:22px")}>AI27</span>
             </div>
             <div style={sx('display:flex;flex-direction:column;gap:2px;text-align:right;font-size:13px;color:#3E4A59')}>

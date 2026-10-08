@@ -1,3 +1,4 @@
+import { Logo } from './Logo'
 import { NavLink } from 'react-router-dom'
 import { sx } from '../lib/sx'
 
@@ -38,7 +39,7 @@ export function Nav({ active }: { active: NavId }) {
   return (
     <nav aria-label="Principal" style={sx("font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#FFFFFF;box-sizing:border-box;padding:22px 14px 28px;display:flex;flex-direction:column;gap:22px")}>
       <NavLink to="/" style={sx('display:flex;align-items:center;gap:10px;text-decoration:none;color:#121821;padding:0 8px')}>
-        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#F2A93B" strokeWidth="2" /><path d="M10 17l4 4 8-9" stroke="#F2A93B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        <Logo size={30} />
         <span style={sx('display:flex;flex-direction:column;line-height:1.1')}>
           <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:20px;letter-spacing:.02em")}>AI27</span>
           <span style={sx('font-size:11px;color:#5F6B7A;letter-spacing:.08em;text-transform:uppercase')}>Centro de operación</span>

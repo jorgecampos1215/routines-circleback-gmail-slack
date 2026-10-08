@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { Shell } from '../components/Shell'
+import { Field, Modal, btnPriStyle, btnStyle, inputStyle, useToast } from '../components/ui'
 import { sx } from '../lib/sx'
+import { CLIENTES_FILTRO, ZONAS_FILTRO, desdeSeed } from '../data/reportes'
 
 const CSS = `
 a{color:#B36B00}a:hover{color:#8A5300}
@@ -42,12 +44,13 @@ const R: Rep[] = [
   { id: 'ing', cat: 'Comercial', name: 'Ingresos por cliente', desc: 'Facturación del trimestre por cliente.', chart: 'Millones MXN', unit: 'M', fmt: 2, kpis: [['Ingresos', '$40.6M'], ['Clientes activos', '25'], ['Top 5', '47%']], data: [['Alpura', 14.6], ['Marsh', 11.2], ['Farmacéutica Orión', 8.4], ['Autopartes Saltillo', 6.8], ['Electrónica del Bajío', 5.6]], ai: 'La concentración en los 2 primeros clientes es de 32%; conviene diversificar en Bajío.' },
   { id: 'cxc', cat: 'Finanzas', name: 'Antigüedad de saldos', desc: 'Cuentas por cobrar por rango de días.', chart: 'Millones MXN', unit: 'M', fmt: 1, kpis: [['Por cobrar', '$18.2M'], ['Días de cobro', '38'], ['+60 días', '$3.1M']], data: [['Al corriente', 9.8], ['1–30 días', 3.6], ['31–60 días', 1.7], ['+60 días', 3.1]], ai: '71% del saldo a más de 60 días está en Bebidas del Golfo y Grupo Textil Arrayán.' },
   { id: 'rot', cat: 'Personas', name: 'Rotación por área', desc: 'Bajas del trimestre entre la plantilla promedio.', chart: 'Rotación trimestral %', unit: '%', fmt: 1, kpis: [['Headcount', '486'], ['Bajas', '23'], ['Rotación', '4.7%']], data: [['Custodia', 5.1], ['Monitoreo', 8.3], ['Flotilla y taller', 2.6], ['Comercial', 0], ['Oficinas', 1.9]], ai: 'Monitoreo tiene la rotación más alta; 2 de 3 bajas citan el turno nocturno fijo.' },
+  { id: 'hc', cat: 'Personas', name: 'Headcount por área', desc: 'Plantilla activa por área (RH), con filtro por zona.', chart: 'Colaboradores', unit: '', kpis: [['Headcount', '486'], ['Custodios', '400'], ['Áreas', '9']], data: [['Custodios', 400], ['Monitoreo', 28], ['Reacción', 14], ['Operaciones', 12], ['Flotilla y taller', 9]], ai: 'Custodios concentra 82% de la plantilla; Monitoreo opera con 28 personas para 86 servicios activos.' },
 ]
 
 const PERIODOS = ['Q3 2026 (jul–sep)', 'Septiembre 2026', 'Año 2026']
 const PERIODO_CORTO: Record<string, string> = { 'Q3 2026 (jul–sep)': 'Q3 2026', 'Septiembre 2026': 'Septiembre 2026', 'Año 2026': 'Año 2026' }
-const ZONAS = ['Todas las zonas', 'Centro', 'Bajío']
-const CLIENTES = ['Todos los clientes', 'Alpura', 'Marsh']
+const ZONAS = ZONAS_FILTRO
+const CLIENTES = CLIENTES_FILTRO
 const TIPOS = ['Todos', 'Por evento', 'Dedicado', 'Monitoreo']
 
 type Sched = { r: string; to: string; f: string; n: string; fmt: string; st: 'Activo' | 'Pausado' }
@@ -73,7 +76,7 @@ const KEYWORDS: [RegExp, string][] = [
   [/rotaci|baja|personal|headcount|rh\b|personas/, 'rot'],
   [/servicio|evento|dedicado|monitoreo/, 'srv'],
 ]
-const CLIENT_NAMES = ['Alpura', 'Marsh', 'Farmacéutica Orión', 'Autopartes Saltillo', 'Electrónica del Bajío', 'Bebidas del Golfo', 'Grupo Textil Arrayán']
+const CLIENT_NAMES = [...CLIENTES_FILTRO.slice(1), 'Autopartes Saltillo']
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const EXAMPLE = 'incidentes de septiembre para Marsh con mapa de calor'
 
@@ -129,24 +132,31 @@ export default function Reportes() {
   const [cliente, setCliente] = useState(CLIENTES[0])
   const [tipo, setTipo] = useState(TIPOS[0])
   const [sched, setSched] = useState<Sched[]>(SCHED0)
-  const [toast, setToast] = useState('')
+  const toast = useToast()
   const inputRef = useRef<HTMLInputElement>(null)
-  const toastTimer = useRef<number | undefined>(undefined)
+  const [envOpen, setEnvOpen] = useState(false)
+  const [env, setEnv] = useState({ para: '', msg: '' })
+  const [progOpen, setProgOpen] = useState(false)
+  const [prog, setProg] = useState({ to: '', f: 'Lunes 7:00', fmt: 'PDF + Excel' })
 
   const all = [...generated, ...R]
-  const cur0 = all.find(x => x.id === r) ?? R[2]
+  const base0 = all.find(x => x.id === r) ?? R[2]
+  // Cifras desde seed con los filtros aplicados (servicios, incidentes, custodios, cartera, plantilla);
+  // los reportes sin base en seed se recortan por cliente cuando el cliente aparece en sus filas.
+  const seed = base0.cat === 'Generados con IA' ? null : desdeSeed(base0.id, { periodo, zona, cliente, tipo })
+  const cur0: Rep = seed
+    ? { ...base0, data: seed.data, kpis: seed.kpis ?? base0.kpis }
+    : cliente !== CLIENTES[0] && base0.data.some(d => d[0] === cliente)
+      ? { ...base0, data: base0.data.filter(d => d[0] === cliente) }
+      : base0
   const max = Math.max(...cur0.data.map(d => d[1])) || 1
   const cats: { name: string; items: Rep[] }[] = []
   all.forEach(x => { let c = cats.find(c => c.name === x.cat); if (!c) { c = { name: x.cat, items: [] }; cats.push(c) } c.items.push(x) })
   const fv = (v: number) => cur0.unit === 'M' ? '$' + v.toFixed(cur0.fmt) + 'M' : (cur0.fmt ? (cur0.unit ? v.toFixed(cur0.fmt) + cur0.unit : '$' + v.toFixed(2)) : v + cur0.unit)
   const filtros = [zona !== ZONAS[0] && zona, cliente !== CLIENTES[0] && cliente, tipo !== TIPOS[0] && tipo].filter(Boolean) as string[]
-  const activos = sched.length
+  const activos = sched.filter(s => s.st === 'Activo').length
 
-  const flash = (msg: string) => {
-    setToast(msg)
-    window.clearTimeout(toastTimer.current)
-    toastTimer.current = window.setTimeout(() => setToast(''), 3200)
-  }
+  const flash = (msg: string) => toast(msg)
 
   const generar = () => {
     if (loading) return
@@ -174,13 +184,24 @@ export default function Reportes() {
     flash('Excel descargado: AI27_' + slug(cur0.name) + '.csv')
   }
 
-  const programar = () => {
-    if (sched.some(s => s.r === cur0.name)) { flash('“' + cur0.name + '” ya tiene un envío programado'); return }
-    setSched(s => [...s, { r: cur0.name, to: DEST[cur0.cat] ?? 'Dirección (3)', f: 'Lunes 7:00', n: '12 oct 07:00', fmt: 'PDF + Excel', st: 'Activo' }])
-    flash('Envío programado: ' + cur0.name + ' · lunes 7:00')
+  const abrirProgramar = () => {
+    if (sched.some(s => s.r === cur0.name)) { toast('“' + cur0.name + '” ya tiene un envío programado', 'warn'); return }
+    setProg({ to: DEST[cur0.cat] ?? 'Dirección (3)', f: 'Lunes 7:00', fmt: 'PDF + Excel' })
+    setProgOpen(true)
   }
+  const programar = () => {
+    const prox: Record<string, string> = { 'Lunes 7:00': '12 oct 07:00', 'Viernes 9:00': '9 oct 09:00', Mensual: '1 nov 08:00', Diario: '9 oct 07:00' }
+    setSched(s => [...s, { r: cur0.name, to: prog.to, f: prog.f, n: prox[prog.f] ?? '12 oct 07:00', fmt: prog.fmt, st: 'Activo' }])
+    setProgOpen(false)
+    flash('Envío programado: ' + cur0.name + ' · ' + prog.f.toLowerCase() + ' · ' + prog.to)
+  }
+  const abrirEnviar = () => { setEnv({ para: DEST[cur0.cat] ?? 'Dirección (3)', msg: `Adjunto el reporte “${cur0.name}” (${PERIODO_CORTO[periodo]}${filtros.length ? ' · ' + filtros.join(', ') : ''}).\n\nLectura de la IA: ${cur0.ai}` }); setEnvOpen(true) }
+  const enviar = () => { setEnvOpen(false); flash('Enviado a ' + env.para + ': ' + cur0.name) }
 
   const toggle = (i: number) => setSched(s => s.map((x, j) => j === i ? { ...x, st: x.st === 'Activo' ? 'Pausado' : 'Activo' } : x))
+  const enviarAhora = (s: Sched) => flash('Enviado ahora a ' + s.to + ': ' + s.r + ' (' + s.fmt + ')')
+  const quitar = (i: number) => { const s = sched[i]; setSched(xs => xs.filter((_, j) => j !== i)); toast('Envío programado eliminado: ' + s.r, 'info') }
+  const abrirReporte = (nombre: string) => { const x = all.find(y => y.name === nombre || nombre.startsWith(y.name)); if (x) { setR(x.id); window.scrollTo({ top: 0, behavior: 'smooth' }) } else toast('Este reporte programado es una plantilla de cliente', 'info') }
 
   return (
     <Shell active="reportes" css={CSS} mainStyle="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
@@ -188,9 +209,9 @@ export default function Reportes() {
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Administración</span>
           <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Reportes</h1>
-          <span style={sx('color:#5F6B7A;font-size:14px')}>{16 + generated.length} reportes listos · {activos} envíos programados · exporta a PDF o Excel</span>
+          <span style={sx('color:#5F6B7A;font-size:14px')}>{R.length + 6 + generated.length} reportes listos · {activos} envíos programados · exporta a PDF o Excel</span>
         </div>
-        <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}><button type="button" className="btn" onClick={programar}>Programar envío</button><button type="button" className="btn btn-pri" onClick={() => inputRef.current?.focus()}>Nuevo reporte</button></div>
+        <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}><button type="button" className="btn" onClick={abrirProgramar}>Programar envío</button><button type="button" className="btn btn-pri" onClick={() => inputRef.current?.focus()}>Nuevo reporte</button></div>
       </header>
 
       <section aria-label="Reporte con IA" style={sx('display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
@@ -229,7 +250,7 @@ export default function Reportes() {
             <div style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">{cur0.cat} · {PERIODO_CORTO[periodo]}</span><h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>{cur0.name}</h2><span style={sx('font-size:14px;color:#3E4A59')}>{cur0.desc}</span>
               {filtros.length > 0 && <span style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:4px')}>{filtros.map(f => <span key={f} className="pill p-info">{f}</span>)}</span>}
             </div>
-            <div className="no-print" style={sx('display:flex;gap:8px;flex-wrap:wrap')}><button type="button" className="btn" onClick={() => window.print()}>Descargar PDF</button><button type="button" className="btn" onClick={exportExcel}>Excel</button><button type="button" className="btn" onClick={() => flash('Enviado a ' + (DEST[cur0.cat] ?? 'Dirección (3)') + ': ' + cur0.name)}>Enviar</button></div>
+            <div className="no-print" style={sx('display:flex;gap:8px;flex-wrap:wrap')}><button type="button" className="btn" onClick={() => { window.print(); flash('PDF listo: ' + cur0.name) }}>Descargar PDF</button><button type="button" className="btn" onClick={exportExcel}>Excel</button><button type="button" className="btn" onClick={abrirEnviar}>Enviar</button></div>
           </div>
           <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px')}>
             {cur0.kpis.map(([k, v]) => (
@@ -238,6 +259,7 @@ export default function Reportes() {
           </div>
           <figure style={sx('margin:0;display:flex;flex-direction:column;gap:12px')}>
             <figcaption className="lbl">{cur0.chart}</figcaption>
+            {cur0.data.length === 0 && <span style={sx('font-size:14px;color:#5F6B7A')}>Sin datos para los filtros seleccionados.</span>}
             {cur0.data.map(([k, v], i) => (
               <div key={k} style={sx('display:grid;grid-template-columns:180px minmax(0,1fr) 90px;gap:12px;align-items:center;font-size:14px')}>
                 <span>{k}</span>
@@ -257,19 +279,30 @@ export default function Reportes() {
         <h2 style={sx("margin:0;padding:0 12px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Envíos programados</h2>
         <div style={sx('overflow-x:auto')}>
           <table className="tbl">
-            <thead><tr><th>Reporte</th><th>Destinatarios</th><th>Frecuencia</th><th>Próximo envío</th><th>Formato</th><th>Estatus</th></tr></thead>
+            <thead><tr><th>Reporte</th><th>Destinatarios</th><th>Frecuencia</th><th>Próximo envío</th><th>Formato</th><th>Estatus</th><th></th></tr></thead>
             <tbody>
               {sched.map((s, i) => (
-                <tr key={s.r}><td>{s.r}</td><td>{s.to}</td><td>{s.f}</td><td className="mono">{s.n}</td><td>{s.fmt}</td><td><button type="button" title={s.st === 'Activo' ? 'Pausar envío' : 'Reactivar envío'} onClick={() => toggle(i)} className={'pill pill-btn ' + (s.st === 'Activo' ? 'p-ok' : 'p-mute')}>{s.st}</button></td></tr>
+                <tr key={s.r}><td><button type="button" onClick={() => abrirReporte(s.r)} style={sx("background:none;border:0;padding:0;cursor:pointer;color:#121821;font:400 14px 'IBM Plex Sans',sans-serif;text-align:left")} title="Abrir reporte">{s.r}</button></td><td>{s.to}</td><td>{s.f}</td><td className="mono">{s.n}</td><td>{s.fmt}</td><td><button type="button" title={s.st === 'Activo' ? 'Pausar envío' : 'Reactivar envío'} onClick={() => toggle(i)} className={'pill pill-btn ' + (s.st === 'Activo' ? 'p-ok' : 'p-mute')}>{s.st}</button></td>
+                  <td><div style={sx('display:flex;gap:6px')}><button type="button" className="btn" style={sx('min-height:30px;padding:0 10px;font-size:13px')} onClick={() => enviarAhora(s)}>Enviar ahora</button><button type="button" className="btn" style={sx('min-height:30px;padding:0 10px;font-size:13px')} aria-label="Eliminar envío" onClick={() => quitar(i)}>×</button></div></td></tr>
               ))}
             </tbody>
           </table>
         </div>
       </section>
 
-      {toast && (
-        <div role="status" style={sx('position:fixed;right:24px;bottom:24px;background:#121821;color:#FFFFFF;border-radius:8px;padding:12px 16px;font-size:14px;box-shadow:0 6px 24px rgba(18,24,33,.25);z-index:50;max-width:420px')}>{toast}</div>
-      )}
+      <Modal open={envOpen} onClose={() => setEnvOpen(false)} title={'Enviar reporte · ' + cur0.name} footer={<><button type="button" style={sx(btnStyle)} onClick={() => setEnvOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={enviar}>Enviar</button></>}>
+        <Field label="Destinatarios"><select style={sx(inputStyle)} value={env.para} onChange={e => setEnv({ ...env, para: e.target.value })}>{[...new Set(Object.values(DEST))].map(d => <option key={d}>{d}</option>)}<option>Alpura logística (2)</option><option>Marsh riesgos (2)</option></select></Field>
+        <Field label="Mensaje"><textarea rows={5} style={sx(inputStyle + ';padding:10px 12px;resize:vertical')} value={env.msg} onChange={e => setEnv({ ...env, msg: e.target.value })} /></Field>
+        <span style={sx('font-size:13px;color:#5F6B7A')}>Adjuntos: {slug(cur0.name)}.pdf · {slug(cur0.name)}.csv</span>
+      </Modal>
+      <Modal open={progOpen} onClose={() => setProgOpen(false)} title={'Programar envío · ' + cur0.name} footer={<><button type="button" style={sx(btnStyle)} onClick={() => setProgOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={programar}>Programar</button></>}>
+        <Field label="Destinatarios"><select style={sx(inputStyle)} value={prog.to} onChange={e => setProg({ ...prog, to: e.target.value })}>{[...new Set(Object.values(DEST))].map(d => <option key={d}>{d}</option>)}<option>Alpura logística (2)</option><option>Marsh riesgos (2)</option></select></Field>
+        <div style={sx('display:grid;grid-template-columns:1fr 1fr;gap:12px')}>
+          <Field label="Frecuencia"><select style={sx(inputStyle)} value={prog.f} onChange={e => setProg({ ...prog, f: e.target.value })}>{['Diario', 'Lunes 7:00', 'Viernes 9:00', 'Mensual'].map(d => <option key={d}>{d}</option>)}</select></Field>
+          <Field label="Formato"><select style={sx(inputStyle)} value={prog.fmt} onChange={e => setProg({ ...prog, fmt: e.target.value })}>{['PDF', 'Excel', 'PDF + Excel'].map(d => <option key={d}>{d}</option>)}</select></Field>
+        </div>
+        <span style={sx('font-size:13px;color:#5F6B7A')}>Se enviará con los filtros actuales: {[PERIODO_CORTO[periodo], ...filtros].join(' · ')}</span>
+      </Modal>
     </Shell>
   )
 }

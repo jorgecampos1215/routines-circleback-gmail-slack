@@ -1,8 +1,11 @@
 import { Logo } from '../components/Logo'
-import { useMemo } from 'react'
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Field, Modal, btnPriStyle, btnStyle, inputStyle, useToast } from '../components/ui'
 import { ROUTES } from '../lib/routes'
+import { actions } from '../lib/store'
 import { sx } from '../lib/sx'
+import { clientes } from '../data/seed'
 
 /** Valores que el Cotizador manda a esta hoja (por query string `?d=` y por location.state). */
 export type CotizacionPayload = {
@@ -11,6 +14,11 @@ export type CotizacionPayload = {
   items: { t: string; s: string; q: number; v: number | null }[]
   subtotal: number
   formato?: string
+  folio?: string
+  cliente?: string
+  contacto?: string
+  correo?: string
+  telefono?: string
 }
 
 /** Valores del diseño (COT-1182 · Marsh · Méx–SLP nocturno). */
@@ -29,6 +37,8 @@ const DISENO: CotizacionPayload = {
     { t: 'Monitoreo 24/7 desde centro de control', s: 'Seguimiento en vivo, alertas y protocolo de reacción', q: 1, v: null },
   ],
   subtotal: 21300,
+  folio: 'COT-1182',
+  cliente: 'Marsh',
 }
 
 const CSS = `
@@ -64,9 +74,34 @@ function leer(search: URLSearchParams, state: unknown): CotizacionPayload | null
 export default function CotizacionPDF() {
   const [search] = useSearchParams()
   const location = useLocation()
+  const navigate = useNavigate()
+  const toast = useToast()
   const p = useMemo(() => leer(search, location.state) ?? DISENO, [search, location.state])
+  // Contacto del cliente: lo que mandó el Cotizador o, si no, el de seed
+  const seedCli = clientes.find(c => c.nombre === p.cliente)
+  const contacto = p.contacto ?? seedCli?.contacto ?? '[NOMBRE DEL CONTACTO]'
+  const correo = p.correo ?? seedCli?.correo ?? '[CORREO]'
+  const telefono = p.telefono ?? seedCli?.telefono ?? '[TELÉFONO]'
+  const folio = p.folio ?? 'COT-1182'
+  const clienteNombre = p.cliente ?? 'Marsh'
+  const [mail, setMail] = useState(false)
+  const [para, setPara] = useState(correo)
+  const [asunto, setAsunto] = useState(`Cotización ${folio} · ${p.modelo}`)
+  const [msg, setMsg] = useState(`Estimado/a ${contacto}:\n\nAdjunto la cotización ${folio} (${p.modelo}) por ${money(p.subtotal)} MXN antes de IVA, vigente 15 días naturales.\n\nAI27 · Comercial`)
   const iva = Math.round(p.subtotal * 0.16 * 100) / 100
   const total = p.subtotal + iva
+
+  const enviar = () => { setMail(false); toast(`Cotización ${folio} enviada a ${clienteNombre} (${para})`) }
+  const copiar = async () => {
+    try { await navigator.clipboard.writeText(window.location.href); toast('Liga de la cotización copiada al portapapeles', 'info') } catch { toast('No se pudo copiar la liga', 'warn') }
+  }
+  const aceptar = () => {
+    const ruta = p.info.find(i => i[0] === 'Ruta')?.[1] ?? p.modelo
+    const tipo = p.modelo.startsWith('Custodio dedicado') ? 'Dedicado' : p.modelo.startsWith('Monitoreo') ? 'Monitoreo' : 'Por evento'
+    const id = actions.crearServicio({ cliente: clienteNombre, tipo, ruta, precio: p.subtotal })
+    toast(`Cotización ${folio} aceptada: servicio ${id} creado`)
+    navigate(ROUTES.AsignacionIA)
+  }
   const td = 'padding:12px;border-bottom:1px solid #D5DBE3'
   const tdNum = "padding:12px;border-bottom:1px solid #D5DBE3;text-align:right;font-family:'IBM Plex Mono',monospace"
 
@@ -77,7 +112,10 @@ export default function CotizacionPDF() {
         <Link className="pdf-btn" to={ROUTES.Cotizador}>← Volver al cotizador</Link>
         <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
           {p.formato && <span style={sx("font:400 13px 'IBM Plex Sans',sans-serif;color:#5F6B7A")}>Formato: {p.formato}</span>}
-          <button type="button" className="pdf-btn pdf-btn-pri" onClick={() => window.print()}>Imprimir / descargar PDF</button>
+          <button type="button" className="pdf-btn" onClick={copiar}>Copiar liga</button>
+          <button type="button" className="pdf-btn" onClick={() => setMail(true)}>Enviar por correo</button>
+          <button type="button" className="pdf-btn" onClick={aceptar}>Marcar aceptada</button>
+          <button type="button" className="pdf-btn pdf-btn-pri" onClick={() => { window.print(); toast(`${folio}.pdf listo para descargar / imprimir`, 'info') }}>Imprimir / descargar PDF</button>
         </div>
       </div>
 
@@ -92,16 +130,16 @@ export default function CotizacionPDF() {
           </div>
           <div style={sx('display:flex;flex-direction:column;align-items:flex-end;gap:2px')}>
             <span style={sx("font-family:'Archivo',sans-serif;font-size:22px;font-weight:600;letter-spacing:.04em")}>COTIZACIÓN</span>
-            <span style={sx("font-family:'IBM Plex Mono',monospace;font-size:13px")}>COT-1182</span>
+            <span style={sx("font-family:'IBM Plex Mono',monospace;font-size:13px")}>{folio}</span>
           </div>
         </header>
 
         <section style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px')}>
           <div style={sx('display:flex;flex-direction:column;gap:2px')}>
             <span style={sx('font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A')}>Cliente</span>
-            <span style={sx('font-weight:600;font-size:16px')}>Marsh</span>
-            <span>Atención: [NOMBRE DEL CONTACTO]</span>
-            <span>[CORREO] · [TELÉFONO]</span>
+            <span style={sx('font-weight:600;font-size:16px')}>{clienteNombre}</span>
+            <span>Atención: {contacto}</span>
+            <span>{correo} · {telefono}</span>
           </div>
           <div style={sx('display:grid;grid-template-columns:auto 1fr;gap:2px 16px;align-content:start')}>
             <span style={sx('color:#5F6B7A')}>Fecha</span><span>7 de octubre de 2026</span>
@@ -164,6 +202,13 @@ export default function CotizacionPDF() {
           <span>AI27 · [DIRECCIÓN FISCAL]</span><span>[TELÉFONO] · ai27.com</span><span>Página 1 de 1</span>
         </footer>
       </div>
+
+      <Modal open={mail} onClose={() => setMail(false)} title={`Enviar ${folio} por correo`} footer={<><button type="button" style={sx(btnStyle)} onClick={() => setMail(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={enviar}>Enviar correo</button></>}>
+        <Field label="Para"><input style={sx(inputStyle)} value={para} onChange={e => setPara(e.target.value)} /></Field>
+        <Field label="Asunto"><input style={sx(inputStyle)} value={asunto} onChange={e => setAsunto(e.target.value)} /></Field>
+        <Field label="Mensaje"><textarea rows={6} style={sx(inputStyle + ';padding:10px 12px;resize:vertical')} value={msg} onChange={e => setMsg(e.target.value)} /></Field>
+        <span style={sx("font:400 13px 'IBM Plex Sans',sans-serif;color:#5F6B7A")}>Adjunto: {folio}.pdf · {money(total)} MXN con IVA</span>
+      </Modal>
     </div>
   )
 }

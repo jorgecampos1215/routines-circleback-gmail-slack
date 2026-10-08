@@ -35,10 +35,7 @@ type State = {
 
 const KEY = 'ai27-demo-state-v1'
 const initial: State = {
-  vacaciones: [
-    { id: 'VAC-118', colaborador: 'Laura Méndez', area: 'Monitoreo', desde: '2026-10-19', hasta: '2026-10-23', dias: 5, estatus: 'Pendiente', creada: '2026-10-05' },
-    { id: 'VAC-117', colaborador: 'Jorge Salinas', area: 'Custodios · Bajío', desde: '2026-10-26', hasta: '2026-10-28', dias: 3, estatus: 'Pendiente', creada: '2026-10-04' },
-  ],
+  vacaciones: [],
   servicios: [],
   decisiones: [],
 }

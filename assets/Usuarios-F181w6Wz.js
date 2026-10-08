@@ -1,4 +1,4 @@
-import{c as e,l as t,t as n}from"./index-D_4qDxB0.js";import{n as r}from"./sx-q2cB-BX0.js";import{t as i}from"./Shell-Bgdd5nAJ.js";var a=t(e(),1),o=n(),s=`
+import{c as e,l as t,t as n}from"./index-CtrJYQby.js";import{n as r}from"./sx-q2cB-BX0.js";import{t as i}from"./Shell-KNjUM0eS.js";var a=t(e(),1),o=n(),s=`
 a{color:#B36B00}a:hover{color:#8A5300}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}

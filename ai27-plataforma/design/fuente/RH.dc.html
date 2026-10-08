@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · Personas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EEF1F4;color:#4A5868}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.k{font-family:'Archivo',sans-serif;font-size:26px;font-weight:600}
+.sel{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+</style>
+</helmet>
+<div style="font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap">
+  <div style="flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4">
+    <dc-import name="Nav" active="rh" hint-size="100%,1100px"></dc-import>
+  </div>
+  <main style="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
+    <header style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="lbl">Recursos humanos · toda la empresa</span>
+        <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600">Personas</h1>
+        <span style="color:#5F6B7A;font-size:14px">486 colaboradores en 9 áreas y 4 sedes</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn" href="PortalColaborador.dc.html">Portal del colaborador</a>
+        <button type="button" class="btn">Exportar plantilla</button>
+        <button type="button" class="btn btn-pri">Alta de colaborador</button>
+      </div>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px">
+      <div class="card" style="display:flex;flex-direction:column;gap:6px;padding:16px"><span class="lbl">Headcount</span><span class="k">486</span><span style="font-size:13px;color:#5F6B7A">+5 vs agosto</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px;padding:16px"><span class="lbl">Altas del mes</span><span class="k" style="color:#17784A">14</span><span style="font-size:13px;color:#5F6B7A">11 custodios · 3 oficina</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px;padding:16px"><span class="lbl">Bajas del mes</span><span class="k" style="color:#B42318">9</span><span style="font-size:13px;color:#5F6B7A">7 voluntarias</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px;padding:16px"><span class="lbl">Rotación</span><span class="k">3.1%</span><span style="font-size:13px;color:#5F6B7A">mensual</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px;padding:16px"><span class="lbl">De vacaciones hoy</span><span class="k">12</span><span style="font-size:13px;color:#5F6B7A">4 solicitudes por aprobar</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px;padding:16px"><span class="lbl">Vacantes</span><span class="k">23</span><span style="font-size:13px;color:#5F6B7A">19 días para contratar</span></div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:16px">
+      <figure class="card" style="margin:0;display:flex;flex-direction:column;gap:12px">
+        <figcaption style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><span style="font-family:'Archivo',sans-serif;font-size:16px;font-weight:600">Altas y bajas por mes</span>
+          <span style="display:flex;gap:14px;font-size:12px;color:#3E4A59"><span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:2px;background:#2B9A66"></span>Altas</span><span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:2px;background:#D9534F"></span>Bajas</span></span>
+        </figcaption>
+        <div style="display:flex;gap:18px;align-items:flex-end;height:130px">
+          <sc-for list="{{months}}" as="m" hint-placeholder-count="6">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+              <div style="display:flex;gap:3px;align-items:flex-end;height:104px"><div style="{{m.a}}"></div><div style="{{m.b}}"></div></div>
+              <span style="font-size:12px;color:#5F6B7A">{{m.n}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </figure>
+      <figure class="card" style="margin:0;display:flex;flex-direction:column;gap:10px">
+        <figcaption style="font-family:'Archivo',sans-serif;font-size:16px;font-weight:600">Colaboradores por área</figcaption>
+        <sc-for list="{{areas}}" as="a" hint-placeholder-count="8">
+          <div style="display:grid;grid-template-columns:150px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:13px">
+            <span>{{a.n}}</span><div style="height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden"><div style="{{a.bar}}"></div></div><span class="mono" style="text-align:right">{{a.v}}</span>
+          </div>
+        </sc-for>
+      </figure>
+    </section>
+
+    <section aria-label="Sugerencia de IA" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <div style="flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-weight:600">IA · riesgo de rotación</span><span style="font-size:14px;color:#3E4A59">7 colaboradores muestran el patrón previo a una baja: exceso de horas 3 semanas seguidas, vacaciones sin tomar y sin ajuste de sueldo en más de 18 meses. 5 son custodios de Bajío y 2 monitoristas.</span></div>
+      <a class="btn" href="AsistenteIA.dc.html">Ver a quiénes</a>
+    </section>
+
+    <div role="tablist" aria-label="Sección de personas" style="display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #E4E8ED;padding-bottom:12px">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+        <button type="button" role="tab" class="btn" style="{{t.style}}" onClick="{{t.pick}}">{{t.label}}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{isDir}}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+        <section style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <label style="display:flex;flex:1 1 240px"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar persona</span><input type="search" class="sel" placeholder="Buscar por nombre, puesto o número" style="flex:1"></label>
+            <label style="display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Área</span><select class="sel"><option>Todas las áreas</option><option>Custodia</option><option>Monitoreo</option><option>Reacción</option><option>Operaciones</option><option>Flotilla y taller</option><option>Comercial</option><option>Finanzas y administración</option><option>RH</option><option>Dirección</option></select></label>
+            <label style="display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Sede</span><select class="sel"><option>Todas las sedes</option><option>Cuautitlán</option><option>Querétaro</option><option>Monterrey</option><option>Veracruz</option></select></label>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(210px,100%),1fr));gap:12px">
+            <sc-for list="{{people}}" as="p" hint-placeholder-count="10">
+              <button type="button" onClick="{{p.pick}}" style="{{p.card}}">
+                <span style="{{p.av}}">{{p.ini}}</span>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left">
+                  <span style="font-weight:600;font-size:14px">{{p.name}}</span>
+                  <span style="font-size:13px;color:#3E4A59">{{p.role}}</span>
+                  <span style="font-size:12px;color:#5F6B7A">{{p.area}} · {{p.site}}</span>
+                  <span class="{{p.cls}}" style="align-self:flex-start;margin-top:4px">{{p.status}}</span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+          <span style="font-size:13px;color:#5F6B7A">Mostrando 10 de 486 · las iniciales se reemplazan por la foto del expediente</span>
+        </section>
+
+        <aside class="card" aria-label="Perfil" style="flex:1 1 360px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;gap:16px;align-items:center">
+            <span style="{{sel.avBig}}">{{sel.ini}}</span>
+            <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+              <span style="font-family:'Archivo',sans-serif;font-size:20px;font-weight:600">{{sel.name}}</span>
+              <span style="font-size:14px;color:#3E4A59">{{sel.role}}</span>
+              <span class="mono" style="font-size:12px;color:#5F6B7A">{{sel.id}} · {{sel.area}} · {{sel.site}}</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn">Cambiar foto</button><button type="button" class="btn">Editar</button><button type="button" class="btn">Iniciar baja</button></div>
+          <dl style="margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;font-size:14px">
+            <div><dt class="lbl">Ingreso</dt><dd style="margin:4px 0 0">{{sel.since}}</dd></div>
+            <div><dt class="lbl">Antigüedad</dt><dd style="margin:4px 0 0">{{sel.tenure}}</dd></div>
+            <div><dt class="lbl">Jefe directo</dt><dd style="margin:4px 0 0">{{sel.boss}}</dd></div>
+            <div><dt class="lbl">Contrato</dt><dd style="margin:4px 0 0">Indefinido</dd></div>
+          </dl>
+          <section style="display:flex;flex-direction:column;gap:10px;border-top:1px solid #EEF1F4;padding-top:14px">
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="lbl">Compensación</span><span class="pill p-mute">Visible para RH y Dirección</span></div>
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><span style="font-size:14px">Sueldo mensual bruto</span><span class="mono" style="font-size:20px;font-weight:500">{{sel.pay}}</span></div>
+            <sc-for list="{{sel.payHist}}" as="h" hint-placeholder-count="3">
+              <div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;color:#3E4A59"><span>{{h.d}} · {{h.why}}</span><span class="mono">{{h.v}}</span></div>
+            </sc-for>
+          </section>
+          <section style="display:flex;flex-direction:column;gap:10px;border-top:1px solid #EEF1F4;padding-top:14px">
+            <span class="lbl">Vacaciones {{year}}</span>
+            <div style="height:10px;border-radius:5px;background:#EBEEF2;overflow:hidden;display:flex"><div style="{{sel.vacBar}}"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#3E4A59"><span>{{sel.vacUsed}} tomados</span><span>{{sel.vacLeft}} disponibles de {{sel.vacTotal}}</span></div>
+          </section>
+          <section style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #EEF1F4;padding-top:14px">
+            <span class="lbl">Historial</span>
+            <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">
+              <sc-for list="{{sel.hist}}" as="h" hint-placeholder-count="4">
+                <li style="display:grid;grid-template-columns:80px 12px minmax(0,1fr);gap:10px;padding:6px 0;font-size:13px"><span class="mono" style="color:#5F6B7A">{{h.d}}</span><span style="width:8px;height:8px;border-radius:50%;background:#D08A1C;margin-top:5px"></span><span>{{h.t}}</span></li>
+              </sc-for>
+            </ol>
+          </section>
+          <section style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #EEF1F4;padding-top:14px">
+            <span class="lbl">Documentos</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-ok">INE</span><span class="pill p-ok">Contrato</span><span class="pill p-ok">Comprobante de domicilio</span><span class="pill p-ok">Constancia fiscal</span><span class="{{sel.docCls}}">{{sel.doc}}</span></div>
+          </section>
+        </aside>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isMov}}" hint-placeholder-val="{{ false }}">
+      <section class="card" style="padding:8px 8px 0">
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Fecha</th><th>Persona</th><th>Puesto</th><th>Área</th><th>Movimiento</th><th>Motivo</th></tr></thead>
+            <tbody>
+              <sc-for list="{{moves}}" as="m" hint-placeholder-count="8">
+                <tr><td class="mono">{{m.d}}</td><td>{{m.n}}</td><td>{{m.r}}</td><td>{{m.a}}</td><td><span class="{{m.cls}}">{{m.t}}</span></td><td>{{m.why}}</td></tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isOn}}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:16px">
+        <section class="card" style="display:flex;flex-direction:column;gap:12px">
+          <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Ingresos en curso</h2>
+          <sc-for list="{{onb}}" as="o" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 120px 44px;gap:12px;align-items:center;padding:8px 0;border-top:1px solid #EEF1F4;font-size:14px">
+              <span style="display:flex;flex-direction:column"><span style="font-weight:500">{{o.n}}</span><span style="font-size:12px;color:#5F6B7A">{{o.r}} · ingresa {{o.d}}</span></span>
+              <div style="height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden"><div style="{{o.bar}}"></div></div>
+              <span class="mono" style="font-size:13px;text-align:right">{{o.p}}</span>
+            </div>
+          </sc-for>
+        </section>
+        <section class="card" style="display:flex;flex-direction:column;gap:8px">
+          <h2 style="margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Checklist · Luis Canché</h2>
+          <span style="font-size:13px;color:#5F6B7A">Custodio · Bajío · {{done}} de 7 completos</span>
+          <sc-for list="{{checks}}" as="c" hint-placeholder-count="7">
+            <label style="display:flex;gap:12px;align-items:center;min-height:40px;font-size:14px;border-top:1px solid #EEF1F4;cursor:pointer">
+              <input type="checkbox" checked="{{c.on}}" onChange="{{c.toggle}}" style="width:18px;height:18px;accent-color:#D08A1C">
+              <span style="{{c.style}}">{{c.label}}</span>
+            </label>
+          </sc-for>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isOff}}" hint-placeholder-val="{{ false }}">
+      <section class="card" style="padding:8px 8px 0">
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Persona</th><th>Último día</th><th>Motivo</th><th>Equipo y uniforme</th><th>Unidad</th><th>Accesos y Samsara</th><th>Finiquito</th><th>Entrevista de salida</th></tr></thead>
+            <tbody>
+              <sc-for list="{{off}}" as="o" hint-placeholder-count="4">
+                <tr><td>{{o.n}}<br><span style="font-size:12px;color:#5F6B7A">{{o.r}}</span></td><td class="mono">{{o.d}}</td><td>{{o.why}}</td>
+                  <sc-for list="{{o.steps}}" as="s" hint-placeholder-count="5"><td><span class="{{s.cls}}">{{s.t}}</span></td></sc-for>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isVac}}" hint-placeholder-val="{{ false }}">
+      <section class="card" style="display:flex;flex-direction:column;gap:6px">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Solicitudes de vacaciones y permisos</h2>
+        <span style="font-size:13px;color:#5F6B7A;margin-bottom:8px">Llegan desde el <a href="PortalColaborador.dc.html">portal del colaborador</a>, ya aprobadas por el jefe directo.</span>
+        <sc-for list="{{vac}}" as="v" hint-placeholder-count="5">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid #EEF1F4;font-size:14px">
+            <span style="display:flex;flex-direction:column;min-width:200px"><span style="font-weight:500">{{v.n}}</span><span style="font-size:12px;color:#5F6B7A">{{v.r}}</span></span>
+            <span class="mono" style="min-width:180px">{{v.d}}</span>
+            <span style="min-width:150px;color:#3E4A59">{{v.cover}}</span>
+            <sc-if value="{{v.pending}}" hint-placeholder-val="{{ true }}">
+              <span style="display:flex;gap:8px"><button type="button" class="btn btn-pri" onClick="{{v.ok}}">Aprobar</button><button type="button" class="btn" onClick="{{v.no}}">Rechazar</button></span>
+            </sc-if>
+            <sc-if value="{{v.done}}" hint-placeholder-val="{{ false }}"><span class="{{v.cls}}">{{v.state}}</span></sc-if>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isRec}}" hint-placeholder-val="{{ false }}">
+      <div style="overflow-x:auto">
+        <div style="display:grid;grid-template-columns:repeat(5,minmax(200px,1fr));gap:12px;min-width:1040px">
+          <sc-for list="{{cols}}" as="c" hint-placeholder-count="5">
+            <div style="background:#F3F5F8;border:1px solid #E4E8ED;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between"><span style="font-weight:600;font-size:14px">{{c.name}}</span><span class="mono" style="font-size:13px;color:#5F6B7A">{{c.n}}</span></div>
+              <sc-for list="{{c.cards}}" as="p" hint-placeholder-count="2">
+                <div style="background:#FFFFFF;border:1px solid #E4E8ED;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px">
+                  <span style="font-weight:500;font-size:14px">{{p.name}}</span>
+                  <span style="font-size:12px;color:#5F6B7A">{{p.meta}}</span>
+                  <span class="{{p.cls}}" style="align-self:flex-start">{{p.tag}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'dir', sel: 0, ck: [true, true, true, false, true, false, false], vac: {} }; }
+  renderVals() {
+    const s = this.state;
+    const areaColor = { 'Custodia': '#2B7FA8', 'Monitoreo': '#6A5ACD', 'Reacción': '#C0492F', 'Operaciones': '#B36B00', 'Flotilla y taller': '#4A5868', 'Comercial': '#2B9A66', 'Finanzas': '#8A4FA0', 'RH': '#D08A1C', 'Dirección': '#121821' };
+    const st = { 'Activo': 'pill p-ok', 'Vacaciones': 'pill p-info', 'Incapacidad': 'pill p-warn', 'Onboarding': 'pill p-warn', 'Baja en proceso': 'pill p-bad' };
+    const P = [
+      { name: 'Karla May', role: 'Gerente de RH', area: 'RH', site: 'Cuautitlán', status: 'Activo', id: 'E-0042', since: 'feb 2019', tenure: '7 años 8 meses', boss: 'Dirección general', pay: '$42,000', vac: [10, 16],
+        payHist: [['ene 2026', 'Ajuste anual', '$42,000'], ['ene 2025', 'Ajuste anual', '$39,500'], ['jun 2023', 'Promoción', '$36,000']], hist: [['feb 2019', 'Ingreso como Coordinadora de reclutamiento'], ['jun 2023', 'Promoción a Gerente de RH'], ['mar 2026', 'Evaluación anual: sobresaliente']] },
+      { name: 'Luis Herrera', role: 'Monitorista Sr', area: 'Monitoreo', site: 'Cuautitlán', status: 'Activo', id: 'E-0188', since: 'may 2021', tenure: '5 años 5 meses', boss: 'Jorge Pérez', pay: '$16,000', vac: [4, 14],
+        payHist: [['ene 2026', 'Ajuste anual', '$16,000'], ['ago 2024', 'Promoción a Sr', '$15,000']], hist: [['may 2021', 'Ingreso como Monitorista'], ['ago 2024', 'Promoción a Monitorista Sr'], ['oct 2026', 'Atendió INC-0412 (recuperación total)']] },
+      { name: 'Raúl Medina', role: 'Custodio armado', area: 'Custodia', site: 'Cuautitlán', status: 'Activo', id: 'C-1043', since: 'mar 2022', tenure: '4 años 7 meses', boss: 'Jorge Pérez', pay: '$14,500', vac: [6, 14],
+        payHist: [['ene 2026', 'Ajuste anual', '$14,500'], ['ene 2025', 'Ajuste anual', '$13,800']], hist: [['mar 2022', 'Ingreso como Custodio'], ['nov 2024', 'Certificación carga de alto valor'], ['oct 2026', 'Incidente INC-0412 · actuación correcta']] },
+      { name: 'Gabriel Pacheco', role: 'Jefe de reacción', area: 'Reacción', site: 'Querétaro', status: 'Activo', id: 'E-0071', since: 'ago 2018', tenure: '8 años 2 meses', boss: 'Dirección de operaciones', pay: '$32,000', vac: [12, 18],
+        payHist: [['ene 2026', 'Ajuste anual', '$32,000'], ['ene 2025', 'Ajuste anual', '$30,500']], hist: [['ago 2018', 'Ingreso como elemento de reacción'], ['jan 2022', 'Promoción a Jefe de reacción'], ['oct 2026', '3 recuperaciones totales en el trimestre']] },
+      { name: 'Laura Cruz', role: 'Contadora general', area: 'Finanzas', site: 'Cuautitlán', status: 'Vacaciones', id: 'E-0103', since: 'oct 2020', tenure: '6 años', boss: 'Dirección general', pay: '$38,000', vac: [11, 16],
+        payHist: [['ene 2026', 'Ajuste anual', '$38,000']], hist: [['oct 2020', 'Ingreso como Contadora'], ['jan 2024', 'Promoción a Contadora general']] },
+      { name: 'Jorge Pérez', role: 'Coordinador de operaciones', area: 'Operaciones', site: 'Cuautitlán', status: 'Activo', id: 'E-0095', since: 'jul 2020', tenure: '6 años 3 meses', boss: 'Dirección de operaciones', pay: '$35,000', vac: [8, 16],
+        payHist: [['ene 2026', 'Ajuste anual', '$35,000']], hist: [['jul 2020', 'Ingreso como Monitorista'], ['sep 2023', 'Promoción a Coordinador']] },
+      { name: 'Ana Domínguez', role: 'Ejecutiva comercial', area: 'Comercial', site: 'Monterrey', status: 'Activo', id: 'E-0211', since: 'ene 2023', tenure: '3 años 9 meses', boss: 'Dirección comercial', pay: '$22,000 + comisión', vac: [5, 14],
+        payHist: [['ene 2026', 'Ajuste anual', '$22,000']], hist: [['ene 2023', 'Ingreso'], ['dic 2025', 'Cerró renovación Autopartes Saltillo']] },
+      { name: 'Ricardo Salas', role: 'Jefe de taller', area: 'Flotilla y taller', site: 'Cuautitlán', status: 'Activo', id: 'E-0150', since: 'abr 2021', tenure: '5 años 6 meses', boss: 'Dirección de operaciones', pay: '$26,000', vac: [7, 14],
+        payHist: [['ene 2026', 'Ajuste anual', '$26,000']], hist: [['abr 2021', 'Ingreso como Mecánico'], ['feb 2024', 'Promoción a Jefe de taller']] },
+      { name: 'Luis Canché', role: 'Custodio', area: 'Custodia', site: 'Querétaro', status: 'Onboarding', id: 'C-1311', since: 'oct 2026', tenure: '1 semana', boss: 'Jorge Pérez', pay: '$13,800', vac: [0, 12],
+        payHist: [['oct 2026', 'Contratación', '$13,800']], hist: [['oct 2026', 'Ingreso · onboarding en curso']] },
+      { name: 'Daniel Soto', role: 'Custodio armado', area: 'Custodia', site: 'Monterrey', status: 'Incapacidad', id: 'C-0566', since: 'jun 2019', tenure: '7 años 4 meses', boss: 'Coordinación Noreste', pay: '$14,500', vac: [9, 16],
+        payHist: [['ene 2026', 'Ajuste anual', '$14,500']], hist: [['jun 2019', 'Ingreso como Custodio'], ['sep 2026', 'Incapacidad registrada']] }
+    ];
+    const ini = (n) => n.split(' ').map(x => x[0]).slice(0, 2).join('');
+    const av = (a, size) => 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-weight:600;font-size:' + Math.round(size * 0.36) + 'px;background:' + areaColor[a];
+    const p0 = P[s.sel];
+    const tabs = [['dir', 'Directorio'], ['mov', 'Altas y bajas'], ['on', 'Onboarding'], ['off', 'Offboarding'], ['vac', 'Vacaciones'], ['rec', 'Reclutamiento']];
+    const labels = ['Expediente digital y contrato', 'Pruebas de confianza registradas', 'Capacitación en protocolo de custodia', 'Uniforme, radio y equipo', 'Alta en nómina e IMSS', 'Alta en Samsara y en la plataforma', 'Asignación de unidad'];
+    const ck = s.ck;
+    const V = [['Laura Cruz', 'Contadora general', '6–17 oct · 10 días', 'Cubre: Pedro Ruiz', true], ['Iván Cetina', 'Custodio · Centro', '20–24 oct · 5 días', 'Sin impacto: Centro +9'], ['Marco Ríos', 'Custodio · Bajío', '13–17 oct · 5 días', 'Bajío queda −7'], ['Sofía Campos', 'Monitorista', '27–31 oct · 5 días', 'Cubre: M. Quintal'], ['Ana Domínguez', 'Ejecutiva comercial', '3–7 nov · 5 días', 'Sin impacto']];
+    const card = (name, meta, tag, cls) => ({ name, meta, tag, cls: 'pill ' + cls });
+    const step = (t) => ({ t, cls: t === 'Listo' ? 'pill p-ok' : (t === 'Pendiente' ? 'pill p-warn' : 'pill p-mute') });
+    return {
+      tabs: tabs.map(([k, label]) => ({ label, pick: () => this.setState({ tab: k }), style: k === s.tab ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '' })),
+      isDir: s.tab === 'dir', isMov: s.tab === 'mov', isOn: s.tab === 'on', isOff: s.tab === 'off', isVac: s.tab === 'vac', isRec: s.tab === 'rec',
+      months: [['Abr', 9, 4], ['May', 11, 6], ['Jun', 10, 6], ['Jul', 12, 8], ['Ago', 15, 8], ['Sep', 14, 9]].map(([n, a, b]) => ({ n, a: 'width:14px;border-radius:3px 3px 0 0;background:#2B9A66;height:' + a * 6 + 'px', b: 'width:14px;border-radius:3px 3px 0 0;background:#D9534F;height:' + b * 6 + 'px' })),
+      areas: [['Custodia', 400], ['Monitoreo', 24], ['Operaciones', 14], ['Flotilla y taller', 13], ['Reacción', 12], ['Finanzas', 8], ['Comercial', 7], ['RH', 5], ['Dirección', 3]].map(([n, v]) => ({ n, v, bar: 'height:100%;width:' + Math.max(2, Math.round(Math.sqrt(v / 400) * 100)) + '%;background:' + areaColor[n] })),
+      people: P.map((p, i) => ({ name: p.name, role: p.role, area: p.area, site: p.site, status: p.status, cls: st[p.status], ini: ini(p.name), av: av(p.area, 48), pick: () => this.setState({ sel: i }),
+        card: 'display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:10px;cursor:pointer;font-family:inherit;color:#121821;background:#FFFFFF;border:1px solid ' + (i === s.sel ? '#F2A93B;box-shadow:0 0 0 2px #FFF1DB' : '#E4E8ED') })),
+      sel: Object.assign({}, p0, { ini: ini(p0.name), avBig: av(p0.area, 80),
+        payHist: p0.payHist.map(([d, why, v]) => ({ d, why, v })), hist: p0.hist.map(([d, t]) => ({ d, t })),
+        vacUsed: p0.vac[0], vacTotal: p0.vac[1], vacLeft: p0.vac[1] - p0.vac[0], vacBar: 'height:100%;background:#2B7FA8;width:' + Math.round(p0.vac[0] / p0.vac[1] * 100) + '%',
+        doc: p0.area === 'Custodia' ? 'Portación y licencia federal' : 'Evaluación anual', docCls: p0.status === 'Incapacidad' ? 'pill p-warn' : 'pill p-ok' }),
+      year: '2026',
+      moves: [
+        ['06 oct', 'Luis Canché', 'Custodio', 'Custodia', 'Alta', 'Vacante VAC-118 Bajío'], ['03 oct', 'Mariana Ek', 'Analista de cobranza', 'Finanzas', 'Alta', 'Nueva posición'],
+        ['02 oct', 'Rafael Gómez', 'Custodio', 'Custodia', 'Baja', 'Mejor oferta económica'], ['30 sep', 'Ernesto Lara', 'Monitorista', 'Monitoreo', 'Baja', 'Cambio de ciudad'],
+        ['29 sep', 'Patricia Vela', 'Ejecutiva comercial', 'Comercial', 'Alta', 'Expansión Bajío'], ['26 sep', 'Omar Chi', 'Custodio', 'Custodia', 'Baja', 'No aprobó evaluación de confianza'],
+        ['22 sep', 'Diego Ramos', 'Mecánico', 'Flotilla y taller', 'Alta', 'Reemplazo'], ['19 sep', 'Hugo Navarro', 'Custodio', 'Custodia', 'Baja', 'Desempeño']
+      ].map(([d, n, r, a, t, why]) => ({ d, n, r, a, t, why, cls: t === 'Alta' ? 'pill p-ok' : 'pill p-bad' })),
+      onb: [['Luis Canché', 'Custodio · Bajío', '1 oct', ck.filter(Boolean).length / 7], ['Mariana Ek', 'Analista de cobranza', '3 oct', 0.85], ['Patricia Vela', 'Ejecutiva comercial', '29 sep', 1], ['Mario Tun', 'Custodio · Bajío', '13 oct', 0.15], ['Sergio Ávila', 'Custodio · Bajío', '13 oct', 0.3]].map(([n, r, d, p]) => ({ n, r, d, p: Math.round(p * 100) + '%', bar: 'height:100%;width:' + Math.round(p * 100) + '%;background:' + (p >= 1 ? '#2B9A66' : '#D08A1C') })),
+      checks: labels.map((label, i) => ({ label, on: ck[i], style: ck[i] ? 'color:#5F6B7A;text-decoration:line-through' : '', toggle: () => { const n = ck.slice(); n[i] = !n[i]; this.setState({ ck: n }); } })),
+      done: ck.filter(Boolean).length,
+      off: [
+        { n: 'Rafael Gómez', r: 'Custodio · Centro', d: '02 oct', why: 'Mejor oferta', steps: ['Listo', 'Listo', 'Listo', 'Pendiente', 'Listo'].map(step) },
+        { n: 'Ernesto Lara', r: 'Monitorista', d: '30 sep', why: 'Cambio de ciudad', steps: ['Listo', 'No aplica', 'Listo', 'Listo', 'Listo'].map(step) },
+        { n: 'Omar Chi', r: 'Custodio · Golfo', d: '26 sep', why: 'Evaluación de confianza', steps: ['Pendiente', 'Listo', 'Listo', 'Pendiente', 'Pendiente'].map(step) }
+      ],
+      vac: V.map(([n, r, d, cover, done0], i) => { const v = s.vac[i] || (done0 ? 'Aprobada' : null); return { n, r, d, cover, pending: !v, done: !!v, state: v || '', cls: v === 'Aprobada' ? 'pill p-ok' : 'pill p-bad',
+        ok: () => this.setState({ vac: Object.assign({}, s.vac, { [i]: 'Aprobada' }) }), no: () => this.setState({ vac: Object.assign({}, s.vac, { [i]: 'Rechazada' }) }) }; }),
+      cols: [
+        { name: 'Solicitud', n: 14, cards: [card('Juan Pablo Euán', 'Custodio · León', 'Nuevo', 'p-mute'), card('Fernanda Ruiz', 'Monitorista · Cuautitlán', 'Referida', 'p-info')] },
+        { name: 'Entrevista', n: 6, cards: [card('Mario Tun', 'Custodio · Irapuato', 'Agendada', 'p-info'), card('Carlos Ibarra', 'Analista de nómina', 'Aprobada', 'p-ok')] },
+        { name: 'Pruebas de confianza', n: 5, cards: [card('Alan Vega', 'Poligrafía y toxicológico', 'En proceso', 'p-warn')] },
+        { name: 'Documentos', n: 3, cards: [card('Rodrigo Pool', 'Falta licencia federal', 'Incompleto', 'p-bad')] },
+        { name: 'Contratación', n: 2, cards: [card('Sergio Ávila', 'Ingresa 13 oct', 'Oferta firmada', 'p-ok')] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

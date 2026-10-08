@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · CRM</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.k{font-family:'Archivo',sans-serif;font-size:24px;font-weight:600}
+</style>
+</helmet>
+<div style="font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap">
+  <div style="flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4">
+    <dc-import name="Nav" active="crm" hint-size="100%,1100px"></dc-import>
+  </div>
+  <main style="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px">
+    <header style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="lbl">Comercial</span>
+        <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600">Clientes y pipeline</h1>
+        <span style="color:#5F6B7A;font-size:14px">25 clientes activos · 18 leads abiertos · cierre de cotizaciones 42%</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><button type="button" class="btn">Nuevo lead</button><a class="btn btn-pri" href="Cotizador.dc.html">Nueva cotización</a></div>
+    </header>
+
+    <section aria-label="Sugerencia de IA" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <div style="flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-weight:600">IA · siguiente mejor acción</span><span style="font-size:14px;color:#3E4A59">Agroexport Sinaloa tiene la cotización vencida hace 2 días y abrió el PDF 4 veces. Si se le llama hoy, la probabilidad de cierre estimada es 64%. Farmacéutica Orión es el deal con más probabilidad del pipeline (85%).</span></div>
+      <figure style="margin:0;display:flex;flex-direction:column;gap:4px">
+        <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Probabilidad de cierre por deal: Orión 85, Peninsular 71, Agroexport 64, Marsh 52, Cementos 38" style="display:block"><g font-family="IBM Plex Mono, monospace" font-size="10" fill="#3E4A59"><rect x="4" y="9.2" width="30" height="51" rx="2" fill="#2B9A66"></rect><rect x="48" y="17.4" width="30" height="42.6" rx="2" fill="#2B7FA8"></rect><rect x="92" y="21.6" width="30" height="38.4" rx="2" fill="#D08A1C"></rect><rect x="136" y="28.8" width="30" height="31.2" rx="2" fill="#2B7FA8"></rect><rect x="180" y="37.2" width="30" height="22.8" rx="2" fill="#AEB8C4"></rect><text x="8" y="6">85%</text><text x="96" y="18">64%</text></g></svg>
+        <figcaption style="font-size:11px;color:#5F6B7A">Probabilidad de cierre por deal</figcaption>
+      </figure>
+      <a class="btn" href="AsistenteIA.dc.html">Preguntarle a la IA</a>
+    </section>
+
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+      <nav aria-label="Clientes" class="card" style="flex:1 1 260px;padding:10px;display:flex;flex-direction:column;gap:4px">
+        <sc-for list="{{clients}}" as="c" hint-placeholder-count="8">
+          <button type="button" onClick="{{c.pick}}" style="{{c.style}}">
+            <span style="display:flex;flex-direction:column;align-items:flex-start;gap:2px"><span style="font-weight:500">{{c.name}}</span><span style="font-size:12px;color:#5F6B7A">{{c.type}}</span></span>
+            <span class="mono" style="font-size:13px;color:#3E4A59">{{c.rev}}</span>
+          </button>
+        </sc-for>
+      </nav>
+
+      <section style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px">
+        <div class="card" style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+            <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Vista 360</span><h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600">{{sel.name}}</h2><span style="font-size:14px;color:#5F6B7A">{{sel.type}} · cliente desde {{sel.since}}</span></div>
+            <span class="pill p-ok">Contrato vigente</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr));gap:12px">
+            <div style="background:#F3F5F8;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px"><span class="lbl">Servicios activos</span><span class="k">{{sel.active}}</span></div>
+            <div style="background:#F3F5F8;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px"><span class="lbl">Facturado trimestre</span><span class="k">{{sel.q}}</span></div>
+            <div style="background:#F3F5F8;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px"><span class="lbl">Margen</span><span class="k">{{sel.margin}}</span></div>
+            <div style="background:#F3F5F8;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px"><span class="lbl">Incidentes</span><span class="k">{{sel.inc}}</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:20px;font-size:14px">
+            <div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Contactos</span><span>{{sel.c1}}</span><span>{{sel.c2}}</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Rutas frecuentes</span><span>{{sel.routes}}</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Tarifa pactada</span><span class="mono">{{sel.rate}}</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Requisitos especiales</span><span>{{sel.req}}</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="display:flex;flex-direction:column;gap:14px;padding:20px 8px 0">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:0 12px">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Todos los clientes</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-mute">25 activos</span><span class="pill p-mute">3 con portal en vivo</span><button type="button" class="btn">Alta de cliente</button></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:14px">
+          <thead><tr>
+            <th style="text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED">Cliente</th>
+            <th style="text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED">Modelo</th>
+            <th style="text-align:right;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED">Servicios activos</th>
+            <th style="text-align:right;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED">Facturado trimestre</th>
+            <th style="text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;min-width:160px">Margen</th>
+            <th style="text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED">Cobranza</th>
+            <th style="text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED">Último servicio</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{table}}" as="t" hint-placeholder-count="10">
+              <tr>
+                <td style="padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap;font-weight:500">{{t.n}}</td>
+                <td style="padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap">{{t.m}}</td>
+                <td class="mono" style="padding:12px;border-bottom:1px solid #EEF1F4;text-align:right">{{t.a}}</td>
+                <td class="mono" style="padding:12px;border-bottom:1px solid #EEF1F4;text-align:right">{{t.q}}</td>
+                <td style="padding:12px;border-bottom:1px solid #EEF1F4"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden"><div style="{{t.bar}}"></div></div><span class="mono" style="font-size:13px">{{t.mg}}</span></div></td>
+                <td style="padding:12px;border-bottom:1px solid #EEF1F4"><span class="{{t.cls}}">{{t.c}}</span></td>
+                <td style="padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap;color:#3E4A59">{{t.l}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Pipeline comercial</h2>
+        <span style="font-size:13px;color:#5F6B7A">Valor mensual estimado · MXN</span>
+      </div>
+      <div style="overflow-x:auto">
+        <div style="display:grid;grid-template-columns:repeat(5,minmax(210px,1fr));gap:12px;min-width:1080px">
+          <sc-for list="{{stages}}" as="s" hint-placeholder-count="5">
+            <div style="background:#F3F5F8;border:1px solid #E4E8ED;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;gap:8px"><span style="font-weight:600;font-size:14px">{{s.name}}</span><span class="mono" style="font-size:13px;color:#5F6B7A">{{s.total}}</span></div>
+              <sc-for list="{{s.deals}}" as="d" hint-placeholder-count="2">
+                <div style="background:#F3F5F8;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px">
+                  <span style="font-weight:500;font-size:14px">{{d.name}}</span>
+                  <span style="font-size:12px;color:#5F6B7A">{{d.what}}</span>
+                  <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="mono" style="font-size:13px">{{d.amt}}</span><span class="{{d.cls}}">{{d.next}}</span></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0 }; }
+  renderVals() {
+    const C = [
+      { name: 'Alpura', type: 'Por evento', rev: '$5.0M', since: '2019', active: 14, q: '$14.6M', margin: '38%', inc: '2', c1: 'Gerente de logística · [NOMBRE]', c2: 'Seguridad corporativa · [NOMBRE]', routes: 'Cuautitlán–Guadalajara, Cuautitlán–Querétaro, Cuautitlán–Puebla', rate: '$30.50/km · 2 custodios nocturno', req: 'Cadena de frío: check-in de temperatura en cada parada' },
+      { name: 'Marsh', type: 'Evento + monitoreo', rev: '$3.8M', since: '2021', active: 9, q: '$11.2M', margin: '34%', inc: '1', c1: 'Riesgos de transporte · [NOMBRE]', c2: 'Siniestros · [NOMBRE]', routes: 'Arco Norte, Méx–SLP', rate: '$31.00/km · monitoreo $900/unidad', req: 'Reporte post-incidente en 24 h para aseguradora' },
+      { name: 'Farmacéutica Orión', type: 'Por evento', rev: '$2.9M', since: '2020', active: 6, q: '$8.4M', margin: '29%', inc: '0', c1: 'Distribución · [NOMBRE]', c2: 'Compras · [NOMBRE]', routes: 'Toluca–Monterrey, Toluca–Guadalajara', rate: '$29.00/km', req: 'Custodios con certificación de carga farmacéutica' },
+      { name: 'Autopartes Saltillo', type: 'Dedicado', rev: '$2.3M', since: '2023', active: 4, q: '$6.8M', margin: '31%', inc: '0', c1: 'Planta Ramos Arizpe · [NOMBRE]', c2: '—', routes: 'Saltillo–Nuevo Laredo', rate: '$47,000/mes por custodio', req: 'Custodios con inglés básico para cruce' },
+      { name: 'Electrónica del Bajío', type: 'Dedicado', rev: '$1.9M', since: '2022', active: 2, q: '$5.6M', margin: '33%', inc: '1', c1: 'Seguridad patrimonial · [NOMBRE]', c2: '—', routes: 'León–Lázaro Cárdenas', rate: '$48,000/mes por custodio', req: 'Rotación de custodios cada 6 meses' },
+      { name: 'Logística Pacífico Norte', type: 'Monitoreo', rev: '$1.3M', since: '2024', active: 1, q: '$3.9M', margin: '41%', inc: '0', c1: 'Torre de control · [NOMBRE]', c2: '—', routes: '48 unidades propias', rate: '$900/unidad/mes', req: 'SLA 5 minutos 24/7' },
+      { name: 'Bebidas del Golfo', type: 'Por evento', rev: '$1.1M', since: '2024', active: 3, q: '$3.2M', margin: '27%', inc: '1', c1: 'Logística · [NOMBRE]', c2: '—', routes: 'Veracruz–Puebla, Veracruz–CDMX', rate: '$27.50/km', req: 'Ventanas de entrega nocturnas' }
+    ];
+    const sel = C[this.state.sel];
+    const D = (name, what, amt, next, cls) => ({ name, what, amt, next, cls: 'pill ' + cls });
+    const stages = [
+      { name: 'Prospecto', total: '$1.2M', deals: [D('Grupo Textil Arrayán', 'Eventos Puebla–Pacífico', '$420K', 'Llamar 9 oct', 'p-mute'), D('Cementos del Centro', 'Monitoreo 60 unidades', '$780K', 'Correo hoy', 'p-warn')] },
+      { name: 'Diagnóstico', total: '$0.9M', deals: [D('Distribuidora Peninsular', 'Dedicado 4 custodios', '$560K', 'Visita 10 oct', 'p-info')] },
+      { name: 'Cotizado', total: '$2.1M', deals: [D('Marsh', 'Méx–SLP nocturno', '$190K/evento', 'Seguimiento 8 oct', 'p-warn'), D('Agroexport Sinaloa', 'Eventos Culiacán–Nogales', '$1.4M', 'Vencido 2 días', 'p-bad')] },
+      { name: 'Negociación', total: '$1.6M', deals: [D('Farmacéutica Orión', 'Ampliar a Monterrey dedicado', '$1.6M', 'Junta 14 oct', 'p-info')] },
+      { name: 'Ganado', total: '$0.7M', deals: [D('Autopartes Saltillo', 'Renovación 12 meses', '$188K/mes', 'Firmado', 'p-ok')] }
+    ];
+    return {
+      clients: C.map((c, i) => ({ name: c.name, type: c.type, rev: c.rev, pick: () => this.setState({ sel: i }),
+        style: 'display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:52px;padding:6px 12px;border-radius:8px;border:0;cursor:pointer;font:400 14px \'IBM Plex Sans\',sans-serif;text-align:left;' + (i === this.state.sel ? 'background:#FFF1DB;color:#8A5300' : 'background:transparent;color:#121821') })),
+      sel, stages,
+      table: [
+        ['Alpura', 'Por evento', 14, '$14.6M', 38, 'Al corriente', 'hoy'], ['Marsh', 'Evento + monitoreo', 9, '$11.2M', 34, 'Al corriente', 'hoy'],
+        ['Farmacéutica Orión', 'Por evento', 6, '$8.4M', 29, '45 días', 'hoy'], ['Autopartes Saltillo', 'Dedicado', 4, '$6.8M', 31, 'Al corriente', 'continuo'],
+        ['Electrónica del Bajío', 'Dedicado', 2, '$5.6M', 33, 'Al corriente', 'continuo'], ['Logística Pacífico Norte', 'Monitoreo', 1, '$3.9M', 41, 'Al corriente', 'continuo'],
+        ['Bebidas del Golfo', 'Por evento', 3, '$3.2M', 27, '74 días', 'ayer'], ['Grupo Textil Arrayán', 'Por evento', 0, '$1.4M', 22, '81 días', 'hace 12 días'],
+        ['Distribuidora Peninsular', 'Por evento', 1, '$1.1M', 30, 'Al corriente', 'hace 3 días'], ['Química del Norte', 'Monitoreo', 1, '$0.9M', 36, 'Al corriente', 'continuo']
+      ].map(([n, m, a, q, mg, c, l]) => ({ n, m, a, q, l, c, mg: mg + '%', cls: c === 'Al corriente' ? 'pill p-ok' : (parseInt(c) > 60 ? 'pill p-bad' : 'pill p-warn'),
+        bar: 'height:100%;width:' + Math.round(mg / 45 * 100) + '%;background:' + (mg < 28 ? '#D08A1C' : '#2B9A66') }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · Dashboard directivo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.kpi{font-family:'Archivo',sans-serif;font-size:32px;font-weight:600;letter-spacing:-.01em}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
+.field select,.field input{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+.track{height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden}
+</style>
+</helmet>
+<div style="font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap">
+  <div style="flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4">
+    <dc-import name="Nav" active="dashboard" hint-size="100%,1100px"></dc-import>
+  </div>
+  <main style="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px">
+
+    <header style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="lbl">Dirección</span>
+        <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600">Operación hoy</h1>
+        <span style="color:#5F6B7A;font-size:14px">Miércoles 7 oct 2026 · 14:32 · telemetría Samsara + Ruptela normalizada</span>
+      </div>
+      <form style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+        <label class="field">Periodo<select><option>Octubre 2026</option><option>Q3 2026</option></select></label>
+        <label class="field">Zona<select><option>Todas las zonas</option><option>Centro</option><option>Bajío</option></select></label>
+        <label class="field">Cliente<select><option>Todos los clientes</option><option>Alpura</option><option>Marsh</option></select></label>
+        <label class="field">Tipo de servicio<select><option>Todos</option><option>Por evento</option><option>Dedicado</option><option>Monitoreo</option></select></label>
+        <button type="button" class="btn">Exportar</button>
+        <a class="btn btn-pri" href="Cotizador.dc.html">Nueva cotización</a>
+      </form>
+    </header>
+
+    <section aria-label="KPIs principales" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:16px">
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <span class="lbl">Servicios activos</span>
+        <span class="kpi">86</span>
+        <span style="font-size:13px;color:#5F6B7A">34 evento · 41 dedicado · 11 monitoreo</span>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <span class="lbl">Utilización custodios</span>
+        <span class="kpi">78%</span>
+        <div class="track"><div style="width:78%;height:100%;background:#F2A93B"></div></div>
+        <span style="font-size:13px;color:#5F6B7A">312 de 400 en servicio</span>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <span class="lbl">Entregas sin incidente</span>
+        <span class="kpi">98.6%</span>
+        <span style="font-size:13px;color:#17784A">+0.4 pts vs septiembre</span>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <span class="lbl">Incidentes / 100 servicios</span>
+        <span class="kpi">1.4</span>
+        <span style="font-size:13px;color:#B42318">+0.3 vs trimestre anterior</span>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <span class="lbl">Unidades operando</span>
+        <span class="kpi">91%</span>
+        <span style="font-size:13px;color:#5F6B7A">546 de 600 · 31 en taller</span>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <span class="lbl">Ingresos del mes</span>
+        <span class="kpi">$14.8M</span>
+        <span style="font-size:13px;color:#5F6B7A">Margen 31% · proyección MXN</span>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:16px">
+      <div class="card" style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Alertas priorizadas</h2>
+          <a href="Monitoreo.dc.html" style="font-size:14px">Abrir monitoreo</a>
+        </div>
+        <sc-for list="{{alerts}}" as="a" hint-placeholder-count="5">
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid #EEF1F4">
+            <span class="{{a.cls}}" style="min-width:64px;justify-content:center">{{a.level}}</span>
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+              <span style="font-weight:500">{{a.title}}</span>
+              <span style="font-size:13px;color:#5F6B7A">{{a.detail}}</span>
+            </div>
+            <span class="mono" style="font-size:12px;color:#5F6B7A;white-space:nowrap">{{a.when}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div class="card" style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Custodios disponibles por zona</h2>
+          <span class="pill p-warn">Hueco: Bajío mañana −6</span>
+        </div>
+        <sc-for list="{{zones}}" as="z" hint-placeholder-count="7">
+          <div style="display:grid;grid-template-columns:110px minmax(0,1fr) 92px;gap:12px;align-items:center;font-size:14px">
+            <span>{{z.name}}</span>
+            <div class="track" style="height:10px"><div style="{{z.bar}}"></div></div>
+            <span class="mono" style="text-align:right;color:#3E4A59">{{z.avail}} / {{z.total}}</span>
+          </div>
+        </sc-for>
+        <span style="font-size:13px;color:#5F6B7A">Disponibles ahora / plantilla de la zona. 23 en descanso, vacaciones o incapacidad.</span>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:16px">
+      <div class="card" style="display:flex;flex-direction:column;gap:16px">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Ingresos por tipo de servicio</h2>
+        <div style="display:flex;gap:20px;align-items:flex-end;height:180px;padding-top:8px">
+          <sc-for list="{{months}}" as="m" hint-placeholder-count="4">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px">
+              <span class="mono" style="font-size:12px;color:#3E4A59">{{m.total}}</span>
+              <div style="width:100%;max-width:48px;display:flex;flex-direction:column;border-radius:4px;overflow:hidden">
+                <div style="{{m.mon}}"></div>
+                <div style="{{m.ded}}"></div>
+                <div style="{{m.evt}}"></div>
+              </div>
+              <span style="font-size:12px;color:#5F6B7A">{{m.name}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#3E4A59">
+          <span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:2px;background:#F2A93B"></span>Por evento</span>
+          <span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:2px;background:#3FA7C9"></span>Dedicado</span>
+          <span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:2px;background:#1F5A73"></span>Monitoreo</span>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Seguridad y reacción</h2>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Tiempo de reacción</span><span class="kpi" style="font-size:24px">18 min</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">% recuperación</span><span class="kpi" style="font-size:24px">72%</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Recuperado</span><span class="kpi" style="font-size:24px;color:#17784A">$8.4M</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Perdido</span><span class="kpi" style="font-size:24px;color:#B42318">$3.2M</span></div>
+        </div>
+        <span class="lbl" style="margin-top:4px">Incidentes por carretera · trimestre</span>
+        <sc-for list="{{roads}}" as="r" hint-placeholder-count="4">
+          <div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-top:1px solid #EEF1F4"><span>{{r.name}}</span><span class="mono">{{r.n}}</span></div>
+        </sc-for>
+      </div>
+
+      <div class="card" style="display:flex;flex-direction:column;gap:14px">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Comercial y RH</h2>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Cierre cotizaciones</span><span class="kpi" style="font-size:24px">42%</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Clientes activos</span><span class="kpi" style="font-size:24px">25</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Top 5 concentración</span><span class="kpi" style="font-size:24px">47%</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Días de cobro</span><span class="kpi" style="font-size:24px">38</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Vacantes abiertas</span><span class="kpi" style="font-size:24px">23</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Rotación mensual</span><span class="kpi" style="font-size:24px">3.1%</span></div>
+        </div>
+        <a href="Finanzas.dc.html" style="font-size:14px">Ver rentabilidad por cliente</a>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Asistente de IA" style="display:flex;flex-direction:column;gap:16px;border-color:#F3D9A8">
+      <div style="display:flex;gap:10px;align-items:center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F2A93B" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600;flex:1">Pregúntale a la operación</h2>
+        <a href="AsistenteIA.dc.html" style="font-size:14px">Abrir asistente completo con gráficas</a>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
+          <button type="button" class="btn" style="{{q.style}}" onClick="{{q.pick}}">{{q.text}}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <label style="flex:1 1 320px;display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Pregunta</span><input type="text" placeholder="Escribe una pregunta sobre clientes, rutas, custodios o finanzas" style="flex:1;min-height:44px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 14px;font:400 14px 'IBM Plex Sans',sans-serif"></label>
+        <button type="button" class="btn btn-pri" style="min-height:44px">Preguntar</button>
+      </div>
+      <div style="background:#F3F5F8;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px">
+        <span class="lbl">{{answerQ}}</span>
+        <p style="margin:0;font-size:15px;line-height:1.55;text-wrap:pretty">{{answer}}</p>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { q: 0 }; }
+  renderVals() {
+    const Q = [
+      { text: '¿Qué cliente nos dejó más margen en septiembre?', a: 'Alpura: $1.92M de margen en septiembre (38% sobre $5.05M facturados) con 46 servicios por evento en Méx–Qro–Gdl sin incidentes. Le siguen Marsh ($1.31M, 34%) y Farmacéutica Orión ($0.88M, 29%).' },
+      { text: '¿Dónde subieron los incidentes?', a: 'Arco Norte (Edomex–Hidalgo): 7 incidentes este trimestre contra 3 el anterior, 5 de ellos entre 22:00 y 04:00. Sugiero subir el factor de riesgo de la ruta de 1.2 a 1.4 en el cotizador y exigir 2 custodios en horario nocturno.' },
+      { text: '¿Cuántos custodios faltan mañana en Bajío?', a: 'Mañana hay 18 servicios agendados en Bajío y 12 custodios disponibles. Puedes cubrir el hueco moviendo 4 custodios de Centro (Querétaro a 2 h) y 2 de Occidente.' }
+    ];
+    const zones = [['Centro',21,118],['Bajío',4,74],['Occidente',12,61],['Noreste',9,58],['Golfo',8,41],['Sureste',6,26],['Noroeste',5,22]].map(([name,avail,total]) => ({
+      name, avail, total,
+      bar: 'height:100%;width:' + Math.round(avail/total*100*3) + '%;max-width:100%;background:' + (avail/total < 0.08 ? '#F0605D' : '#3FA7C9')
+    }));
+    const px = (v) => Math.round(v / 14.8 * 140);
+    const months = [['Jul',5.6,5.1,2.2],['Ago',5.9,5.3,2.4],['Sep',6.1,5.4,2.6],['Oct*',6.4,5.6,2.8]].map(([name,e,d,m]) => ({
+      name, total: '$' + (e+d+m).toFixed(1) + 'M',
+      evt: 'height:' + px(e) + 'px;background:#F2A93B',
+      ded: 'height:' + px(d) + 'px;background:#3FA7C9',
+      mon: 'height:' + px(m) + 'px;background:#1F5A73'
+    }));
+    return {
+      alerts: [
+        { level: 'Crítica', cls: 'pill p-bad', title: 'Desvío de ruta · SRV-24817 · Alpura', detail: 'Méx–Qro km 142 · 1.6 km fuera de geocerca · Samsara', when: 'hace 2 min' },
+        { level: 'Alta', cls: 'pill p-bad', title: 'Separación custodio–tráiler 1.8 km', detail: 'SRV-24803 · Marsh · Arco Norte', when: 'hace 6 min' },
+        { level: 'Alta', cls: 'pill p-warn', title: 'Pérdida de señal GPS 9 min', detail: 'Unidad C-214 · Puebla–Orizaba · Ruptela', when: 'hace 9 min' },
+        { level: 'Media', cls: 'pill p-warn', title: 'Hueco de cobertura en Bajío', detail: 'Mañana: 18 servicios, 12 custodios disponibles', when: 'IA' },
+        { level: 'Media', cls: 'pill p-mute', title: '14 documentos vencen en 7 días', detail: 'Portación, licencia federal y evaluación de confianza', when: 'hoy' }
+      ],
+      zones, months,
+      roads: [{ name: 'Arco Norte', n: 7 }, { name: 'Méx–Puebla–Orizaba', n: 6 }, { name: 'Méx–Querétaro', n: 5 }, { name: 'Querétaro–SLP', n: 4 }],
+      questions: Q.map((q, i) => ({ text: q.text, pick: () => this.setState({ q: i }), style: i === this.state.q ? 'border-color:#F2A93B;color:#8A5300' : '' })),
+      answerQ: Q[this.state.q].text,
+      answer: Q[this.state.q].a
+    };
+  }
+}
+</script>
+</body>
+</html>

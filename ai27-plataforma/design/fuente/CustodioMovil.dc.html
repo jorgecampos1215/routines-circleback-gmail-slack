@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · Vista custodio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;overflow:hidden;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;padding:56px 18px 24px;display:flex;flex-direction:column;gap:16px">
+  <header style="display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="font-size:13px;color:#5F6B7A">Raúl Medina · C-1043</span>
+      <span style="font-family:'Archivo',sans-serif;font-size:22px;font-weight:600">En servicio</span>
+    </div>
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#E3F6EC;color:#17784A;font-size:12px;font-weight:500"><span style="width:8px;height:8px;border-radius:50%;background:#4CC38A"></span>GPS activo</span>
+  </header>
+
+  <section style="background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px">
+    <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A">SRV-24803 · Marsh</span>
+    <span style="font-weight:600;font-size:17px">Tultitlán → Pachuca</span>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;font-size:13px">
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#5F6B7A">Tráiler</span><span style="font-family:'IBM Plex Mono',monospace">TR-71188</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#5F6B7A">Unidad</span><span style="font-family:'IBM Plex Mono',monospace">AU-2214</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#5F6B7A">Distancia al tráiler</span><span style="font-family:'IBM Plex Mono',monospace">120 m</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#5F6B7A">Llegada estimada</span><span style="font-family:'IBM Plex Mono',monospace">16:05</span></div>
+    </div>
+  </section>
+
+  <section aria-label="Registro" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+    <sc-for list="{{acts}}" as="a" hint-placeholder-count="3">
+      <button type="button" onClick="{{a.go}}" style="{{a.style}}">{{a.label}}</button>
+    </sc-for>
+  </section>
+  <span style="font-size:13px;color:#5F6B7A;min-height:18px">{{last}}</span>
+
+  <button type="button" style="min-height:120px;border-radius:16px;border:0;background:#C9302C;color:#FFFFFF;font:700 22px 'Archivo',sans-serif;letter-spacing:.04em;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+    PÁNICO
+    <span style="font:400 13px 'IBM Plex Sans',sans-serif;opacity:.9">Mantén presionado 3 segundos</span>
+  </button>
+
+  <section style="background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;font-size:14px">
+    <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A">Próximo turno</span>
+    <span>Jueves 8 oct · 06:00 · Alpura Cuautitlán</span>
+    <div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #EEF1F4;padding-top:8px"><span>Licencia federal</span><span style="color:#17784A">vigente</span></div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { last: 'Último registro: check-in 13:52 en CEDIS Tultitlán' }; }
+  renderVals() {
+    const now = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+    const base = 'min-height:72px;border-radius:12px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px \'IBM Plex Sans\',sans-serif;cursor:pointer';
+    return {
+      acts: [['Check-in', 'check-in'], ['Parada', 'parada'], ['Evidencia', 'foto de evidencia']].map(([label, what]) => ({ label, style: base, go: () => this.setState({ last: 'Registrado: ' + what + ' a las ' + now() + ' · enviado al monitorista' }) })),
+      last: this.state.last
+    };
+  }
+}
+</script>
+</body>
+</html>

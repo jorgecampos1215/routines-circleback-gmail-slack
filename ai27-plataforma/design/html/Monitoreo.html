@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="es"><head><style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  </style>
+<meta charset="utf-8">
+<title>AI27 · Monitoreo en vivo</title>
+<style>x-dc{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" data-dc-tpl="1"><style data-dc-tpl="2">
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.city{font:500 13px 'IBM Plex Sans',sans-serif;fill:#5F6B7A}
+@keyframes ping{0%{r:8;opacity:.9}100%{r:26;opacity:0}}
+.ping{animation:ping 1.6s ease-out infinite}
+</style><style data-dc-tpl="2">body{margin:0}</style></head>
+<body>
+<div id="dc-root"><div class="sc-host" data-sc-name="Monitoreo"><div data-dc-tpl="3" style="font-family: &quot;IBM Plex Sans&quot;, system-ui, sans-serif; color: rgb(18, 24, 33); background: rgb(246, 247, 249); min-height: 100vh; display: flex; flex-wrap: wrap;">
+  <div data-dc-tpl="4" style="flex: 1 1 240px; background: rgb(255, 255, 255); border-right: 1px solid rgb(238, 241, 244);">
+    <div class="sc-host" data-sc-name="Nav" data-dc-tpl="5"><nav data-dc-tpl="3" aria-label="Principal" style="font-family: &quot;IBM Plex Sans&quot;, system-ui, sans-serif; color: rgb(18, 24, 33); background: rgb(255, 255, 255); box-sizing: border-box; padding: 22px 14px 28px; display: flex; flex-direction: column; gap: 22px;">
+  <a data-dc-tpl="4" href="Main.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: rgb(18, 24, 33); padding: 0px 8px;">
+    <svg data-dc-tpl="5" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path data-dc-tpl="6" d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#F2A93B" stroke-width="2"></path><path data-dc-tpl="7" d="M10 17l4 4 8-9" stroke="#F2A93B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    <span data-dc-tpl="8" style="display: flex; flex-direction: column; line-height: 1.1;">
+      <span data-dc-tpl="9" style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.02em;">AI27</span>
+      <span data-dc-tpl="10" style="font-size: 11px; color: rgb(95, 107, 122); letter-spacing: 0.08em; text-transform: uppercase;">Centro de operación</span>
+    </span>
+  </a>
+  
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="13" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132); padding: 0px 12px 6px;"><span class="sc-interp">Operación</span></span>
+      
+        <a data-dc-tpl="15" href="Main.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Dashboard</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="AsistenteIA.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M4 5h16v11H9l-5 4zM12 7.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Asistente IA</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Servicios.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM8 17h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Servicios</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="AsignacionIA.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Asignación IA</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Monitoreo.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; background: rgb(255, 241, 219); color: rgb(138, 83, 0); font-weight: 600;">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Monitoreo en vivo</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Reaccion.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 3l9 16H3zM12 10v4M12 17.5v.01"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Reacción</span></span>
+        </a>
+      
+    </div>
+  
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="13" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132); padding: 0px 12px 6px;"><span class="sc-interp">Recursos</span></span>
+      
+        <a data-dc-tpl="15" href="Custodios.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8 16.5c1-1.5 2.4-2.2 4-2.2s3 .7 4 2.2"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Custodios</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Flotilla.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M5 16v2M19 16v2M4 12l2-5h12l2 5v4H4zM7.5 13.5h.01M16.5 13.5h.01"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Flotilla y taller</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="RH.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.8-3.4 3.4-5 6.5-5s5.7 1.6 6.5 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18.5 15c1.6.6 2.7 2.2 3 5"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Personas (RH)</span></span>
+        </a>
+      
+    </div>
+  
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="13" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132); padding: 0px 12px 6px;"><span class="sc-interp">Comercial</span></span>
+      
+        <a data-dc-tpl="15" href="Cotizador.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01M9 17h.01M12 17h3"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Cotizador</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="CRM.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M3 8h18v12H3zM8 8V5h8v3M3 13h18"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Clientes y CRM</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Finanzas.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M3 3v18h18M7 15l4-4 3 3 5-6"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Finanzas</span></span>
+        </a>
+      
+    </div>
+  
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="13" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132); padding: 0px 12px 6px;"><span class="sc-interp">Administración</span></span>
+      
+        <a data-dc-tpl="15" href="Reportes.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M6 3h9l3 3v15H6zM9 17v-3M12 17v-6M15 17v-4"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Reportes</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="PortalColaborador.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Mi portal</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Usuarios.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M6 11h12v10H6zM8.5 11V7.5a3.5 3.5 0 0 1 7 0V11M12 15v2"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Usuarios y roles</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="CustodioMovil.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M8 2.5h8a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 20V4A1.5 1.5 0 0 1 8 2.5zM11 18h2"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Vista custodio</span></span>
+        </a>
+      
+    </div>
+  
+  <div data-dc-tpl="19" style="display: flex; flex-direction: column; gap: 8px; padding: 14px 12px; border: 1px solid rgb(228, 232, 237); border-radius: 10px; font-size: 12px; color: rgb(62, 74, 89);">
+    <span data-dc-tpl="20" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132);">Fuentes de telemetría</span>
+    <span data-dc-tpl="21" style="display: flex; align-items: center; gap: 8px;"><span data-dc-tpl="22" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(76, 195, 138);"></span>Samsara · principal</span>
+    <span data-dc-tpl="23" style="display: flex; align-items: center; gap: 8px;"><span data-dc-tpl="24" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(63, 167, 201);"></span>Ruptela · secundaria</span>
+  </div>
+  <div data-dc-tpl="25" style="display: flex; align-items: center; gap: 10px; padding: 0px 8px;">
+    <span data-dc-tpl="26" style="width: 36px; height: 36px; border-radius: 50%; background: rgb(255, 241, 219); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: rgb(138, 83, 0);">DR</span>
+    <span data-dc-tpl="27" style="display: flex; flex-direction: column; font-size: 13px; line-height: 1.3;"><span data-dc-tpl="28">Dirección</span><span data-dc-tpl="29" style="color: rgb(95, 107, 122); font-size: 12px;">Rol: Dirección general</span></span>
+  </div></nav></div>
+  </div>
+  <main data-dc-tpl="6" style="flex: 999 1 560px; min-width: 0px; padding: 28px 32px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px;">
+    <header data-dc-tpl="7" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between;">
+      <div data-dc-tpl="8" style="display: flex; flex-direction: column; gap: 6px;">
+        <span data-dc-tpl="9" class="lbl">Monitoreo</span>
+        <h1 data-dc-tpl="10" style="margin: 0px; font-family: Archivo, sans-serif; font-size: 32px; font-weight: 600;">Mapa en vivo</h1>
+        <span data-dc-tpl="11" style="color: rgb(95, 107, 122); font-size: 14px;">128 custodios · 94 autos de custodia · 212 tráileres reportando</span>
+      </div>
+      <div data-dc-tpl="12" role="group" aria-label="Fuente de telemetría" style="display: flex; gap: 8px; flex-wrap: wrap;">
+        
+          <button data-dc-tpl="14" type="button" class="btn" style="background: rgb(255, 241, 219); border-color: rgb(242, 169, 59); color: rgb(138, 83, 0);"><span class="sc-interp">Todas las fuentes</span></button>
+        
+          <button data-dc-tpl="14" type="button" class="btn" style=""><span class="sc-interp">Samsara</span></button>
+        
+          <button data-dc-tpl="14" type="button" class="btn" style=""><span class="sc-interp">Ruptela</span></button>
+        
+      </div>
+    </header>
+
+    <section data-dc-tpl="15" aria-label="Sugerencia de IA" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: rgb(255, 248, 236); border: 1px solid rgb(243, 217, 168); border-radius: 10px; padding: 16px 18px;">
+      <svg data-dc-tpl="16" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto;"><path data-dc-tpl="17" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <div data-dc-tpl="18" style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 4px; min-width: 0px;"><span data-dc-tpl="19" style="font-weight: 600;">IA · patrón de robo detectado</span><span data-dc-tpl="20" style="font-size: 14px; color: rgb(62, 74, 89);">El desvío de SRV-24817 coincide 87% con 5 robos previos en Méx–Qro: salida a terracería, velocidad baja y separación del custodio. Recomiendo escalar a Reacción ahora y pre-alertar a la unidad R-03.</span></div>
+      <figure data-dc-tpl="21" style="margin: 0px; display: flex; flex-direction: column; gap: 4px;">
+        <svg data-dc-tpl="22" width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Incidentes por franja horaria: el pico está entre 21 y 24 horas, seguido de 00 a 03" style="display: block;"><g data-dc-tpl="23" fill="#AEB8C4"><rect data-dc-tpl="24" x="4" y="12" width="20" height="48" rx="2"></rect><rect data-dc-tpl="25" x="31" y="42" width="20" height="18" rx="2"></rect><rect data-dc-tpl="26" x="58" y="54" width="20" height="6" rx="2"></rect><rect data-dc-tpl="27" x="85" y="48" width="20" height="12" rx="2"></rect><rect data-dc-tpl="28" x="139" y="30" width="20" height="30" rx="2"></rect><rect data-dc-tpl="29" x="166" y="36" width="20" height="24" rx="2"></rect><rect data-dc-tpl="30" x="193" y="6" width="20" height="54" rx="2"></rect></g><rect data-dc-tpl="31" x="112" y="24" width="20" height="36" rx="2" fill="#D9534F"></rect></svg>
+        <figcaption data-dc-tpl="32" style="font-size: 11px; color: rgb(95, 107, 122);">Incidentes por franja de 3 h · rojo: ahora</figcaption>
+      </figure>
+      <a data-dc-tpl="33" class="btn" href="Reaccion.html">Escalar a Reacción</a>
+    </section>
+
+    <div data-dc-tpl="34" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch;">
+      <section data-dc-tpl="35" class="card" style="flex: 999 1 560px; padding: 0px; overflow: hidden; position: relative; display: flex; flex-direction: column;">
+        <svg data-dc-tpl="36" viewBox="0 0 900 560" role="img" aria-label="Mapa de rutas activas en el centro del país" style="width: 100%; height: auto; display: block; background: rgb(247, 249, 251);">
+          <defs data-dc-tpl="37"><pattern data-dc-tpl="38" id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path data-dc-tpl="39" d="M40 0H0V40" fill="none" stroke="#F3F5F8" stroke-width="1"></path></pattern></defs>
+          <rect data-dc-tpl="40" width="900" height="560" fill="url(#g)"></rect>
+          <path data-dc-tpl="41" d="M560 120L480 250L450 320L500 370L560 390L660 370M300 330L390 290L450 320M480 250L390 290M500 370L470 380L300 330M500 370L520 345L560 120" fill="none" stroke="#D5DBE3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path data-dc-tpl="42" d="M500 370L470 330L450 320L480 250" fill="none" stroke="#3FA7C9" stroke-width="3" stroke-dasharray="2 0"></path>
+          <path data-dc-tpl="43" d="M470 330L438 344L450 320" fill="none" stroke="#F0605D" stroke-width="3" stroke-dasharray="6 5"></path>
+          <path data-dc-tpl="44" d="M520 345L560 120" fill="none" stroke="#3FA7C9" stroke-width="3"></path>
+          <path data-dc-tpl="45" d="M560 390L660 370" fill="none" stroke="#3FA7C9" stroke-width="3"></path>
+          <g data-dc-tpl="46" class="city">
+            <text data-dc-tpl="47" x="572" y="116">Monterrey</text><text data-dc-tpl="48" x="492" y="246">San Luis Potosí</text><text data-dc-tpl="49" x="236" y="352">Guadalajara</text><text data-dc-tpl="50" x="352" y="280">León</text><text data-dc-tpl="51" x="372" y="316">Querétaro</text><text data-dc-tpl="52" x="512" y="398">CDMX</text><text data-dc-tpl="53" x="532" y="340">Pachuca</text><text data-dc-tpl="54" x="566" y="414">Puebla</text><text data-dc-tpl="55" x="668" y="366">Veracruz</text>
+          </g>
+          <circle data-dc-tpl="56" cx="438" cy="344" r="8" fill="none" stroke="#F0605D" stroke-width="2" class="ping"></circle>
+          <rect data-dc-tpl="57" x="432" y="338" width="12" height="12" rx="2" fill="#0B6A8A"></rect>
+          <circle data-dc-tpl="58" cx="452" cy="352" r="7" fill="#F2A93B"></circle>
+          <path data-dc-tpl="59" d="M438 344L452 352" stroke="#F0605D" stroke-width="2" stroke-dasharray="3 3"></path>
+          <rect data-dc-tpl="60" x="534" y="222" width="12" height="12" rx="2" fill="#0B6A8A"></rect><circle data-dc-tpl="61" cx="548" cy="238" r="7" fill="#F2A93B"></circle>
+          <rect data-dc-tpl="62" x="604" y="374" width="12" height="12" rx="2" fill="#0B6A8A"></rect><circle data-dc-tpl="63" cx="620" cy="388" r="7" fill="#F2A93B"></circle>
+          <rect data-dc-tpl="64" x="470" y="282" width="12" height="12" rx="2" fill="#0B6A8A"></rect><circle data-dc-tpl="65" cx="486" cy="296" r="7" fill="#F2A93B"></circle>
+          <rect data-dc-tpl="66" x="356" y="306" width="12" height="12" rx="2" fill="#0B6A8A"></rect><circle data-dc-tpl="67" cx="372" cy="296" r="7" fill="#F2A93B"></circle>
+          <rect data-dc-tpl="68" x="140" y="470" width="300" height="70" rx="8" fill="#FFFFFF" stroke="#E4E8ED"></rect>
+          <rect data-dc-tpl="69" x="158" y="488" width="12" height="12" rx="2" fill="#0B6A8A"></rect><text data-dc-tpl="70" x="178" y="499" class="city" style="fill: rgb(62, 74, 89);">Tráiler del cliente</text>
+          <circle data-dc-tpl="71" cx="164" cy="520" r="6" fill="#F2A93B"></circle><text data-dc-tpl="72" x="178" y="525" class="city" style="fill: rgb(62, 74, 89);">Custodio / auto de custodia</text>
+          <path data-dc-tpl="73" d="M320 494H348" stroke="#F0605D" stroke-width="3" stroke-dasharray="6 5"></path><text data-dc-tpl="74" x="356" y="499" class="city" style="fill: rgb(62, 74, 89);">Desvío</text>
+        </svg>
+        <div data-dc-tpl="75" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgb(228, 232, 237);">
+          <div data-dc-tpl="76" style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <span data-dc-tpl="77" class="lbl">Replay de ruta · SRV-24817</span>
+            <span data-dc-tpl="78" class="mono" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">14:00 · 193 km recorridos</span></span>
+          </div>
+          <label data-dc-tpl="79" style="display: flex; gap: 12px; align-items: center;">
+            <span data-dc-tpl="80" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px);">Posición del replay</span>
+            <input data-dc-tpl="81" type="range" min="0" max="100" value="92" style="flex: 1 1 0%; accent-color: rgb(242, 169, 59); min-height: 44px;">
+          </label>
+          <div data-dc-tpl="82" style="display: flex; justify-content: space-between; font-size: 12px; color: rgb(95, 107, 122);"><span data-dc-tpl="83">08:12 salida</span><span data-dc-tpl="84">10:47 parada</span><span data-dc-tpl="85">13:05 frenado</span><span data-dc-tpl="86">14:30 desvío</span></div>
+        </div>
+      </section>
+
+      <aside data-dc-tpl="87" style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 16px; min-width: 0px;">
+        <div data-dc-tpl="88" class="card" style="display: flex; flex-direction: column; gap: 12px; border-color: rgb(245, 194, 194);">
+          <div data-dc-tpl="89" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;"><span data-dc-tpl="90" class="pill p-bad">Crítica · Desvío de ruta</span><span data-dc-tpl="91" class="mono" style="font-size: 12px; color: rgb(95, 107, 122);">14:30:12</span></div>
+          <span data-dc-tpl="92" style="font-weight: 600; font-size: 16px;">SRV-24817 · Alpura · TR-88213</span>
+          <span data-dc-tpl="93" style="font-size: 14px; color: rgb(62, 74, 89);">1.6 km fuera de geocerca hacia camino de terracería, km 142 Méx–Qro. Custodio a 1.1 km del tráiler. Velocidad 38 km/h.</span>
+          <div data-dc-tpl="94" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a data-dc-tpl="95" class="btn btn-pri" href="Reaccion.html">Abrir incidente</a>
+            <button data-dc-tpl="96" type="button" class="btn">Llamar custodio</button>
+          </div>
+        </div>
+        <div data-dc-tpl="97" class="card" style="display: flex; flex-direction: column; gap: 4px;">
+          <h2 data-dc-tpl="98" style="margin: 0px 0px 8px; font-family: Archivo, sans-serif; font-size: 16px; font-weight: 600;">Eventos entrantes</h2>
+          
+            <div data-dc-tpl="100" style="display: grid; grid-template-columns: 64px minmax(0px, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 13px;">
+              <span data-dc-tpl="101" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">14:30:12</span></span>
+              <span data-dc-tpl="102" style="min-width: 0px;"><span class="sc-interp">Desvío de ruta · TR-88213</span></span>
+              <span data-dc-tpl="103" class="pill p-bad"><span class="sc-interp">Samsara</span></span>
+            </div>
+          
+            <div data-dc-tpl="100" style="display: grid; grid-template-columns: 64px minmax(0px, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 13px;">
+              <span data-dc-tpl="101" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">14:29:40</span></span>
+              <span data-dc-tpl="102" style="min-width: 0px;"><span class="sc-interp">Separación 1.1 km · AU-3321 / TR-88213</span></span>
+              <span data-dc-tpl="103" class="pill p-warn"><span class="sc-interp">Samsara</span></span>
+            </div>
+          
+            <div data-dc-tpl="100" style="display: grid; grid-template-columns: 64px minmax(0px, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 13px;">
+              <span data-dc-tpl="101" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">14:27:03</span></span>
+              <span data-dc-tpl="102" style="min-width: 0px;"><span class="sc-interp">Pérdida de señal · TR-71540</span></span>
+              <span data-dc-tpl="103" class="pill p-warn"><span class="sc-interp">Ruptela</span></span>
+            </div>
+          
+            <div data-dc-tpl="100" style="display: grid; grid-template-columns: 64px minmax(0px, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 13px;">
+              <span data-dc-tpl="101" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">14:25:51</span></span>
+              <span data-dc-tpl="102" style="min-width: 0px;"><span class="sc-interp">Entrada a geocerca · CEDIS Monterrey</span></span>
+              <span data-dc-tpl="103" class="pill p-info"><span class="sc-interp">Samsara</span></span>
+            </div>
+          
+            <div data-dc-tpl="100" style="display: grid; grid-template-columns: 64px minmax(0px, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 13px;">
+              <span data-dc-tpl="101" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">14:24:18</span></span>
+              <span data-dc-tpl="102" style="min-width: 0px;"><span class="sc-interp">Frenado brusco · AU-1876</span></span>
+              <span data-dc-tpl="103" class="pill p-mute"><span class="sc-interp">Samsara</span></span>
+            </div>
+          
+            <div data-dc-tpl="100" style="display: grid; grid-template-columns: 64px minmax(0px, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 13px;">
+              <span data-dc-tpl="101" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">14:22:09</span></span>
+              <span data-dc-tpl="102" style="min-width: 0px;"><span class="sc-interp">Parada no autorizada 6 min · TR-66012</span></span>
+              <span data-dc-tpl="103" class="pill p-warn"><span class="sc-interp">Ruptela</span></span>
+            </div>
+          
+            <div data-dc-tpl="100" style="display: grid; grid-template-columns: 64px minmax(0px, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 13px;">
+              <span data-dc-tpl="101" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">14:20:44</span></span>
+              <span data-dc-tpl="102" style="min-width: 0px;"><span class="sc-interp">Evento de cámara: distracción · AU-2051</span></span>
+              <span data-dc-tpl="103" class="pill p-mute"><span class="sc-interp">Samsara</span></span>
+            </div>
+          
+        </div>
+      </aside>
+    </div>
+
+    <section data-dc-tpl="104" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 16px;">
+      <div data-dc-tpl="105" class="card" style="display: flex; flex-direction: column; gap: 6px;"><span data-dc-tpl="106" class="lbl">Alertas abiertas</span><span data-dc-tpl="107" style="font-family: Archivo; font-size: 28px; font-weight: 600;">7</span><span data-dc-tpl="108" style="font-size: 13px; color: rgb(95, 107, 122);">1 crítica · 3 altas · 3 medias</span></div>
+      <div data-dc-tpl="109" class="card" style="display: flex; flex-direction: column; gap: 6px;"><span data-dc-tpl="110" class="lbl">Separación custodio–tráiler</span><span data-dc-tpl="111" style="font-family: Archivo; font-size: 28px; font-weight: 600;">2</span><span data-dc-tpl="112" style="font-size: 13px; color: rgb(95, 107, 122);">Umbral 1 km por más de 3 min</span></div>
+      <div data-dc-tpl="113" class="card" style="display: flex; flex-direction: column; gap: 6px;"><span data-dc-tpl="114" class="lbl">Sin señal</span><span data-dc-tpl="115" style="font-family: Archivo; font-size: 28px; font-weight: 600;">3</span><span data-dc-tpl="116" style="font-size: 13px; color: rgb(95, 107, 122);">2 Ruptela · 1 Samsara</span></div>
+      <div data-dc-tpl="117" class="card" style="display: flex; flex-direction: column; gap: 6px;"><span data-dc-tpl="118" class="lbl">En zona de riesgo</span><span data-dc-tpl="119" style="font-family: Archivo; font-size: 28px; font-weight: 600;">11</span><span data-dc-tpl="120" style="font-size: 13px; color: rgb(95, 107, 122);">Arco Norte y Puebla–Orizaba</span></div>
+    </section>
+  </main></div></div></div>
+
+
+
+</body></html>

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · Reportes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-mute{background:#EEF1F4;color:#4A5868}.p-info{background:#E3F2F8;color:#0B6A8A}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
+.field select{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+</style>
+</helmet>
+<div style="font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap">
+  <div style="flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4">
+    <dc-import name="Nav" active="reportes" hint-size="100%,1100px"></dc-import>
+  </div>
+  <main style="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
+    <header style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="lbl">Administración</span>
+        <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600">Reportes</h1>
+        <span style="color:#5F6B7A;font-size:14px">16 reportes listos · 5 envíos programados · exporta a PDF o Excel</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><button type="button" class="btn">Programar envío</button><button type="button" class="btn btn-pri">Nuevo reporte</button></div>
+    </header>
+
+    <section aria-label="Reporte con IA" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <label style="flex:1 1 360px;display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Pídele un reporte a la IA</span><input type="text" placeholder="Pídele un reporte a la IA: ej. incidentes de septiembre para Marsh con mapa de calor" style="flex:1;min-height:44px;background:#FFFFFF;border:1px solid #E2C48F;border-radius:8px;color:#121821;padding:0 14px;font:400 14px 'IBM Plex Sans',sans-serif"></label>
+      <a class="btn btn-pri" href="AsistenteIA.dc.html" style="min-height:44px">Generar con IA</a>
+    </section>
+
+    <form style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+      <label class="field">Periodo<select><option>Q3 2026 (jul–sep)</option><option>Septiembre 2026</option><option>Año 2026</option></select></label>
+      <label class="field">Zona<select><option>Todas las zonas</option><option>Centro</option><option>Bajío</option></select></label>
+      <label class="field">Cliente<select><option>Todos los clientes</option><option>Alpura</option><option>Marsh</option></select></label>
+      <label class="field">Tipo de servicio<select><option>Todos</option><option>Por evento</option><option>Dedicado</option><option>Monitoreo</option></select></label>
+    </form>
+
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+      <nav aria-label="Biblioteca de reportes" class="card" style="flex:1 1 280px;padding:12px;display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="7">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span class="lbl" style="padding:4px 10px">{{c.name}}</span>
+            <sc-for list="{{c.items}}" as="r" hint-placeholder-count="2">
+              <button type="button" onClick="{{r.pick}}" style="{{r.style}}">{{r.name}}</button>
+            </sc-for>
+          </div>
+        </sc-for>
+      </nav>
+
+      <section class="card" style="flex:999 1 560px;display:flex;flex-direction:column;gap:18px;padding:24px">
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">{{cur.cat}} · Q3 2026</span><h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600">{{cur.name}}</h2><span style="font-size:14px;color:#3E4A59">{{cur.desc}}</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn">Descargar PDF</button><button type="button" class="btn">Excel</button><button type="button" class="btn">Enviar</button></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px">
+          <sc-for list="{{cur.kpis}}" as="k" hint-placeholder-count="3">
+            <div style="background:#F7F9FB;border:1px solid #E4E8ED;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:4px"><span class="lbl">{{k.k}}</span><span style="font-family:'Archivo',sans-serif;font-size:24px;font-weight:600">{{k.v}}</span></div>
+          </sc-for>
+        </div>
+        <figure style="margin:0;display:flex;flex-direction:column;gap:12px">
+          <figcaption class="lbl">{{cur.chart}}</figcaption>
+          <sc-for list="{{cur.bars}}" as="b" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:180px minmax(0,1fr) 90px;gap:12px;align-items:center;font-size:14px">
+              <span>{{b.k}}</span>
+              <div style="height:16px;border-radius:4px;background:#EBEEF2;overflow:hidden"><div style="{{b.bar}}"></div></div>
+              <span class="mono" style="text-align:right">{{b.v}}</span>
+            </div>
+          </sc-for>
+        </figure>
+        <div style="display:flex;gap:10px;align-items:flex-start;background:#F7F9FB;border-radius:8px;padding:14px;font-size:14px;color:#3E4A59">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+          <span><b style="color:#121821">Lectura de la IA:</b> {{cur.ai}}</span>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="padding:20px 8px 0;display:flex;flex-direction:column;gap:12px">
+      <h2 style="margin:0;padding:0 12px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Envíos programados</h2>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Reporte</th><th>Destinatarios</th><th>Frecuencia</th><th>Próximo envío</th><th>Formato</th><th>Estatus</th></tr></thead>
+          <tbody>
+            <sc-for list="{{sched}}" as="s" hint-placeholder-count="5">
+              <tr><td>{{s.r}}</td><td>{{s.to}}</td><td>{{s.f}}</td><td class="mono">{{s.n}}</td><td>{{s.fmt}}</td><td><span class="{{s.cls}}">{{s.st}}</span></td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { r: 'inc' }; }
+  renderVals() {
+    const R = [
+      { id: 'srv', cat: 'Operación', name: 'Servicios por modelo', desc: 'Servicios del trimestre por modelo de servicio y su resultado.', chart: 'Servicios por modelo', unit: '', kpis: [['Servicios', '300'], ['Sin incidente', '98.6%'], ['Puntualidad', '96.4%']], data: [['Por evento', 182], ['Dedicado', 74], ['Monitoreo', 44]], ai: 'Los servicios por evento crecieron 12% contra Q2, impulsados por Alpura y Marsh.' },
+      { id: 'pun', cat: 'Operación', name: 'Puntualidad por cliente', desc: 'Entregas a tiempo contra la ventana pactada.', chart: 'Puntualidad %', unit: '%', kpis: [['Promedio', '96.4%'], ['Mejor', 'Alpura'], ['Por mejorar', 'Bebidas del Golfo']], data: [['Alpura', 97.8], ['Marsh', 96.9], ['Autopartes Saltillo', 96.2], ['Farmacéutica Orión', 94.1], ['Bebidas del Golfo', 93.2]], ai: 'Los retrasos de Bebidas del Golfo se concentran en la entrada a Puebla entre 7:00 y 9:00.' },
+      { id: 'inc', cat: 'Seguridad', name: 'Incidentes por carretera', desc: 'Incidentes del trimestre por tramo, para riesgo de rutas y cotizador.', chart: 'Incidentes Q3', unit: '', kpis: [['Incidentes', '40'], ['Por 100 servicios', '1.4'], ['Recuperación', '72%']], data: [['Arco Norte', 7], ['Méx–Puebla–Orizaba', 6], ['Méx–Querétaro', 5], ['Querétaro–SLP', 4], ['Guadalajara–Colima', 2]], ai: 'Arco Norte duplicó incidentes contra Q2; 5 de 7 fueron de noche.' },
+      { id: 'rea', cat: 'Seguridad', name: 'Tiempo de reacción por zona', desc: 'Minutos desde la alerta hasta el equipo en sitio.', chart: 'Minutos promedio', unit: ' min', kpis: [['Promedio', '18 min'], ['Meta', '20 min'], ['Fuera de meta', 'Golfo']], data: [['Centro', 16], ['Bajío', 21], ['Occidente', 19], ['Golfo', 24], ['Noreste', 17]], ai: 'Golfo no tiene base de reacción propia; una unidad en Córdoba bajaría el tiempo a unos 15 min.' },
+      { id: 'uti', cat: 'Custodios', name: 'Utilización por zona', desc: 'Porcentaje de custodios en servicio o asignados.', chart: 'Utilización %', unit: '%', kpis: [['Promedio', '78%'], ['Disponibles', '65'], ['Docs por vencer', '14']], data: [['Bajío', 94], ['Centro', 82], ['Occidente', 80], ['Noreste', 84], ['Golfo', 80]], ai: 'Bajío está sobre 90%: es la zona con más riesgo de fatiga y de huecos de cobertura.' },
+      { id: 'cpk', cat: 'Flotilla', name: 'Costo por km por unidad', desc: 'Combustible, mantenimiento y seguro entre kilómetros GPS.', chart: 'Costo por km (MXN)', unit: '', fmt: 1, kpis: [['Promedio', '$4.10'], ['Unidades', '600'], ['En taller', '31']], data: [['AU-1876', 6.2], ['AU-1450', 5.4], ['AU-1688', 5.9], ['AU-2214', 3.9], ['AU-3321', 3.86]], ai: 'Las 3 unidades más caras coinciden con consumo anómalo o fallas recurrentes.' },
+      { id: 'ing', cat: 'Comercial', name: 'Ingresos por cliente', desc: 'Facturación del trimestre por cliente.', chart: 'Millones MXN', unit: 'M', fmt: 2, kpis: [['Ingresos', '$40.6M'], ['Clientes activos', '25'], ['Top 5', '47%']], data: [['Alpura', 14.6], ['Marsh', 11.2], ['Farmacéutica Orión', 8.4], ['Autopartes Saltillo', 6.8], ['Electrónica del Bajío', 5.6]], ai: 'La concentración en los 2 primeros clientes es de 32%; conviene diversificar en Bajío.' },
+      { id: 'cxc', cat: 'Finanzas', name: 'Antigüedad de saldos', desc: 'Cuentas por cobrar por rango de días.', chart: 'Millones MXN', unit: 'M', fmt: 1, kpis: [['Por cobrar', '$18.2M'], ['Días de cobro', '38'], ['+60 días', '$3.1M']], data: [['Al corriente', 9.8], ['1–30 días', 3.6], ['31–60 días', 1.7], ['+60 días', 3.1]], ai: '71% del saldo a más de 60 días está en Bebidas del Golfo y Grupo Textil Arrayán.' },
+      { id: 'rot', cat: 'Personas', name: 'Rotación por área', desc: 'Bajas del trimestre entre la plantilla promedio.', chart: 'Rotación trimestral %', unit: '%', fmt: 1, kpis: [['Headcount', '486'], ['Bajas', '23'], ['Rotación', '4.7%']], data: [['Custodia', 5.1], ['Monitoreo', 8.3], ['Flotilla y taller', 2.6], ['Comercial', 0], ['Oficinas', 1.9]], ai: 'Monitoreo tiene la rotación más alta; 2 de 3 bajas citan el turno nocturno fijo.' }
+    ];
+    const cur0 = R.find(x => x.id === this.state.r);
+    const max = Math.max.apply(null, cur0.data.map(d => d[1])) || 1;
+    const cats = [];
+    R.forEach(x => { let c = cats.find(c => c.name === x.cat); if (!c) { c = { name: x.cat, items: [] }; cats.push(c); }
+      c.items.push({ name: x.name, pick: () => this.setState({ r: x.id }), style: 'text-align:left;min-height:40px;padding:0 10px;border-radius:8px;cursor:pointer;font:400 14px \'IBM Plex Sans\',sans-serif;' + (x.id === this.state.r ? 'background:#FFF1DB;border:1px solid #F3D9A8;color:#121821;font-weight:500' : 'background:transparent;border:1px solid transparent;color:#3E4A59') }); });
+    const fv = (v) => cur0.unit === 'M' ? '$' + v.toFixed(cur0.fmt) + 'M' : (cur0.fmt ? (cur0.unit ? v.toFixed(cur0.fmt) + cur0.unit : '$' + v.toFixed(2)) : v + cur0.unit);
+    return {
+      cats,
+      cur: { cat: cur0.cat, name: cur0.name, desc: cur0.desc, chart: cur0.chart, ai: cur0.ai,
+        kpis: cur0.kpis.map(([k, v]) => ({ k, v })),
+        bars: cur0.data.map(([k, v], i) => ({ k, v: fv(v), bar: 'height:100%;width:' + Math.max(1, Math.round(v / max * 100)) + '%;background:' + (i === 0 ? '#D08A1C' : '#2B7FA8') })) },
+      sched: [
+        { r: 'Dashboard directivo', to: 'Dirección (3)', f: 'Lunes 7:00', n: '12 oct 07:00', fmt: 'PDF', st: 'Activo', cls: 'pill p-ok' },
+        { r: 'Servicios y puntualidad · Alpura', to: 'Alpura logística (2)', f: 'Mensual', n: '1 nov 08:00', fmt: 'PDF', st: 'Activo', cls: 'pill p-ok' },
+        { r: 'Incidentes y recuperación · Marsh', to: 'Marsh riesgos (2)', f: 'Mensual', n: '1 nov 08:00', fmt: 'PDF + Excel', st: 'Activo', cls: 'pill p-ok' },
+        { r: 'Antigüedad de saldos', to: 'Finanzas (3)', f: 'Viernes 9:00', n: '9 oct 09:00', fmt: 'Excel', st: 'Activo', cls: 'pill p-ok' },
+        { r: 'Headcount y rotación', to: 'RH y Dirección (5)', f: 'Mensual', n: '1 nov 08:00', fmt: 'PDF', st: 'Pausado', cls: 'pill p-mute' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

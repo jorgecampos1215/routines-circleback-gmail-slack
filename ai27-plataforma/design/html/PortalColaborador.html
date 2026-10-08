@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es"><head><style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  </style>
+<meta charset="utf-8">
+<title>AI27 · Mi portal</title>
+<style>x-dc{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" data-dc-tpl="1"><style data-dc-tpl="2">
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;padding:22px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-mute{background:#EEF1F4;color:#4A5868}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#3E4A59}
+.field select,.field input,.field textarea{min-height:44px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 15px 'IBM Plex Sans',sans-serif;box-sizing:border-box}
+.field textarea{padding:10px 12px;resize:vertical}
+</style></head>
+<body>
+<div id="dc-root"><div class="sc-host" data-sc-name="PortalColaborador"><div data-dc-tpl="3" style="font-family: &quot;IBM Plex Sans&quot;, system-ui, sans-serif; color: rgb(18, 24, 33); background: rgb(246, 247, 249); min-height: 100vh;">
+  <header data-dc-tpl="4" style="background: rgb(255, 255, 255); border-bottom: 1px solid rgb(228, 232, 237);">
+    <div data-dc-tpl="5" style="max-width: 1120px; margin: 0px auto; padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;">
+      <div data-dc-tpl="6" style="display: flex; align-items: center; gap: 10px;">
+        <svg data-dc-tpl="7" width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path data-dc-tpl="8" d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#D08A1C" stroke-width="2"></path><path data-dc-tpl="9" d="M10 17l4 4 8-9" stroke="#D08A1C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span data-dc-tpl="10" style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 19px;">AI27</span>
+        <span data-dc-tpl="11" style="font-size: 14px; color: rgb(95, 107, 122); padding-left: 10px; border-left: 1px solid rgb(228, 232, 237);">Mi portal</span>
+      </div>
+      <nav data-dc-tpl="12" aria-label="Secciones del portal" style="display: flex; gap: 4px; flex-wrap: wrap;">
+        
+          <button data-dc-tpl="14" type="button" style="min-height: 40px; padding: 0px 14px; border-radius: 8px; border: 0px; cursor: pointer; font: 500 14px &quot;IBM Plex Sans&quot;, sans-serif; background: rgb(255, 241, 219); color: rgb(138, 83, 0);"><span class="sc-interp">Inicio</span></button>
+        
+          <button data-dc-tpl="14" type="button" style="min-height: 40px; padding: 0px 14px; border-radius: 8px; border: 0px; cursor: pointer; font: 500 14px &quot;IBM Plex Sans&quot;, sans-serif; background: transparent; color: rgb(62, 74, 89);"><span class="sc-interp">Vacaciones y permisos</span></button>
+        
+          <button data-dc-tpl="14" type="button" style="min-height: 40px; padding: 0px 14px; border-radius: 8px; border: 0px; cursor: pointer; font: 500 14px &quot;IBM Plex Sans&quot;, sans-serif; background: transparent; color: rgb(62, 74, 89);"><span class="sc-interp">Recibos</span></button>
+        
+          <button data-dc-tpl="14" type="button" style="min-height: 40px; padding: 0px 14px; border-radius: 8px; border: 0px; cursor: pointer; font: 500 14px &quot;IBM Plex Sans&quot;, sans-serif; background: transparent; color: rgb(62, 74, 89);"><span class="sc-interp">Documentos</span></button>
+        
+      </nav>
+      <div data-dc-tpl="15" style="display: flex; align-items: center; gap: 10px;">
+        <span data-dc-tpl="16" style="width: 38px; height: 38px; border-radius: 50%; background: rgb(106, 90, 205); color: rgb(255, 255, 255); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">LH</span>
+        <span data-dc-tpl="17" style="display: flex; flex-direction: column; font-size: 13px; line-height: 1.3;"><span data-dc-tpl="18" style="font-weight: 500;">Luis Herrera</span><span data-dc-tpl="19" style="color: rgb(95, 107, 122);">Monitorista Sr</span></span>
+      </div>
+    </div>
+  </header>
+
+  <main data-dc-tpl="20" style="max-width: 1120px; margin: 0px auto; padding: 28px 24px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px;">
+
+    
+      <div data-dc-tpl="22" style="display: flex; flex-direction: column; gap: 22px;">
+        <div data-dc-tpl="23" style="display: flex; flex-direction: column; gap: 6px;">
+          <h1 data-dc-tpl="24" style="margin: 0px; font-family: Archivo, sans-serif; font-size: 30px; font-weight: 600;">Hola, Luis</h1>
+          <span data-dc-tpl="25" style="color: rgb(95, 107, 122); font-size: 15px;">Aquí puedes pedir vacaciones y permisos, descargar tus recibos y consultar tus documentos.</span>
+        </div>
+        <section data-dc-tpl="26" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 14px;">
+          <div data-dc-tpl="27" class="card" style="display: flex; flex-direction: column; gap: 8px;">
+            <span data-dc-tpl="28" class="lbl">Vacaciones disponibles</span>
+            <span data-dc-tpl="29" style="font-family: Archivo, sans-serif; font-size: 34px; font-weight: 600;"><span class="sc-interp">10</span> días</span>
+            <div data-dc-tpl="30" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="31" style="height: 100%; background: rgb(43, 127, 168); width: 29%;"></div></div>
+            <span data-dc-tpl="32" style="font-size: 13px; color: rgb(95, 107, 122);"><span class="sc-interp">4</span> usados de 14 · periodo 2026</span>
+          </div>
+          <div data-dc-tpl="33" class="card" style="display: flex; flex-direction: column; gap: 8px;"><span data-dc-tpl="34" class="lbl">Próximo pago</span><span data-dc-tpl="35" style="font-family: Archivo, sans-serif; font-size: 34px; font-weight: 600;">15 oct</span><span data-dc-tpl="36" style="font-size: 13px; color: rgb(95, 107, 122);">Quincena 19 · depósito en nómina</span></div>
+          <div data-dc-tpl="37" class="card" style="display: flex; flex-direction: column; gap: 8px;"><span data-dc-tpl="38" class="lbl">Mis solicitudes</span><span data-dc-tpl="39" style="font-family: Archivo, sans-serif; font-size: 34px; font-weight: 600;"><span class="sc-interp">0</span></span><span data-dc-tpl="40" style="font-size: 13px; color: rgb(95, 107, 122);">pendientes de aprobación</span></div>
+          <div data-dc-tpl="41" class="card" style="display: flex; flex-direction: column; gap: 8px;"><span data-dc-tpl="42" class="lbl">Mi turno</span><span data-dc-tpl="43" style="font-family: Archivo, sans-serif; font-size: 22px; font-weight: 600;">Vespertino</span><span data-dc-tpl="44" style="font-size: 13px; color: rgb(95, 107, 122);">14:00 a 22:00 · descanso miércoles</span></div>
+        </section>
+        <section data-dc-tpl="45" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 16px;">
+          <div data-dc-tpl="46" class="card" style="display: flex; flex-direction: column; gap: 12px;">
+            <h2 data-dc-tpl="47" style="margin: 0px; font-family: Archivo, sans-serif; font-size: 18px; font-weight: 600;">¿Qué necesitas?</h2>
+            <div data-dc-tpl="48" style="display: grid; grid-template-columns: repeat(2, minmax(0px, 1fr)); gap: 10px;">
+              <button data-dc-tpl="49" type="button" class="btn">Pedir vacaciones</button>
+              <button data-dc-tpl="50" type="button" class="btn">Pedir un permiso</button>
+              <button data-dc-tpl="51" type="button" class="btn">Descargar recibo</button>
+              <button data-dc-tpl="52" type="button" class="btn">Constancia laboral</button>
+            </div>
+          </div>
+          <div data-dc-tpl="53" class="card" style="display: flex; flex-direction: column; gap: 10px;">
+            <h2 data-dc-tpl="54" style="margin: 0px; font-family: Archivo, sans-serif; font-size: 18px; font-weight: 600;">Avisos de RH</h2>
+            <div data-dc-tpl="55" style="padding: 10px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 14px; display: flex; flex-direction: column; gap: 2px;"><span data-dc-tpl="56" style="font-weight: 500;">Capacitación de protocolo de reacción</span><span data-dc-tpl="57" style="color: rgb(95, 107, 122);">Jueves 16 oct · 10:00 · sala de monitoreo</span></div>
+            <div data-dc-tpl="58" style="padding: 10px 0px; border-top: 1px solid rgb(238, 241, 244); font-size: 14px; display: flex; flex-direction: column; gap: 2px;"><span data-dc-tpl="59" style="font-weight: 500;">Actualiza tu contacto de emergencia</span><span data-dc-tpl="60" style="color: rgb(95, 107, 122);">Antes del 31 de octubre</span></div>
+          </div>
+        </section>
+      </div>
+    
+
+    
+
+    
+
+    
+
+    <a data-dc-tpl="149" href="RH.html" style="font-size: 14px; align-self: center;">Volver a la vista de RH (demo)</a>
+  </main></div></div></div>
+
+
+
+</body></html>

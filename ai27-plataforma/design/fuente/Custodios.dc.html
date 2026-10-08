@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · Control de custodios</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+</style>
+</helmet>
+<div style="font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap">
+  <div style="flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4">
+    <dc-import name="Nav" active="custodios" hint-size="100%,1100px"></dc-import>
+  </div>
+  <main style="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px">
+    <header style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="lbl">Recursos</span>
+        <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600">Custodios</h1>
+        <span style="color:#5F6B7A;font-size:14px">400 custodios en 7 zonas · utilización 78% · 41 h promedio por semana</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <label style="display:flex"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar custodio</span><input type="search" placeholder="Buscar por nombre, ID o zona" style="min-height:40px;min-width:260px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif"></label>
+        <button type="button" class="btn btn-pri">Alta de custodio</button>
+      </div>
+    </header>
+
+    <section aria-label="Sugerencia de IA" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <div style="flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-weight:600">IA · fatiga y cobertura</span><span style="font-size:14px;color:#3E4A59">J. Ordaz lleva 52 h esta semana y 3 custodios de Bajío acumulan semanas sin descanso completo. Rafael Uc lleva 9 días sin asignar: sugiero asignarlo al hueco de Bajío de mañana.</span></div>
+      <figure style="margin:0;display:flex;flex-direction:column;gap:4px">
+        <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Utilización semanal de custodios en las últimas 6 semanas: 72, 74, 76, 79, 77 y 78 por ciento" style="display:block"><path d="M10 60H210" stroke="#E4E8ED"></path><path d="M10 12.8H210" stroke="#F3D9A8" stroke-dasharray="4 3"></path><polyline points="10,46.4 50,36.8 90,27.2 130,12.8 170,22.4 210,17.6" fill="none" stroke="#2B7FA8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline><circle cx="210" cy="17.6" r="4" fill="#2B7FA8"></circle><text x="176" y="34" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1E6488">78%</text></svg>
+        <figcaption style="font-size:11px;color:#5F6B7A">Utilización semanal · línea punteada: tope sano</figcaption>
+      </figure>
+      <a class="btn" href="AsignacionIA.dc.html">Abrir asignación</a>
+    </section>
+
+    <div role="group" aria-label="Filtrar por estatus" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr));gap:10px">
+      <sc-for list="{{statuses}}" as="s" hint-placeholder-count="7">
+        <button type="button" onClick="{{s.pick}}" style="{{s.style}}">
+          <span style="font-size:12px;color:#5F6B7A">{{s.label}}</span>
+          <span style="font-family:'Archivo',sans-serif;font-size:24px;font-weight:600">{{s.n}}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+      <section class="card" style="flex:999 1 560px;padding:8px 8px 0">
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Custodio</th><th>Zona</th><th>Estatus</th><th>Asignación actual</th><th>Horas sem.</th><th>Desempeño</th><th>Docs</th><th><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Acción</span></th></tr></thead>
+            <tbody>
+              <sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+                <tr style="{{r.rowStyle}}">
+                  <td><span style="display:flex;flex-direction:column"><span>{{r.name}}</span><span class="mono" style="font-size:12px;color:#5F6B7A">{{r.id}}</span></span></td>
+                  <td>{{r.zone}}</td><td><span class="{{r.cls}}">{{r.status}}</span></td><td>{{r.asg}}</td><td class="mono">{{r.h}}</td><td class="mono">{{r.perf}}</td><td><span class="{{r.docCls}}">{{r.docs}}</span></td>
+                  <td><button type="button" class="btn" style="min-height:36px;padding:0 12px" onClick="{{r.pick}}">Expediente</button></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="card" aria-label="Expediente" style="flex:1 1 320px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;gap:14px;align-items:center">
+          <div style="width:64px;height:64px;border-radius:10px;background:#FFF1DB;border:1px dashed #D5DBE3;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F6B7A">Foto</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-weight:600;font-size:18px">{{sel.name}}</span>
+            <span class="mono" style="font-size:13px;color:#5F6B7A">{{sel.id}} · {{sel.zone}}</span>
+            <span class="{{sel.cls}}" style="align-self:flex-start">{{sel.status}}</span>
+          </div>
+        </div>
+        <dl style="margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;font-size:14px">
+          <div><dt class="lbl">Base</dt><dd style="margin:4px 0 0">{{sel.base}}</dd></div>
+          <div><dt class="lbl">Cobertura</dt><dd style="margin:4px 0 0">{{sel.zone}}, Bajío</dd></div>
+          <div><dt class="lbl">Ingreso</dt><dd style="margin:4px 0 0">mar 2022</dd></div>
+          <div><dt class="lbl">Desempeño</dt><dd style="margin:4px 0 0">{{sel.perf}} / 5</dd></div>
+        </dl>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span class="lbl">Documentos y vigencias</span>
+          <sc-for list="{{docs}}" as="d" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:6px 0;border-top:1px solid #EEF1F4"><span>{{d.k}}</span><span class="{{d.cls}}">{{d.v}}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span class="lbl">Historial reciente</span>
+          <span style="font-size:14px;color:#3E4A59">SRV-24803 Marsh · en curso · 2 custodios</span>
+          <span style="font-size:14px;color:#3E4A59">SRV-24760 Alpura · entregado sin incidente</span>
+          <span style="font-size:14px;color:#3E4A59">SRV-24711 Orión · parada no autorizada (justificada)</span>
+        </div>
+      </aside>
+    </div>
+
+    <section class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Turnos · Centro · semana 41</h2>
+        <div style="display:flex;gap:14px;font-size:12px;color:#3E4A59;flex-wrap:wrap">
+          <span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:2px;background:#3FA7C9"></span>En servicio</span>
+          <span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:2px;background:#CBD3DD"></span>Descanso</span>
+          <span style="display:flex;gap:6px;align-items:center"><span style="width:10px;height:10px;border-radius:2px;background:#4CC38A"></span>Libre</span>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <div style="display:grid;grid-template-columns:160px repeat(7,minmax(70px,1fr));gap:4px;min-width:720px;font-size:13px">
+          <span></span><span class="lbl" style="text-align:center">Lun 5</span><span class="lbl" style="text-align:center">Mar 6</span><span class="lbl" style="text-align:center">Mié 7</span><span class="lbl" style="text-align:center">Jue 8</span><span class="lbl" style="text-align:center">Vie 9</span><span class="lbl" style="text-align:center">Sáb 10</span><span class="lbl" style="text-align:center">Dom 11</span>
+          <sc-for list="{{shifts}}" as="s" hint-placeholder-count="5">
+            <span style="display:flex;align-items:center">{{s.name}}</span>
+            <sc-for list="{{s.days}}" as="d" hint-placeholder-count="7"><span style="{{d}}"></span></sc-for>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { f: 'Todos', sel: 'C-1102' }; }
+  renderVals() {
+    const cls = { 'Disponible': 'pill p-ok', 'Asignado': 'pill p-info', 'En servicio': 'pill p-info', 'Descanso': 'pill p-mute', 'Vacaciones': 'pill p-mute', 'Incapacidad': 'pill p-warn', 'Baja': 'pill p-bad' };
+    const counts = [['Todos', 400], ['Disponible', 65], ['Asignado', 54], ['En servicio', 258], ['Descanso', 14], ['Vacaciones', 6], ['Incapacidad', 3]];
+    const data = [
+      ['C-1102','Hugo Salazar','Centro','Cuautitlán','Disponible','—','32','4.9','Al día'],
+      ['C-0877','Iván Cetina','Centro','Tepotzotlán','Disponible','—','38','4.8','Al día'],
+      ['C-1043','Raúl Medina','Centro','Cuautitlán','En servicio','Alpura · SRV-24817','44','4.6','Al día'],
+      ['C-1188','Ernesto Villa','Centro','Ecatepec','En servicio','Alpura · SRV-24817','47','4.4','Licencia 12 días'],
+      ['C-0654','Marco Ríos','Bajío','Celaya','Asignado','Orión · SRV-24822','40','4.7','Al día'],
+      ['C-0712','Jesús Ordaz','Bajío','León','En servicio','Electrónica del Bajío · DED-0412','52','4.5','Exceso de horas'],
+      ['C-1240','Óscar Bautista','Bajío','Querétaro','Disponible','—','29','4.3','Confianza 21 días'],
+      ['C-0398','Felipe Arce','Golfo','Veracruz','Descanso','—','46','4.6','Al día'],
+      ['C-0931','Rafael Uc','Centro','Tultitlán','Disponible','—','41','4.2','Sin asignar 9 días'],
+      ['C-0566','Daniel Soto','Noreste','Monterrey','Incapacidad','—','0','4.7','Portación 30 días']
+    ];
+    const rows = data.map(([id,name,zone,base,status,asg,h,perf,docs]) => ({ id,name,zone,base,status,asg,h,perf,docs, cls: cls[status],
+      docCls: docs === 'Al día' ? 'pill p-ok' : (docs.indexOf('días') > 0 && parseInt(docs.replace(/\D/g,'')) <= 14 ? 'pill p-bad' : 'pill p-warn'),
+      rowStyle: id === this.state.sel ? 'background:#F3F5F8' : '', pick: () => this.setState({ sel: id }) }));
+    const sel = rows.find(r => r.id === this.state.sel) || rows[0];
+    const sh = (pat) => pat.split('').map(c => 'height:32px;border-radius:4px;background:' + (c === 's' ? '#3FA7C9' : c === 'd' ? '#CBD3DD' : '#4CC38A'));
+    return {
+      statuses: counts.map(([label, n]) => ({ label, n, pick: () => this.setState({ f: label }),
+        style: 'display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;border-radius:10px;cursor:pointer;font-family:inherit;color:#121821;text-align:left;background:#FFFFFF;border:1px solid ' + (label === this.state.f ? '#F2A93B' : '#E4E8ED') })),
+      rows: this.state.f === 'Todos' ? rows : rows.filter(r => r.status === this.state.f),
+      sel,
+      docs: [
+        { k: 'Licencia federal', v: sel.id === 'C-1188' ? 'vence en 12 días' : 'vigente · 2028', cls: sel.id === 'C-1188' ? 'pill p-bad' : 'pill p-ok' },
+        { k: 'Portación / permiso', v: sel.id === 'C-0566' ? 'vence en 30 días' : 'vigente · 2027', cls: sel.id === 'C-0566' ? 'pill p-warn' : 'pill p-ok' },
+        { k: 'Evaluación de confianza', v: sel.id === 'C-1240' ? 'vence en 21 días' : 'abr 2026', cls: sel.id === 'C-1240' ? 'pill p-warn' : 'pill p-ok' },
+        { k: 'Certificación carga alto valor', v: 'vigente', cls: 'pill p-ok' },
+        { k: 'Alta en Samsara', v: 'activo', cls: 'pill p-ok' }
+      ],
+      shifts: [
+        { name: 'Hugo Salazar', days: sh('ssdllss') },
+        { name: 'Iván Cetina', days: sh('sssdlsl') },
+        { name: 'Raúl Medina', days: sh('dsssssd') },
+        { name: 'Ernesto Villa', days: sh('ssssssd') },
+        { name: 'Rafael Uc', days: sh('llllssd') }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

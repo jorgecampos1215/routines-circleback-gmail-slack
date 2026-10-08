@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · Finanzas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.k{font-family:'Archivo',sans-serif;font-size:26px;font-weight:600}
+</style>
+</helmet>
+<div style="font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap">
+  <div style="flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4">
+    <dc-import name="Nav" active="finanzas" hint-size="100%,1100px"></dc-import>
+  </div>
+  <main style="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px">
+    <header style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="lbl">ERP ligero · septiembre 2026</span>
+        <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600">Finanzas</h1>
+        <span style="color:#5F6B7A;font-size:14px">Registro de facturación sin timbrado CFDI en el demo</span>
+      </div>
+      <button type="button" class="btn">Exportar a Excel</button>
+    </header>
+
+    <section aria-label="Sugerencia de IA" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <div style="flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-weight:600">IA · proyección de cobranza</span><span style="font-size:14px;color:#3E4A59">Con el historial de pago de cada cliente, se esperan cobrar $7.9M en octubre. Bebidas del Golfo y Grupo Textil Arrayán concentran 71% del riesgo a más de 60 días: sugiero condicionar nuevos servicios a pago.</span></div>
+      <figure style="margin:0;display:flex;flex-direction:column;gap:4px">
+        <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Cobranza acumulada proyectada por semana de octubre: 1.8, 3.9, 5.6 y 7.9 millones" style="display:block"><g><rect x="8" y="49" width="40" height="11" rx="2" fill="#2B9A66"></rect><rect x="60" y="36.3" width="40" height="23.7" rx="2" fill="#2B9A66"></rect><rect x="112" y="26" width="40" height="34" rx="2" fill="#9FD6BB"></rect><rect x="164" y="12" width="40" height="48" rx="2" fill="#9FD6BB"></rect></g><text x="166" y="9" font-family="IBM Plex Mono, monospace" font-size="10" fill="#17784A">$7.9M</text></svg>
+        <figcaption style="font-size:11px;color:#5F6B7A">Cobranza acumulada de octubre · claro: proyectado</figcaption>
+      </figure>
+      <a class="btn" href="AsistenteIA.dc.html">Preguntarle a la IA</a>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px">
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Ingresos</span><span class="k">$14.1M</span><span style="font-size:13px;color:#17784A">+3.7% vs agosto</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Gastos</span><span class="k">$9.7M</span><span style="font-size:13px;color:#5F6B7A">69% de ingresos</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Margen operativo</span><span class="k">31%</span><span style="font-size:13px;color:#5F6B7A">$4.4M</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Cuentas por cobrar</span><span class="k">$18.2M</span><span style="font-size:13px;color:#B42318">$3.1M a más de 60 días</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Días de cobro</span><span class="k">38</span><span style="font-size:13px;color:#5F6B7A">meta 30</span></div>
+    </section>
+
+    <section class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Rentabilidad</h2>
+        <div role="tablist" aria-label="Agrupar por" style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" class="btn" style="{{t.style}}" onClick="{{t.pick}}">{{t.label}}</button></sc-for>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>{{firstCol}}</th><th>Ingresos</th><th>Costo directo</th><th>Margen</th><th style="min-width:200px">% margen</th></tr></thead>
+          <tbody>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+              <tr><td>{{r.n}}</td><td class="mono">{{r.rev}}</td><td class="mono">{{r.cost}}</td><td class="mono">{{r.m}}</td>
+                <td><div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden"><div style="{{r.bar}}"></div></div><span class="mono" style="font-size:13px;min-width:40px;text-align:right">{{r.pct}}</span></div></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px">
+      <div class="card" style="display:flex;flex-direction:column;gap:12px">
+        <h2 style="margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Gastos por categoría</h2>
+        <sc-for list="{{exp}}" as="e" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:150px minmax(0,1fr) 80px;gap:12px;align-items:center;font-size:14px">
+            <span>{{e.k}}</span><div style="height:10px;border-radius:5px;background:#EBEEF2;overflow:hidden"><div style="{{e.bar}}"></div></div><span class="mono" style="text-align:right">{{e.v}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:12px">
+        <h2 style="margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Cuentas por cobrar</h2>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+          <div style="background:#F3F5F8;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#5F6B7A">Al corriente</span><span class="mono">$9.8M</span></div>
+          <div style="background:#F3F5F8;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#5F6B7A">1–30 d</span><span class="mono">$3.6M</span></div>
+          <div style="background:#F3F5F8;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#5F6B7A">31–60 d</span><span class="mono">$1.7M</span></div>
+          <div style="background:#FDECEC;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#B42318">+60 d</span><span class="mono">$3.1M</span></div>
+        </div>
+        <sc-for list="{{inv}}" as="i" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:90px minmax(0,1fr) 100px auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #EEF1F4;font-size:14px">
+            <span class="mono" style="font-size:13px;color:#5F6B7A">{{i.id}}</span><span>{{i.c}}</span><span class="mono" style="text-align:right">{{i.v}}</span><span class="{{i.cls}}">{{i.s}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { by: 'cli' }; }
+  renderVals() {
+    const fmt = (n) => '$' + (n / 1e6).toFixed(2) + 'M';
+    const D = {
+      cli: ['Cliente', [['Alpura', 5.05, 3.13], ['Marsh', 3.85, 2.54], ['Farmacéutica Orión', 3.03, 2.15], ['Autopartes Saltillo', 2.26, 1.56], ['Electrónica del Bajío', 1.92, 1.29], ['Bebidas del Golfo', 1.10, 0.80]]],
+      srv: ['Tipo de servicio', [['Por evento', 6.1, 4.05], ['Dedicado', 5.4, 3.89], ['Monitoreo', 2.6, 1.53]]],
+      uni: ['Unidad', [['AU-3321', 0.41, 0.24], ['AU-1876', 0.38, 0.29], ['AU-2214', 0.35, 0.22], ['AU-2087', 0.29, 0.20], ['AU-1450', 0.12, 0.13]]]
+    };
+    const [firstCol, data] = D[this.state.by];
+    const scale = this.state.by === 'uni' ? 1e6 : 1e6;
+    return {
+      tabs: [['cli', 'Por cliente'], ['srv', 'Por servicio'], ['uni', 'Por unidad']].map(([k, label]) => ({ label, pick: () => this.setState({ by: k }), style: k === this.state.by ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '' })),
+      firstCol,
+      rows: data.map(([n, r, c]) => { const m = r - c, p = m / r; return { n, rev: fmt(r * scale), cost: fmt(c * scale), m: fmt(m * scale), pct: Math.round(p * 100) + '%',
+        bar: 'height:100%;width:' + Math.max(2, Math.round(p * 100 / 0.45)) + '%;max-width:100%;background:' + (p < 0 ? '#F0605D' : p < 0.3 ? '#F2A93B' : '#4CC38A') }; }),
+      exp: [['Nómina operativa', 4.9], ['Combustible', 1.8], ['Taller', 0.9], ['Viáticos', 0.8], ['Casetas', 0.7], ['Seguros', 0.6]].map(([k, v]) => ({ k, v: '$' + v.toFixed(1) + 'M', bar: 'height:100%;width:' + Math.round(v / 4.9 * 100) + '%;background:#3FA7C9' })),
+      inv: [
+        { id: 'F-9934', c: 'Alpura · septiembre', v: '$1.84M', s: 'Registrada', cls: 'pill p-mute' },
+        { id: 'F-9921', c: 'Marsh · eventos', v: '$0.96M', s: 'Cobrada', cls: 'pill p-ok' },
+        { id: 'F-9887', c: 'Farmacéutica Orión', v: '$1.12M', s: '45 días', cls: 'pill p-warn' },
+        { id: 'F-9810', c: 'Bebidas del Golfo', v: '$0.62M', s: '74 días', cls: 'pill p-bad' },
+        { id: 'F-9795', c: 'Grupo Textil Arrayán', v: '$0.48M', s: '81 días', cls: 'pill p-bad' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

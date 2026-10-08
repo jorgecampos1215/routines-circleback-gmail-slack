@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · Reacción y recuperación</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+</style>
+</helmet>
+<div style="font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap">
+  <div style="flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4">
+    <dc-import name="Nav" active="reaccion" hint-size="100%,1100px"></dc-import>
+  </div>
+  <main style="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px">
+    <header style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="lbl">Reacción · INC-0412</span>
+        <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600">Intento de robo · Méx–Qro km 142</h1>
+        <span style="color:#5F6B7A;font-size:14px">Abierto desde alerta Samsara · SRV-24817 · Alpura · lácteos refrigerados $2.4M</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn" href="ReporteIncidente.dc.html">Reporte post-incidente</a>
+        <button type="button" class="btn btn-pri" onClick="{{next}}">{{nextLabel}}</button>
+      </div>
+    </header>
+
+    <section aria-label="Sugerencia de IA" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <div style="flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-weight:600">IA · ruta probable de escape</span><span style="font-size:14px;color:#3E4A59">En 12 incidentes previos en este tramo, 70% de los vehículos salió por el entronque a Polotitlán (km 151). Sugiero posicionar a Guardia Nacional ahí. La tasa de recuperación del área sube cada mes.</span></div>
+      <figure style="margin:0;display:flex;flex-direction:column;gap:4px">
+        <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Porcentaje de recuperación de abril a septiembre: 61, 64, 66, 70, 69 y 72 por ciento" style="display:block"><path d="M10 60H210" stroke="#E4E8ED"></path><polyline points="10,47 50,38 90,32 130,20 170,23 210,14" fill="none" stroke="#2B9A66" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline><circle cx="210" cy="14" r="4" fill="#2B9A66"></circle><text x="176" y="10" font-family="IBM Plex Mono, monospace" font-size="10" fill="#17784A">72%</text></svg>
+        <figcaption style="font-size:11px;color:#5F6B7A">% de recuperación · abr a sep</figcaption>
+      </figure>
+      <a class="btn" href="AsistenteIA.dc.html">Preguntarle a la IA</a>
+    </section>
+
+    <ol aria-label="Flujo de reacción" style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr));gap:8px">
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="6">
+        <li style="{{s.style}}">
+          <span class="mono" style="font-size:12px;opacity:.85">{{s.n}} · {{s.time}}</span>
+          <span style="font-weight:600;font-size:14px">{{s.label}}</span>
+        </li>
+      </sc-for>
+    </ol>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:16px">
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Alerta → incidente</span><span style="font-family:'Archivo';font-size:28px;font-weight:600">1 min</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Aviso a autoridades</span><span style="font-family:'Archivo';font-size:28px;font-weight:600">4 min</span><span style="font-size:13px;color:#5F6B7A">Guardia Nacional · C5 Edomex</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Equipo en sitio</span><span style="font-family:'Archivo';font-size:28px;font-weight:600">17 min</span><span style="font-size:13px;color:#5F6B7A">Meta: 20 min</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:6px"><span class="lbl">Equipo de reacción</span><span style="font-family:'Archivo';font-size:20px;font-weight:600">Unidad R-03</span><span style="font-size:13px;color:#5F6B7A">G. Pacheco + 3 · base San Juan del Río</span></div>
+    </section>
+
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+      <section class="card" style="flex:999 1 480px;display:flex;flex-direction:column;gap:12px">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Bitácora minuto a minuto</h2>
+        <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">
+          <sc-for list="{{log}}" as="l" hint-placeholder-count="8">
+            <li style="display:grid;grid-template-columns:60px minmax(0,1fr) auto;gap:12px;padding:10px 0;border-top:1px solid #EEF1F4;align-items:start">
+              <span class="mono" style="font-size:13px;color:#5F6B7A">{{l.t}}</span>
+              <span style="font-size:14px">{{l.text}}</span>
+              <span style="font-size:12px;color:#5F6B7A;white-space:nowrap">{{l.who}}</span>
+            </li>
+          </sc-for>
+        </ol>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A">Nueva entrada
+          <input type="text" placeholder="Acción, contacto o hallazgo" style="min-height:44px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif">
+        </label>
+      </section>
+
+      <section class="card" style="flex:1 1 300px;display:flex;flex-direction:column;gap:16px">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Resultado</h2>
+        <fieldset style="border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px">
+          <legend class="lbl" style="margin-bottom:8px">Recuperación</legend>
+          <sc-for list="{{outcomes}}" as="o" hint-placeholder-count="3">
+            <button type="button" class="btn" style="{{o.style}}" onClick="{{o.pick}}">{{o.label}}</button>
+          </sc-for>
+        </fieldset>
+        <dl style="margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;font-size:14px">
+          <div><dt class="lbl">Valor recuperado</dt><dd class="mono" style="margin:4px 0 0;color:#17784A">{{recovered}}</dd></div>
+          <div><dt class="lbl">Pérdida</dt><dd class="mono" style="margin:4px 0 0;color:#B42318">{{lost}}</dd></div>
+          <div><dt class="lbl">Denuncia</dt><dd class="mono" style="margin:4px 0 0">FGJEM/CUA/1184/2026</dd></div>
+          <div><dt class="lbl">Aseguradora</dt><dd style="margin:4px 0 0">Siniestro reportado</dd></div>
+        </dl>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span class="lbl">Evidencias</span>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+            <div style="aspect-ratio:1;background:#F3F5F8;border:1px dashed #D5DBE3;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F6B7A">Foto 1</div>
+            <div style="aspect-ratio:1;background:#F3F5F8;border:1px dashed #D5DBE3;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F6B7A">Foto 2</div>
+            <div style="aspect-ratio:1;background:#F3F5F8;border:1px dashed #D5DBE3;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F6B7A">Acta MP</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Mapa de calor · incidentes por carretera y horario (trimestre)</h2>
+        <span style="font-size:13px;color:#5F6B7A">Alimenta el factor de riesgo del cotizador</span>
+      </div>
+      <div style="overflow-x:auto">
+        <div style="display:grid;grid-template-columns:200px repeat(6,minmax(64px,1fr));gap:4px;min-width:640px;font-size:13px">
+          <span></span><span class="lbl" style="text-align:center">00–04</span><span class="lbl" style="text-align:center">04–08</span><span class="lbl" style="text-align:center">08–12</span><span class="lbl" style="text-align:center">12–16</span><span class="lbl" style="text-align:center">16–20</span><span class="lbl" style="text-align:center">20–24</span>
+          <sc-for list="{{heat}}" as="h" hint-placeholder-count="6">
+            <span style="display:flex;align-items:center">{{h.road}}</span>
+            <sc-for list="{{h.cells}}" as="c" hint-placeholder-count="6">
+              <span class="mono" style="{{c.style}}">{{c.v}}</span>
+            </sc-for>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { step: 3, out: 'total' }; }
+  renderVals() {
+    const labels = ['Detección', 'Aviso a autoridades', 'Equipo asignado', 'Búsqueda y seguimiento', 'Recuperación', 'Cierre y reporte'];
+    const times = ['14:30', '14:34', '14:35', '14:47', '—', '—'];
+    const step = this.state.step;
+    const O = { total: ['Recuperación total', '$2,400,000', '$0'], parcial: ['Recuperación parcial', '$1,750,000', '$650,000'], perdida: ['Pérdida', '$0', '$2,400,000'] };
+    const heat = [['Arco Norte', [3, 1, 0, 0, 1, 2]], ['Méx–Puebla–Orizaba', [2, 1, 0, 1, 0, 2]], ['Méx–Querétaro', [1, 1, 0, 1, 1, 1]], ['Querétaro–SLP', [2, 0, 0, 0, 0, 2]], ['Guadalajara–Colima', [1, 0, 0, 0, 1, 1]], ['Monterrey–Nuevo Laredo', [0, 1, 0, 0, 0, 1]]];
+    const shade = (v) => ['#F3F5F8', '#FBE3CF', '#F5B98A', '#E8743B'][Math.min(v, 3)];
+    return {
+      steps: labels.map((label, i) => ({ label, n: i + 1, time: i < step ? times[i] : (i === step ? 'en curso' : '—'),
+        style: 'display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:8px;' + (i < step ? 'background:#E3F6EC;color:#17784A' : i === step ? 'background:#FFF1DB;color:#8A5300;outline:1px solid #F2A93B' : 'background:#F3F5F8;color:#5F6B7A') })),
+      next: () => this.setState({ step: Math.min(step + 1, 6) }),
+      nextLabel: step >= 6 ? 'Incidente cerrado' : 'Avanzar a: ' + labels[Math.min(step, 5)],
+      log: [
+        { t: '14:30', text: 'Alerta de desvío Samsara convertida en incidente (intento de robo)', who: 'L. Herrera' },
+        { t: '14:31', text: 'Custodio R. Medina reporta cierre del paso por dos vehículos', who: 'Radio' },
+        { t: '14:34', text: 'Aviso a Guardia Nacional y C5 Edomex, folio 88213', who: 'L. Herrera' },
+        { t: '14:35', text: 'Unidad de reacción R-03 asignada, sale de San Juan del Río', who: 'Coordinación' },
+        { t: '14:39', text: 'Tráiler detenido en camino de terracería; motor apagado remoto', who: 'Samsara' },
+        { t: '14:47', text: 'R-03 y Guardia Nacional en sitio; agresores huyen', who: 'G. Pacheco' },
+        { t: '14:52', text: 'Inspección de sellos: carga íntegra', who: 'G. Pacheco' },
+        { t: '14:58', text: 'Aviso al cliente Alpura y a aseguradora', who: 'Coordinación' }
+      ],
+      outcomes: Object.keys(O).map(k => ({ label: O[k][0], pick: () => this.setState({ out: k }), style: k === this.state.out ? 'justify-content:flex-start;background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : 'justify-content:flex-start' })),
+      recovered: O[this.state.out][1], lost: O[this.state.out][2],
+      heat: heat.map(([road, vs]) => ({ road, cells: vs.map(v => ({ v, style: 'display:flex;align-items:center;justify-content:center;height:40px;border-radius:4px;background:' + shade(v) + ';color:' + (v ? '#5A2A0A' : '#A0AAB6') })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

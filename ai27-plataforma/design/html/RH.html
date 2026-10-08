@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="es"><head><style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  </style>
+<meta charset="utf-8">
+<title>AI27 · Personas</title>
+<style>x-dc{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" data-dc-tpl="1"><style data-dc-tpl="2">
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EEF1F4;color:#4A5868}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.k{font-family:'Archivo',sans-serif;font-size:26px;font-weight:600}
+.sel{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+</style><style data-dc-tpl="2">body{margin:0}</style></head>
+<body>
+<div id="dc-root"><div class="sc-host" data-sc-name="RH"><div data-dc-tpl="3" style="font-family: &quot;IBM Plex Sans&quot;, system-ui, sans-serif; color: rgb(18, 24, 33); background: rgb(246, 247, 249); min-height: 100vh; display: flex; flex-wrap: wrap;">
+  <div data-dc-tpl="4" style="flex: 1 1 240px; background: rgb(255, 255, 255); border-right: 1px solid rgb(238, 241, 244);">
+    <div class="sc-host" data-sc-name="Nav" data-dc-tpl="5"><nav data-dc-tpl="3" aria-label="Principal" style="font-family: &quot;IBM Plex Sans&quot;, system-ui, sans-serif; color: rgb(18, 24, 33); background: rgb(255, 255, 255); box-sizing: border-box; padding: 22px 14px 28px; display: flex; flex-direction: column; gap: 22px;">
+  <a data-dc-tpl="4" href="Main.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: rgb(18, 24, 33); padding: 0px 8px;">
+    <svg data-dc-tpl="5" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path data-dc-tpl="6" d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#F2A93B" stroke-width="2"></path><path data-dc-tpl="7" d="M10 17l4 4 8-9" stroke="#F2A93B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    <span data-dc-tpl="8" style="display: flex; flex-direction: column; line-height: 1.1;">
+      <span data-dc-tpl="9" style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.02em;">AI27</span>
+      <span data-dc-tpl="10" style="font-size: 11px; color: rgb(95, 107, 122); letter-spacing: 0.08em; text-transform: uppercase;">Centro de operación</span>
+    </span>
+  </a>
+  
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="13" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132); padding: 0px 12px 6px;"><span class="sc-interp">Operación</span></span>
+      
+        <a data-dc-tpl="15" href="Main.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Dashboard</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="AsistenteIA.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M4 5h16v11H9l-5 4zM12 7.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Asistente IA</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Servicios.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM8 17h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Servicios</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="AsignacionIA.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Asignación IA</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Monitoreo.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Monitoreo en vivo</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Reaccion.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 3l9 16H3zM12 10v4M12 17.5v.01"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Reacción</span></span>
+        </a>
+      
+    </div>
+  
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="13" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132); padding: 0px 12px 6px;"><span class="sc-interp">Recursos</span></span>
+      
+        <a data-dc-tpl="15" href="Custodios.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8 16.5c1-1.5 2.4-2.2 4-2.2s3 .7 4 2.2"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Custodios</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Flotilla.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M5 16v2M19 16v2M4 12l2-5h12l2 5v4H4zM7.5 13.5h.01M16.5 13.5h.01"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Flotilla y taller</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="RH.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; background: rgb(255, 241, 219); color: rgb(138, 83, 0); font-weight: 600;">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.8-3.4 3.4-5 6.5-5s5.7 1.6 6.5 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18.5 15c1.6.6 2.7 2.2 3 5"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Personas (RH)</span></span>
+        </a>
+      
+    </div>
+  
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="13" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132); padding: 0px 12px 6px;"><span class="sc-interp">Comercial</span></span>
+      
+        <a data-dc-tpl="15" href="Cotizador.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01M9 17h.01M12 17h3"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Cotizador</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="CRM.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M3 8h18v12H3zM8 8V5h8v3M3 13h18"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Clientes y CRM</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Finanzas.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M3 3v18h18M7 15l4-4 3 3 5-6"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Finanzas</span></span>
+        </a>
+      
+    </div>
+  
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="13" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132); padding: 0px 12px 6px;"><span class="sc-interp">Administración</span></span>
+      
+        <a data-dc-tpl="15" href="Reportes.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M6 3h9l3 3v15H6zM9 17v-3M12 17v-6M15 17v-4"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Reportes</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="PortalColaborador.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Mi portal</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="Usuarios.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M6 11h12v10H6zM8.5 11V7.5a3.5 3.5 0 0 1 7 0V11M12 15v2"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Usuarios y roles</span></span>
+        </a>
+      
+        <a data-dc-tpl="15" href="CustodioMovil.html" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: rgb(62, 74, 89);">
+          <svg data-dc-tpl="16" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="17" d="M8 2.5h8a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 20V4A1.5 1.5 0 0 1 8 2.5zM11 18h2"></path></svg>
+          <span data-dc-tpl="18"><span class="sc-interp">Vista custodio</span></span>
+        </a>
+      
+    </div>
+  
+  <div data-dc-tpl="19" style="display: flex; flex-direction: column; gap: 8px; padding: 14px 12px; border: 1px solid rgb(228, 232, 237); border-radius: 10px; font-size: 12px; color: rgb(62, 74, 89);">
+    <span data-dc-tpl="20" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(107, 118, 132);">Fuentes de telemetría</span>
+    <span data-dc-tpl="21" style="display: flex; align-items: center; gap: 8px;"><span data-dc-tpl="22" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(76, 195, 138);"></span>Samsara · principal</span>
+    <span data-dc-tpl="23" style="display: flex; align-items: center; gap: 8px;"><span data-dc-tpl="24" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(63, 167, 201);"></span>Ruptela · secundaria</span>
+  </div>
+  <div data-dc-tpl="25" style="display: flex; align-items: center; gap: 10px; padding: 0px 8px;">
+    <span data-dc-tpl="26" style="width: 36px; height: 36px; border-radius: 50%; background: rgb(255, 241, 219); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: rgb(138, 83, 0);">DR</span>
+    <span data-dc-tpl="27" style="display: flex; flex-direction: column; font-size: 13px; line-height: 1.3;"><span data-dc-tpl="28">Dirección</span><span data-dc-tpl="29" style="color: rgb(95, 107, 122); font-size: 12px;">Rol: Dirección general</span></span>
+  </div></nav></div>
+  </div>
+  <main data-dc-tpl="6" style="flex: 999 1 560px; min-width: 0px; padding: 28px 32px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px;">
+    <header data-dc-tpl="7" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between;">
+      <div data-dc-tpl="8" style="display: flex; flex-direction: column; gap: 6px;">
+        <span data-dc-tpl="9" class="lbl">Recursos humanos · toda la empresa</span>
+        <h1 data-dc-tpl="10" style="margin: 0px; font-family: Archivo, sans-serif; font-size: 32px; font-weight: 600;">Personas</h1>
+        <span data-dc-tpl="11" style="color: rgb(95, 107, 122); font-size: 14px;">486 colaboradores en 9 áreas y 4 sedes</span>
+      </div>
+      <div data-dc-tpl="12" style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a data-dc-tpl="13" class="btn" href="PortalColaborador.html">Portal del colaborador</a>
+        <button data-dc-tpl="14" type="button" class="btn">Exportar plantilla</button>
+        <button data-dc-tpl="15" type="button" class="btn btn-pri">Alta de colaborador</button>
+      </div>
+    </header>
+
+    <section data-dc-tpl="16" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 12px;">
+      <div data-dc-tpl="17" class="card" style="display: flex; flex-direction: column; gap: 6px; padding: 16px;"><span data-dc-tpl="18" class="lbl">Headcount</span><span data-dc-tpl="19" class="k">486</span><span data-dc-tpl="20" style="font-size: 13px; color: rgb(95, 107, 122);">+5 vs agosto</span></div>
+      <div data-dc-tpl="21" class="card" style="display: flex; flex-direction: column; gap: 6px; padding: 16px;"><span data-dc-tpl="22" class="lbl">Altas del mes</span><span data-dc-tpl="23" class="k" style="color: rgb(23, 120, 74);">14</span><span data-dc-tpl="24" style="font-size: 13px; color: rgb(95, 107, 122);">11 custodios · 3 oficina</span></div>
+      <div data-dc-tpl="25" class="card" style="display: flex; flex-direction: column; gap: 6px; padding: 16px;"><span data-dc-tpl="26" class="lbl">Bajas del mes</span><span data-dc-tpl="27" class="k" style="color: rgb(180, 35, 24);">9</span><span data-dc-tpl="28" style="font-size: 13px; color: rgb(95, 107, 122);">7 voluntarias</span></div>
+      <div data-dc-tpl="29" class="card" style="display: flex; flex-direction: column; gap: 6px; padding: 16px;"><span data-dc-tpl="30" class="lbl">Rotación</span><span data-dc-tpl="31" class="k">3.1%</span><span data-dc-tpl="32" style="font-size: 13px; color: rgb(95, 107, 122);">mensual</span></div>
+      <div data-dc-tpl="33" class="card" style="display: flex; flex-direction: column; gap: 6px; padding: 16px;"><span data-dc-tpl="34" class="lbl">De vacaciones hoy</span><span data-dc-tpl="35" class="k">12</span><span data-dc-tpl="36" style="font-size: 13px; color: rgb(95, 107, 122);">4 solicitudes por aprobar</span></div>
+      <div data-dc-tpl="37" class="card" style="display: flex; flex-direction: column; gap: 6px; padding: 16px;"><span data-dc-tpl="38" class="lbl">Vacantes</span><span data-dc-tpl="39" class="k">23</span><span data-dc-tpl="40" style="font-size: 13px; color: rgb(95, 107, 122);">19 días para contratar</span></div>
+    </section>
+
+    <section data-dc-tpl="41" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 16px;">
+      <figure data-dc-tpl="42" class="card" style="margin: 0px; display: flex; flex-direction: column; gap: 12px;">
+        <figcaption data-dc-tpl="43" style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;"><span data-dc-tpl="44" style="font-family: Archivo, sans-serif; font-size: 16px; font-weight: 600;">Altas y bajas por mes</span>
+          <span data-dc-tpl="45" style="display: flex; gap: 14px; font-size: 12px; color: rgb(62, 74, 89);"><span data-dc-tpl="46" style="display: flex; gap: 6px; align-items: center;"><span data-dc-tpl="47" style="width: 10px; height: 10px; border-radius: 2px; background: rgb(43, 154, 102);"></span>Altas</span><span data-dc-tpl="48" style="display: flex; gap: 6px; align-items: center;"><span data-dc-tpl="49" style="width: 10px; height: 10px; border-radius: 2px; background: rgb(217, 83, 79);"></span>Bajas</span></span>
+        </figcaption>
+        <div data-dc-tpl="50" style="display: flex; gap: 18px; align-items: flex-end; height: 130px;">
+          
+            <div data-dc-tpl="52" style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <div data-dc-tpl="53" style="display: flex; gap: 3px; align-items: flex-end; height: 104px;"><div data-dc-tpl="54" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(43, 154, 102); height: 54px;"></div><div data-dc-tpl="55" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(217, 83, 79); height: 24px;"></div></div>
+              <span data-dc-tpl="56" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Abr</span></span>
+            </div>
+          
+            <div data-dc-tpl="52" style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <div data-dc-tpl="53" style="display: flex; gap: 3px; align-items: flex-end; height: 104px;"><div data-dc-tpl="54" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(43, 154, 102); height: 66px;"></div><div data-dc-tpl="55" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(217, 83, 79); height: 36px;"></div></div>
+              <span data-dc-tpl="56" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">May</span></span>
+            </div>
+          
+            <div data-dc-tpl="52" style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <div data-dc-tpl="53" style="display: flex; gap: 3px; align-items: flex-end; height: 104px;"><div data-dc-tpl="54" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(43, 154, 102); height: 60px;"></div><div data-dc-tpl="55" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(217, 83, 79); height: 36px;"></div></div>
+              <span data-dc-tpl="56" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Jun</span></span>
+            </div>
+          
+            <div data-dc-tpl="52" style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <div data-dc-tpl="53" style="display: flex; gap: 3px; align-items: flex-end; height: 104px;"><div data-dc-tpl="54" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(43, 154, 102); height: 72px;"></div><div data-dc-tpl="55" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(217, 83, 79); height: 48px;"></div></div>
+              <span data-dc-tpl="56" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Jul</span></span>
+            </div>
+          
+            <div data-dc-tpl="52" style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <div data-dc-tpl="53" style="display: flex; gap: 3px; align-items: flex-end; height: 104px;"><div data-dc-tpl="54" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(43, 154, 102); height: 90px;"></div><div data-dc-tpl="55" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(217, 83, 79); height: 48px;"></div></div>
+              <span data-dc-tpl="56" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Ago</span></span>
+            </div>
+          
+            <div data-dc-tpl="52" style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+              <div data-dc-tpl="53" style="display: flex; gap: 3px; align-items: flex-end; height: 104px;"><div data-dc-tpl="54" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(43, 154, 102); height: 84px;"></div><div data-dc-tpl="55" style="width: 14px; border-radius: 3px 3px 0px 0px; background: rgb(217, 83, 79); height: 54px;"></div></div>
+              <span data-dc-tpl="56" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Sep</span></span>
+            </div>
+          
+        </div>
+      </figure>
+      <figure data-dc-tpl="57" class="card" style="margin: 0px; display: flex; flex-direction: column; gap: 10px;">
+        <figcaption data-dc-tpl="58" style="font-family: Archivo, sans-serif; font-size: 16px; font-weight: 600;">Colaboradores por área</figcaption>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">Custodia</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 100%; background: rgb(43, 127, 168);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">400</span></span>
+          </div>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">Monitoreo</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 24%; background: rgb(106, 90, 205);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">24</span></span>
+          </div>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">Operaciones</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 19%; background: rgb(179, 107, 0);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">14</span></span>
+          </div>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">Flotilla y taller</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 18%; background: rgb(74, 88, 104);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">13</span></span>
+          </div>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">Reacción</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 17%; background: rgb(192, 73, 47);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">12</span></span>
+          </div>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">Finanzas</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 14%; background: rgb(138, 79, 160);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">8</span></span>
+          </div>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">Comercial</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 13%; background: rgb(43, 154, 102);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">7</span></span>
+          </div>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">RH</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 11%; background: rgb(208, 138, 28);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">5</span></span>
+          </div>
+        
+          <div data-dc-tpl="60" style="display: grid; grid-template-columns: 150px minmax(0px, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px;">
+            <span data-dc-tpl="61"><span class="sc-interp">Dirección</span></span><div data-dc-tpl="62" style="height: 8px; border-radius: 4px; background: rgb(235, 238, 242); overflow: hidden;"><div data-dc-tpl="63" style="height: 100%; width: 9%; background: rgb(18, 24, 33);"></div></div><span data-dc-tpl="64" class="mono" style="text-align: right;"><span class="sc-interp">3</span></span>
+          </div>
+        
+      </figure>
+    </section>
+
+    <section data-dc-tpl="65" aria-label="Sugerencia de IA" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: rgb(255, 248, 236); border: 1px solid rgb(243, 217, 168); border-radius: 10px; padding: 16px 18px;">
+      <svg data-dc-tpl="66" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto;"><path data-dc-tpl="67" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <div data-dc-tpl="68" style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 4px; min-width: 0px;"><span data-dc-tpl="69" style="font-weight: 600;">IA · riesgo de rotación</span><span data-dc-tpl="70" style="font-size: 14px; color: rgb(62, 74, 89);">7 colaboradores muestran el patrón previo a una baja: exceso de horas 3 semanas seguidas, vacaciones sin tomar y sin ajuste de sueldo en más de 18 meses. 5 son custodios de Bajío y 2 monitoristas.</span></div>
+      <a data-dc-tpl="71" class="btn" href="AsistenteIA.html">Ver a quiénes</a>
+    </section>
+
+    <div data-dc-tpl="72" role="tablist" aria-label="Sección de personas" style="display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid rgb(228, 232, 237); padding-bottom: 12px;">
+      
+        <button data-dc-tpl="74" type="button" role="tab" class="btn" style="background: rgb(255, 241, 219); border-color: rgb(242, 169, 59); color: rgb(138, 83, 0);"><span class="sc-interp">Directorio</span></button>
+      
+        <button data-dc-tpl="74" type="button" role="tab" class="btn" style=""><span class="sc-interp">Altas y bajas</span></button>
+      
+        <button data-dc-tpl="74" type="button" role="tab" class="btn" style=""><span class="sc-interp">Onboarding</span></button>
+      
+        <button data-dc-tpl="74" type="button" role="tab" class="btn" style=""><span class="sc-interp">Offboarding</span></button>
+      
+        <button data-dc-tpl="74" type="button" role="tab" class="btn" style=""><span class="sc-interp">Vacaciones</span></button>
+      
+        <button data-dc-tpl="74" type="button" role="tab" class="btn" style=""><span class="sc-interp">Reclutamiento</span></button>
+      
+    </div>
+
+    
+      <div data-dc-tpl="76" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start;">
+        <section data-dc-tpl="77" style="flex: 999 1 520px; min-width: 0px; display: flex; flex-direction: column; gap: 14px;">
+          <div data-dc-tpl="78" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <label data-dc-tpl="79" style="display: flex; flex: 1 1 240px;"><span data-dc-tpl="80" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px);">Buscar persona</span><input data-dc-tpl="81" type="search" class="sel" placeholder="Buscar por nombre, puesto o número" style="flex: 1 1 0%;"></label>
+            <label data-dc-tpl="82" style="display: flex;"><span data-dc-tpl="83" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px);">Área</span><select data-dc-tpl="84" class="sel"><option data-dc-tpl="85">Todas las áreas</option><option data-dc-tpl="86">Custodia</option><option data-dc-tpl="87">Monitoreo</option><option data-dc-tpl="88">Reacción</option><option data-dc-tpl="89">Operaciones</option><option data-dc-tpl="90">Flotilla y taller</option><option data-dc-tpl="91">Comercial</option><option data-dc-tpl="92">Finanzas y administración</option><option data-dc-tpl="93">RH</option><option data-dc-tpl="94">Dirección</option></select></label>
+            <label data-dc-tpl="95" style="display: flex;"><span data-dc-tpl="96" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px);">Sede</span><select data-dc-tpl="97" class="sel"><option data-dc-tpl="98">Todas las sedes</option><option data-dc-tpl="99">Cuautitlán</option><option data-dc-tpl="100">Querétaro</option><option data-dc-tpl="101">Monterrey</option><option data-dc-tpl="102">Veracruz</option></select></label>
+          </div>
+          <div data-dc-tpl="103" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr)); gap: 12px;">
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(242, 169, 59); box-shadow: rgb(255, 241, 219) 0px 0px 0px 2px;">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(208, 138, 28);"><span class="sc-interp">KM</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Karla May</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Gerente de RH</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">RH</span> · <span class="sc-interp">Cuautitlán</span></span>
+                  <span data-dc-tpl="111" class="pill p-ok" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Activo</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(106, 90, 205);"><span class="sc-interp">LH</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Luis Herrera</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Monitorista Sr</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Monitoreo</span> · <span class="sc-interp">Cuautitlán</span></span>
+                  <span data-dc-tpl="111" class="pill p-ok" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Activo</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(43, 127, 168);"><span class="sc-interp">RM</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Raúl Medina</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Custodio armado</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Custodia</span> · <span class="sc-interp">Cuautitlán</span></span>
+                  <span data-dc-tpl="111" class="pill p-ok" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Activo</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(192, 73, 47);"><span class="sc-interp">GP</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Gabriel Pacheco</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Jefe de reacción</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Reacción</span> · <span class="sc-interp">Querétaro</span></span>
+                  <span data-dc-tpl="111" class="pill p-ok" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Activo</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(138, 79, 160);"><span class="sc-interp">LC</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Laura Cruz</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Contadora general</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Finanzas</span> · <span class="sc-interp">Cuautitlán</span></span>
+                  <span data-dc-tpl="111" class="pill p-info" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Vacaciones</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(179, 107, 0);"><span class="sc-interp">JP</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Jorge Pérez</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Coordinador de operaciones</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Operaciones</span> · <span class="sc-interp">Cuautitlán</span></span>
+                  <span data-dc-tpl="111" class="pill p-ok" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Activo</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(43, 154, 102);"><span class="sc-interp">AD</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Ana Domínguez</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Ejecutiva comercial</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Comercial</span> · <span class="sc-interp">Monterrey</span></span>
+                  <span data-dc-tpl="111" class="pill p-ok" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Activo</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(74, 88, 104);"><span class="sc-interp">RS</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Ricardo Salas</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Jefe de taller</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Flotilla y taller</span> · <span class="sc-interp">Cuautitlán</span></span>
+                  <span data-dc-tpl="111" class="pill p-ok" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Activo</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(43, 127, 168);"><span class="sc-interp">LC</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Luis Canché</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Custodio</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Custodia</span> · <span class="sc-interp">Querétaro</span></span>
+                  <span data-dc-tpl="111" class="pill p-warn" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Onboarding</span></span>
+                </span>
+              </button>
+            
+              <button data-dc-tpl="105" type="button" style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; color: rgb(18, 24, 33); background: rgb(255, 255, 255); border: 1px solid rgb(228, 232, 237);">
+                <span data-dc-tpl="106" style="width: 48px; height: 48px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 17px; background: rgb(43, 127, 168);"><span class="sc-interp">DS</span></span>
+                <span data-dc-tpl="107" style="display: flex; flex-direction: column; gap: 2px; min-width: 0px; text-align: left;">
+                  <span data-dc-tpl="108" style="font-weight: 600; font-size: 14px;"><span class="sc-interp">Daniel Soto</span></span>
+                  <span data-dc-tpl="109" style="font-size: 13px; color: rgb(62, 74, 89);"><span class="sc-interp">Custodio armado</span></span>
+                  <span data-dc-tpl="110" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">Custodia</span> · <span class="sc-interp">Monterrey</span></span>
+                  <span data-dc-tpl="111" class="pill p-warn" style="align-self: flex-start; margin-top: 4px;"><span class="sc-interp">Incapacidad</span></span>
+                </span>
+              </button>
+            
+          </div>
+          <span data-dc-tpl="112" style="font-size: 13px; color: rgb(95, 107, 122);">Mostrando 10 de 486 · las iniciales se reemplazan por la foto del expediente</span>
+        </section>
+
+        <aside data-dc-tpl="113" class="card" aria-label="Perfil" style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 18px;">
+          <div data-dc-tpl="114" style="display: flex; gap: 16px; align-items: center;">
+            <span data-dc-tpl="115" style="width: 80px; height: 80px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgb(255, 255, 255); font-weight: 600; font-size: 29px; background: rgb(208, 138, 28);"><span class="sc-interp">KM</span></span>
+            <div data-dc-tpl="116" style="display: flex; flex-direction: column; gap: 3px; min-width: 0px;">
+              <span data-dc-tpl="117" style="font-family: Archivo, sans-serif; font-size: 20px; font-weight: 600;"><span class="sc-interp">Karla May</span></span>
+              <span data-dc-tpl="118" style="font-size: 14px; color: rgb(62, 74, 89);"><span class="sc-interp">Gerente de RH</span></span>
+              <span data-dc-tpl="119" class="mono" style="font-size: 12px; color: rgb(95, 107, 122);"><span class="sc-interp">E-0042</span> · <span class="sc-interp">RH</span> · <span class="sc-interp">Cuautitlán</span></span>
+            </div>
+          </div>
+          <div data-dc-tpl="120" style="display: flex; gap: 8px; flex-wrap: wrap;"><button data-dc-tpl="121" type="button" class="btn">Cambiar foto</button><button data-dc-tpl="122" type="button" class="btn">Editar</button><button data-dc-tpl="123" type="button" class="btn">Iniciar baja</button></div>
+          <dl data-dc-tpl="124" style="margin: 0px; display: grid; grid-template-columns: repeat(2, minmax(0px, 1fr)); gap: 12px; font-size: 14px;">
+            <div data-dc-tpl="125"><dt data-dc-tpl="126" class="lbl">Ingreso</dt><dd data-dc-tpl="127" style="margin: 4px 0px 0px;"><span class="sc-interp">feb 2019</span></dd></div>
+            <div data-dc-tpl="128"><dt data-dc-tpl="129" class="lbl">Antigüedad</dt><dd data-dc-tpl="130" style="margin: 4px 0px 0px;"><span class="sc-interp">7 años 8 meses</span></dd></div>
+            <div data-dc-tpl="131"><dt data-dc-tpl="132" class="lbl">Jefe directo</dt><dd data-dc-tpl="133" style="margin: 4px 0px 0px;"><span class="sc-interp">Dirección general</span></dd></div>
+            <div data-dc-tpl="134"><dt data-dc-tpl="135" class="lbl">Contrato</dt><dd data-dc-tpl="136" style="margin: 4px 0px 0px;">Indefinido</dd></div>
+          </dl>
+          <section data-dc-tpl="137" style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgb(238, 241, 244); padding-top: 14px;">
+            <div data-dc-tpl="138" style="display: flex; justify-content: space-between; gap: 8px; align-items: center;"><span data-dc-tpl="139" class="lbl">Compensación</span><span data-dc-tpl="140" class="pill p-mute">Visible para RH y Dirección</span></div>
+            <div data-dc-tpl="141" style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline;"><span data-dc-tpl="142" style="font-size: 14px;">Sueldo mensual bruto</span><span data-dc-tpl="143" class="mono" style="font-size: 20px; font-weight: 500;"><span class="sc-interp">$42,000</span></span></div>
+            
+              <div data-dc-tpl="145" style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: rgb(62, 74, 89);"><span data-dc-tpl="146"><span class="sc-interp">ene 2026</span> · <span class="sc-interp">Ajuste anual</span></span><span data-dc-tpl="147" class="mono"><span class="sc-interp">$42,000</span></span></div>
+            
+              <div data-dc-tpl="145" style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: rgb(62, 74, 89);"><span data-dc-tpl="146"><span class="sc-interp">ene 2025</span> · <span class="sc-interp">Ajuste anual</span></span><span data-dc-tpl="147" class="mono"><span class="sc-interp">$39,500</span></span></div>
+            
+              <div data-dc-tpl="145" style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: rgb(62, 74, 89);"><span data-dc-tpl="146"><span class="sc-interp">jun 2023</span> · <span class="sc-interp">Promoción</span></span><span data-dc-tpl="147" class="mono"><span class="sc-interp">$36,000</span></span></div>
+            
+          </section>
+          <section data-dc-tpl="148" style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid rgb(238, 241, 244); padding-top: 14px;">
+            <span data-dc-tpl="149" class="lbl">Vacaciones <span class="sc-interp">2026</span></span>
+            <div data-dc-tpl="150" style="height: 10px; border-radius: 5px; background: rgb(235, 238, 242); overflow: hidden; display: flex;"><div data-dc-tpl="151" style="height: 100%; background: rgb(43, 127, 168); width: 63%;"></div></div>
+            <div data-dc-tpl="152" style="display: flex; justify-content: space-between; font-size: 13px; color: rgb(62, 74, 89);"><span data-dc-tpl="153"><span class="sc-interp">10</span> tomados</span><span data-dc-tpl="154"><span class="sc-interp">6</span> disponibles de <span class="sc-interp">16</span></span></div>
+          </section>
+          <section data-dc-tpl="155" style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid rgb(238, 241, 244); padding-top: 14px;">
+            <span data-dc-tpl="156" class="lbl">Historial</span>
+            <ol data-dc-tpl="157" style="list-style: none; margin: 0px; padding: 0px; display: flex; flex-direction: column;">
+              
+                <li data-dc-tpl="159" style="display: grid; grid-template-columns: 80px 12px minmax(0px, 1fr); gap: 10px; padding: 6px 0px; font-size: 13px;"><span data-dc-tpl="160" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">feb 2019</span></span><span data-dc-tpl="161" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(208, 138, 28); margin-top: 5px;"></span><span data-dc-tpl="162"><span class="sc-interp">Ingreso como Coordinadora de reclutamiento</span></span></li>
+              
+                <li data-dc-tpl="159" style="display: grid; grid-template-columns: 80px 12px minmax(0px, 1fr); gap: 10px; padding: 6px 0px; font-size: 13px;"><span data-dc-tpl="160" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">jun 2023</span></span><span data-dc-tpl="161" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(208, 138, 28); margin-top: 5px;"></span><span data-dc-tpl="162"><span class="sc-interp">Promoción a Gerente de RH</span></span></li>
+              
+                <li data-dc-tpl="159" style="display: grid; grid-template-columns: 80px 12px minmax(0px, 1fr); gap: 10px; padding: 6px 0px; font-size: 13px;"><span data-dc-tpl="160" class="mono" style="color: rgb(95, 107, 122);"><span class="sc-interp">mar 2026</span></span><span data-dc-tpl="161" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(208, 138, 28); margin-top: 5px;"></span><span data-dc-tpl="162"><span class="sc-interp">Evaluación anual: sobresaliente</span></span></li>
+              
+            </ol>
+          </section>
+          <section data-dc-tpl="163" style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid rgb(238, 241, 244); padding-top: 14px;">
+            <span data-dc-tpl="164" class="lbl">Documentos</span>
+            <div data-dc-tpl="165" style="display: flex; gap: 8px; flex-wrap: wrap;"><span data-dc-tpl="166" class="pill p-ok">INE</span><span data-dc-tpl="167" class="pill p-ok">Contrato</span><span data-dc-tpl="168" class="pill p-ok">Comprobante de domicilio</span><span data-dc-tpl="169" class="pill p-ok">Constancia fiscal</span><span data-dc-tpl="170" class="pill p-ok"><span class="sc-interp">Evaluación anual</span></span></div>
+          </section>
+        </aside>
+      </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </main></div></div></div>
+
+
+
+</body></html>

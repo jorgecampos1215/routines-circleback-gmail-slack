@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es"><head><style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  </style>
+<meta charset="utf-8">
+<title>AI27 · Cotización COT-1182</title>
+<style>x-dc{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" data-dc-tpl="1"><style data-dc-tpl="2">
+body{margin:0;background:#FFFFFF}
+a{color:#8A5300}a:hover{color:#5A3600}
+</style></head>
+<body>
+<div id="dc-root"><div class="sc-host" data-sc-name="CotizacionPDF"><div data-dc-tpl="3" style="width: 816px; height: 1056px; box-sizing: border-box; padding: 56px 72px 48px; background: rgb(255, 255, 255); color: rgb(18, 24, 33); font-family: &quot;IBM Plex Sans&quot;, system-ui, sans-serif; font-size: 14px; line-height: 1.5; display: flex; flex-direction: column; gap: 22px;">
+  <header data-dc-tpl="4" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 18px; border-bottom: 3px solid rgb(208, 138, 28);">
+    <div data-dc-tpl="5" style="display: flex; align-items: center; gap: 10px;">
+      <svg data-dc-tpl="6" width="36" height="36" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path data-dc-tpl="7" d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#D08A1C" stroke-width="2"></path><path data-dc-tpl="8" d="M10 17l4 4 8-9" stroke="#D08A1C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <div data-dc-tpl="9" style="display: flex; flex-direction: column; line-height: 1.2;">
+        <span data-dc-tpl="10" style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 24px;">AI27</span>
+        <span data-dc-tpl="11" style="font-size: 12px; color: rgb(95, 107, 122);">Seguridad y custodia de carga en tránsito</span>
+      </div>
+    </div>
+    <div data-dc-tpl="12" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+      <span data-dc-tpl="13" style="font-family: Archivo, sans-serif; font-size: 22px; font-weight: 600; letter-spacing: 0.04em;">COTIZACIÓN</span>
+      <span data-dc-tpl="14" style="font-family: &quot;IBM Plex Mono&quot;, monospace; font-size: 13px;">COT-1182</span>
+    </div>
+  </header>
+
+  <section data-dc-tpl="15" style="display: grid; grid-template-columns: repeat(2, minmax(0px, 1fr)); gap: 24px;">
+    <div data-dc-tpl="16" style="display: flex; flex-direction: column; gap: 2px;">
+      <span data-dc-tpl="17" style="font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: rgb(95, 107, 122);">Cliente</span>
+      <span data-dc-tpl="18" style="font-weight: 600; font-size: 16px;">Marsh</span>
+      <span data-dc-tpl="19">Atención: [NOMBRE DEL CONTACTO]</span>
+      <span data-dc-tpl="20">[CORREO] · [TELÉFONO]</span>
+    </div>
+    <div data-dc-tpl="21" style="display: grid; grid-template-columns: auto 1fr; gap: 2px 16px; align-content: start;">
+      <span data-dc-tpl="22" style="color: rgb(95, 107, 122);">Fecha</span><span data-dc-tpl="23">7 de octubre de 2026</span>
+      <span data-dc-tpl="24" style="color: rgb(95, 107, 122);">Vigencia</span><span data-dc-tpl="25">15 días naturales</span>
+      <span data-dc-tpl="26" style="color: rgb(95, 107, 122);">Modelo</span><span data-dc-tpl="27">Custodia por evento</span>
+      <span data-dc-tpl="28" style="color: rgb(95, 107, 122);">Ejecutivo</span><span data-dc-tpl="29">[NOMBRE DEL EJECUTIVO]</span>
+    </div>
+  </section>
+
+  <section data-dc-tpl="30" style="background: rgb(247, 249, 251); border: 1px solid rgb(228, 232, 237); border-radius: 8px; padding: 14px 16px; display: grid; grid-template-columns: repeat(4, minmax(0px, 1fr)); gap: 12px;">
+    <div data-dc-tpl="31" style="display: flex; flex-direction: column;"><span data-dc-tpl="32" style="font-size: 12px; color: rgb(95, 107, 122);">Ruta</span><span data-dc-tpl="33" style="font-weight: 500;">Tepotzotlán → San Luis Potosí</span></div>
+    <div data-dc-tpl="34" style="display: flex; flex-direction: column;"><span data-dc-tpl="35" style="font-size: 12px; color: rgb(95, 107, 122);">Distancia y tiempo</span><span data-dc-tpl="36" style="font-weight: 500;">382 km · 4 h 40</span></div>
+    <div data-dc-tpl="37" style="display: flex; flex-direction: column;"><span data-dc-tpl="38" style="font-size: 12px; color: rgb(95, 107, 122);">Salida</span><span data-dc-tpl="39" style="font-weight: 500;">8 oct 2026 · 22:00</span></div>
+    <div data-dc-tpl="40" style="display: flex; flex-direction: column;"><span data-dc-tpl="41" style="font-size: 12px; color: rgb(95, 107, 122);">Nivel de riesgo</span><span data-dc-tpl="42" style="font-weight: 500;">Alto · horario nocturno</span></div>
+  </section>
+
+  <table data-dc-tpl="43" style="width: 100%; border-collapse: collapse;">
+    <thead data-dc-tpl="44">
+      <tr data-dc-tpl="45" style="background: rgb(18, 24, 33); color: rgb(255, 255, 255);">
+        <th data-dc-tpl="46" style="text-align: left; padding: 10px 12px; font-weight: 500; font-size: 13px;">Concepto</th>
+        <th data-dc-tpl="47" style="text-align: right; padding: 10px 12px; font-weight: 500; font-size: 13px;">Cant.</th>
+        <th data-dc-tpl="48" style="text-align: right; padding: 10px 12px; font-weight: 500; font-size: 13px;">Importe</th>
+      </tr>
+    </thead>
+    <tbody data-dc-tpl="49">
+      <tr data-dc-tpl="50"><td data-dc-tpl="51" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227);"><b data-dc-tpl="52" style="font-weight: 600;">Custodios armados certificados</b><br data-dc-tpl="53"><span data-dc-tpl="54" style="color: rgb(62, 74, 89);">Turno nocturno, portación vigente y evaluación de confianza</span></td><td data-dc-tpl="55" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227); text-align: right; font-family: &quot;IBM Plex Mono&quot;, monospace;">2</td><td data-dc-tpl="56" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227); text-align: right; font-family: &quot;IBM Plex Mono&quot;, monospace;">$15,785.00</td></tr>
+      <tr data-dc-tpl="57"><td data-dc-tpl="58" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227);"><b data-dc-tpl="59" style="font-weight: 600;">Unidad de custodia con GPS</b><br data-dc-tpl="60"><span data-dc-tpl="61" style="color: rgb(62, 74, 89);">Incluye combustible del trayecto</span></td><td data-dc-tpl="62" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227); text-align: right; font-family: &quot;IBM Plex Mono&quot;, monospace;">1</td><td data-dc-tpl="63" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227); text-align: right; font-family: &quot;IBM Plex Mono&quot;, monospace;">$2,685.00</td></tr>
+      <tr data-dc-tpl="64"><td data-dc-tpl="65" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227);"><b data-dc-tpl="66" style="font-weight: 600;">Casetas de peaje</b><br data-dc-tpl="67"><span data-dc-tpl="68" style="color: rgb(62, 74, 89);">6 casetas en ruta</span></td><td data-dc-tpl="69" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227); text-align: right; font-family: &quot;IBM Plex Mono&quot;, monospace;">1</td><td data-dc-tpl="70" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227); text-align: right; font-family: &quot;IBM Plex Mono&quot;, monospace;">$2,830.00</td></tr>
+      <tr data-dc-tpl="71"><td data-dc-tpl="72" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227);"><b data-dc-tpl="73" style="font-weight: 600;">Monitoreo 24/7 desde centro de control</b><br data-dc-tpl="74"><span data-dc-tpl="75" style="color: rgb(62, 74, 89);">Seguimiento en vivo, alertas y protocolo de reacción</span></td><td data-dc-tpl="76" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227); text-align: right; font-family: &quot;IBM Plex Mono&quot;, monospace;">1</td><td data-dc-tpl="77" style="padding: 12px; border-bottom: 1px solid rgb(213, 219, 227); text-align: right; font-family: &quot;IBM Plex Mono&quot;, monospace;">Incluido</td></tr>
+    </tbody>
+  </table>
+
+  <section data-dc-tpl="78" style="display: flex; justify-content: flex-end;">
+    <div data-dc-tpl="79" style="width: 300px; display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; font-family: &quot;IBM Plex Mono&quot;, monospace;">
+      <span data-dc-tpl="80" style="font-family: &quot;IBM Plex Sans&quot;, sans-serif; color: rgb(62, 74, 89);">Subtotal</span><span data-dc-tpl="81" style="text-align: right;">$21,300.00</span>
+      <span data-dc-tpl="82" style="font-family: &quot;IBM Plex Sans&quot;, sans-serif; color: rgb(62, 74, 89);">IVA 16%</span><span data-dc-tpl="83" style="text-align: right;">$3,408.00</span>
+      <span data-dc-tpl="84" style="font-family: Archivo, sans-serif; font-weight: 600; font-size: 18px; border-top: 2px solid rgb(18, 24, 33); padding-top: 8px;">Total MXN</span><span data-dc-tpl="85" style="text-align: right; font-weight: 600; font-size: 18px; border-top: 2px solid rgb(18, 24, 33); padding-top: 8px;">$24,708.00</span>
+    </div>
+  </section>
+
+  <section data-dc-tpl="86" style="display: grid; grid-template-columns: repeat(2, minmax(0px, 1fr)); gap: 24px;">
+    <div data-dc-tpl="87" style="display: flex; flex-direction: column; gap: 4px;">
+      <span data-dc-tpl="88" style="font-family: Archivo, sans-serif; font-weight: 600; font-size: 15px;">Incluye</span>
+      <span data-dc-tpl="89">Bitácora del servicio con evidencias fotográficas</span>
+      <span data-dc-tpl="90">Acceso al portal para ver el servicio en vivo</span>
+      <span data-dc-tpl="91">Reporte post-incidente en caso de evento</span>
+    </div>
+    <div data-dc-tpl="92" style="display: flex; flex-direction: column; gap: 4px;">
+      <span data-dc-tpl="93" style="font-family: Archivo, sans-serif; font-weight: 600; font-size: 15px;">Condiciones</span>
+      <span data-dc-tpl="94">Precios en pesos mexicanos más IVA</span>
+      <span data-dc-tpl="95">Forma de pago: [CONDICIONES DE PAGO]</span>
+      <span data-dc-tpl="96">Cancelación: [POLÍTICA DE CANCELACIÓN]</span>
+    </div>
+  </section>
+
+  <section data-dc-tpl="97" style="display: grid; grid-template-columns: repeat(2, minmax(0px, 1fr)); gap: 48px; margin-top: auto;">
+    <div data-dc-tpl="98" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid rgb(18, 24, 33); padding-top: 8px;"><span data-dc-tpl="99" style="font-weight: 600;">Acepta por el cliente</span><span data-dc-tpl="100" style="color: rgb(62, 74, 89);">Nombre, firma y fecha</span></div>
+    <div data-dc-tpl="101" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid rgb(18, 24, 33); padding-top: 8px;"><span data-dc-tpl="102" style="font-weight: 600;">Por AI27</span><span data-dc-tpl="103" style="color: rgb(62, 74, 89);">[NOMBRE Y CARGO]</span></div>
+  </section>
+
+  <footer data-dc-tpl="104" style="display: flex; justify-content: space-between; gap: 16px; font-size: 12px; color: rgb(95, 107, 122); border-top: 1px solid rgb(228, 232, 237); padding-top: 10px;">
+    <span data-dc-tpl="105">AI27 · [DIRECCIÓN FISCAL]</span><span data-dc-tpl="106">[TELÉFONO] · ai27.com</span><span data-dc-tpl="107">Página 1 de 1</span>
+  </footer></div></div></div>
+
+
+
+</body></html>

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AI27 · Mi portal</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F6F7F9}
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;padding:22px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-mute{background:#EEF1F4;color:#4A5868}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#3E4A59}
+.field select,.field input,.field textarea{min-height:44px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 15px 'IBM Plex Sans',sans-serif;box-sizing:border-box}
+.field textarea{padding:10px 12px;resize:vertical}
+</style>
+</helmet>
+<div style="font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh">
+  <header style="background:#FFFFFF;border-bottom:1px solid #E4E8ED">
+    <div style="max-width:1120px;margin:0 auto;padding:14px 24px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 2l12 5v8c0 7.5-5.2 12.6-12 15-6.8-2.4-12-7.5-12-15V7z" stroke="#D08A1C" stroke-width="2"></path><path d="M10 17l4 4 8-9" stroke="#D08A1C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:19px">AI27</span>
+        <span style="font-size:14px;color:#5F6B7A;padding-left:10px;border-left:1px solid #E4E8ED">Mi portal</span>
+      </div>
+      <nav aria-label="Secciones del portal" style="display:flex;gap:4px;flex-wrap:wrap">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+          <button type="button" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+        </sc-for>
+      </nav>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="width:38px;height:38px;border-radius:50%;background:#6A5ACD;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px">LH</span>
+        <span style="display:flex;flex-direction:column;font-size:13px;line-height:1.3"><span style="font-weight:500">Luis Herrera</span><span style="color:#5F6B7A">Monitorista Sr</span></span>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width:1120px;margin:0 auto;padding:28px 24px 56px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
+
+    <sc-if value="{{isHome}}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:22px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:30px;font-weight:600">Hola, Luis</h1>
+          <span style="color:#5F6B7A;font-size:15px">Aquí puedes pedir vacaciones y permisos, descargar tus recibos y consultar tus documentos.</span>
+        </div>
+        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px">
+          <div class="card" style="display:flex;flex-direction:column;gap:8px">
+            <span class="lbl">Vacaciones disponibles</span>
+            <span style="font-family:'Archivo',sans-serif;font-size:34px;font-weight:600">{{left}} días</span>
+            <div style="height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden"><div style="{{vacBar}}"></div></div>
+            <span style="font-size:13px;color:#5F6B7A">{{used}} usados de 14 · periodo 2026</span>
+          </div>
+          <div class="card" style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Próximo pago</span><span style="font-family:'Archivo',sans-serif;font-size:34px;font-weight:600">15 oct</span><span style="font-size:13px;color:#5F6B7A">Quincena 19 · depósito en nómina</span></div>
+          <div class="card" style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Mis solicitudes</span><span style="font-family:'Archivo',sans-serif;font-size:34px;font-weight:600">{{pending}}</span><span style="font-size:13px;color:#5F6B7A">pendientes de aprobación</span></div>
+          <div class="card" style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Mi turno</span><span style="font-family:'Archivo',sans-serif;font-size:22px;font-weight:600">Vespertino</span><span style="font-size:13px;color:#5F6B7A">14:00 a 22:00 · descanso miércoles</span></div>
+        </section>
+        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px">
+          <div class="card" style="display:flex;flex-direction:column;gap:12px">
+            <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">¿Qué necesitas?</h2>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+              <button type="button" class="btn" onClick="{{goVac}}">Pedir vacaciones</button>
+              <button type="button" class="btn" onClick="{{goVac}}">Pedir un permiso</button>
+              <button type="button" class="btn" onClick="{{goPay}}">Descargar recibo</button>
+              <button type="button" class="btn" onClick="{{goDocs}}">Constancia laboral</button>
+            </div>
+          </div>
+          <div class="card" style="display:flex;flex-direction:column;gap:10px">
+            <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600">Avisos de RH</h2>
+            <div style="padding:10px 0;border-top:1px solid #EEF1F4;font-size:14px;display:flex;flex-direction:column;gap:2px"><span style="font-weight:500">Capacitación de protocolo de reacción</span><span style="color:#5F6B7A">Jueves 16 oct · 10:00 · sala de monitoreo</span></div>
+            <div style="padding:10px 0;border-top:1px solid #EEF1F4;font-size:14px;display:flex;flex-direction:column;gap:2px"><span style="font-weight:500">Actualiza tu contacto de emergencia</span><span style="color:#5F6B7A">Antes del 31 de octubre</span></div>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isVac}}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+        <section class="card" style="flex:1 1 380px;display:flex;flex-direction:column;gap:16px">
+          <h1 style="margin:0;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600">Nueva solicitud</h1>
+          <div role="group" aria-label="Tipo de solicitud" style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{types}}" as="t" hint-placeholder-count="4">
+              <button type="button" class="btn" style="{{t.style}}" onClick="{{t.pick}}">{{t.label}}</button>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+            <label class="field">Desde<input type="date" value="2026-10-27"></label>
+            <label class="field">Hasta<input type="date" value="2026-10-31"></label>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;background:#F7F9FB;border-radius:8px;padding:12px 14px;font-size:14px"><span>Días hábiles</span><span class="mono" style="font-size:18px">5</span></div>
+          <label class="field">¿Quién te cubre?<select><option>Sofía Campos · Monitorista</option><option>Pedro Ruiz · Monitorista</option><option>Lo asigna mi jefe</option></select></label>
+          <label class="field">Comentario (opcional)<textarea rows="3" placeholder="Ej. viaje familiar"></textarea></label>
+          <sc-if value="{{isSick}}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px dashed #C3CBD5;border-radius:8px;padding:16px;text-align:center;font-size:14px;color:#3E4A59">Adjunta tu incapacidad del IMSS (PDF o foto)</div>
+          </sc-if>
+          <span style="font-size:13px;color:#5F6B7A">Tu solicitud llega a Jorge Pérez (jefe directo) y después a RH. Te avisamos por correo y WhatsApp.</span>
+          <button type="button" class="btn btn-pri" onClick="{{submit}}">Enviar solicitud</button>
+          <sc-if value="{{sent}}" hint-placeholder-val="{{ false }}"><span class="pill p-ok" style="align-self:flex-start">Solicitud enviada · pendiente de aprobación</span></sc-if>
+        </section>
+        <section class="card" style="flex:999 1 460px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+            <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:20px;font-weight:600">Mis solicitudes</h2>
+            <span style="font-size:14px;color:#3E4A59">{{left}} días disponibles</span>
+          </div>
+          <sc-for list="{{reqs}}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #EEF1F4;font-size:14px">
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:200px"><span style="font-weight:500">{{r.t}}</span><span style="color:#5F6B7A;font-size:13px">{{r.d}}</span></span>
+              <span style="color:#3E4A59;min-width:120px">{{r.n}}</span>
+              <span class="{{r.cls}}">{{r.s}}</span>
+            </div>
+          </sc-for>
+          <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #EEF1F4;padding-top:14px">
+            <span class="lbl">Días festivos y descansos próximos</span>
+            <span style="font-size:14px;color:#3E4A59">2 nov · Día de Muertos (turno con prima) · 16 nov · Revolución mexicana · 25 dic · Navidad</span>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isPay}}" hint-placeholder-val="{{ false }}">
+      <section class="card" style="display:flex;flex-direction:column;gap:14px;padding:22px 10px 4px">
+        <h1 style="margin:0;padding:0 12px;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600">Mis recibos de nómina</h1>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Periodo</th><th>Fecha de pago</th><th style="text-align:right">Percepciones</th><th style="text-align:right">Deducciones</th><th style="text-align:right">Neto</th><th>Descargar</th></tr></thead>
+            <tbody>
+              <sc-for list="{{pay}}" as="p" hint-placeholder-count="5">
+                <tr><td>{{p.p}}</td><td class="mono">{{p.d}}</td><td class="mono" style="text-align:right">$8,000.00</td><td class="mono" style="text-align:right">{{p.ded}}</td><td class="mono" style="text-align:right;font-weight:500">{{p.net}}</td>
+                  <td><span style="display:flex;gap:8px"><button type="button" class="btn" style="min-height:36px;padding:0 12px">PDF</button><button type="button" class="btn" style="min-height:36px;padding:0 12px">XML</button></span></td></tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isDocs}}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px">
+        <section class="card" style="display:flex;flex-direction:column;gap:10px">
+          <h1 style="margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:22px;font-weight:600">Mis documentos</h1>
+          <sc-for list="{{docs}}" as="d" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #EEF1F4;font-size:14px"><span>{{d.n}}</span><span class="{{d.cls}}">{{d.s}}</span></div>
+          </sc-for>
+          <button type="button" class="btn" style="align-self:flex-start">Subir documento</button>
+        </section>
+        <section class="card" style="display:flex;flex-direction:column;gap:12px">
+          <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:20px;font-weight:600">Solicitar a RH</h2>
+          <label class="field">Trámite<select><option>Constancia laboral</option><option>Constancia de percepciones</option><option>Carta de recomendación</option><option>Cambio de datos bancarios</option></select></label>
+          <label class="field">Para qué la necesitas<input type="text" placeholder="Ej. trámite de crédito Infonavit"></label>
+          <button type="button" class="btn btn-pri" style="align-self:flex-start">Enviar a RH</button>
+          <span style="font-size:13px;color:#5F6B7A">Tiempo de respuesta habitual: 1 día hábil.</span>
+        </section>
+      </div>
+    </sc-if>
+
+    <a href="RH.dc.html" style="font-size:14px;align-self:center">Volver a la vista de RH (demo)</a>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'home', type: 'Vacaciones', sent: false }; }
+  renderVals() {
+    const s = this.state;
+    const T = [['home', 'Inicio'], ['vac', 'Vacaciones y permisos'], ['pay', 'Recibos'], ['docs', 'Documentos']];
+    const base = [
+      { t: 'Vacaciones', d: '18–19 ago 2026', n: '2 días', s: 'Aprobada', cls: 'pill p-ok' },
+      { t: 'Permiso con goce', d: '2 sep 2026 · cita médica', n: '1 día', s: 'Aprobada', cls: 'pill p-ok' },
+      { t: 'Vacaciones', d: '6–7 jul 2026', n: '2 días', s: 'Aprobada', cls: 'pill p-ok' }
+    ];
+    const reqs = s.sent ? [{ t: s.type, d: '27–31 oct 2026', n: '5 días', s: 'Pendiente', cls: 'pill p-warn' }].concat(base) : base;
+    const used = 4, left = 14 - used;
+    const tabStyle = (on) => 'min-height:40px;padding:0 14px;border-radius:8px;border:0;cursor:pointer;font:500 14px \'IBM Plex Sans\',sans-serif;' + (on ? 'background:#FFF1DB;color:#8A5300' : 'background:transparent;color:#3E4A59');
+    return {
+      tabs: T.map(([k, label]) => ({ label, pick: () => this.setState({ tab: k }), style: tabStyle(k === s.tab) })),
+      isHome: s.tab === 'home', isVac: s.tab === 'vac', isPay: s.tab === 'pay', isDocs: s.tab === 'docs',
+      goVac: () => this.setState({ tab: 'vac' }), goPay: () => this.setState({ tab: 'pay' }), goDocs: () => this.setState({ tab: 'docs' }),
+      left, used, pending: s.sent ? 1 : 0,
+      vacBar: 'height:100%;background:#2B7FA8;width:' + Math.round(used / 14 * 100) + '%',
+      types: ['Vacaciones', 'Permiso con goce', 'Permiso sin goce', 'Incapacidad'].map(t => ({ label: t, pick: () => this.setState({ type: t, sent: false }), style: t === s.type ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '' })),
+      isSick: s.type === 'Incapacidad',
+      submit: () => this.setState({ sent: true }), sent: s.sent,
+      reqs,
+      pay: [['Quincena 18 · septiembre', '30 sep'], ['Quincena 17 · septiembre', '15 sep'], ['Quincena 16 · agosto', '29 ago'], ['Quincena 15 · agosto', '15 ago'], ['Quincena 14 · julio', '31 jul']].map(([p, d]) => ({ p, d, ded: '$1,148.60', net: '$6,851.40' })),
+      docs: [['Contrato individual de trabajo', 'Vigente', 'pill p-ok'], ['INE', 'Vigente', 'pill p-ok'], ['Comprobante de domicilio', 'Vence en 2 meses', 'pill p-warn'], ['Constancia de situación fiscal', 'Vigente', 'pill p-ok'], ['Certificado de capacitación en monitoreo', 'Vigente', 'pill p-ok']].map(([n, s2, cls]) => ({ n, s: s2, cls }))
+    };
+  }
+}
+</script>
+</body>
+</html>

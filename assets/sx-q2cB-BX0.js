@@ -1,1 +1,0 @@
-var e=new Map;function t(t){if(!t)return{};let n=e.get(t);if(n)return n;let r={};for(let e of t.split(`;`)){let t=e.indexOf(`:`);if(t<0)continue;let n=e.slice(0,t).trim(),i=e.slice(t+1).trim();if(!n)continue;let a=n.startsWith(`--`)?n:n.replace(/-([a-z])/g,(e,t)=>t.toUpperCase());r[a]=i}return e.set(t,r),r}var n=e=>`$`+Math.round(e).toLocaleString(`es-MX`);export{t as n,n as t};

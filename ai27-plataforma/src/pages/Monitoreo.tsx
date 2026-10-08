@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/Shell'
 import { sx } from '../lib/sx'
 import { ROUTES } from '../lib/routes'
+import { Modal, useToast, btnStyle, btnPriStyle } from '../components/ui'
 import { simularEventos, type EventoTelemetria, type TipoEvento } from '../lib/telemetria'
+import { unidadesMapa, HERO, conteosMapa, enZonaRiesgo, custodiosDeUnidad, type UnidadMapa } from '../data/monitoreo'
 
 const CSS = `
 a{color:#B36B00}a:hover{color:#8A5300}
@@ -19,21 +21,30 @@ a{color:#B36B00}a:hover{color:#8A5300}
 .ping{animation:ping 1.6s ease-out infinite}
 @keyframes feedIn{from{background:#FFF8EC}to{background:transparent}}
 .feed-new{animation:feedIn 2.4s ease-out}
+.marker{cursor:pointer}.marker:hover circle,.marker:hover rect{stroke:#121821;stroke-width:2}
+.feed-row{cursor:pointer;background:transparent;border:0;border-top:1px solid #EEF1F4;text-align:left;font:inherit;color:inherit;width:100%}.feed-row:hover{background:#FAFBFC}
+.kpi-btn{cursor:pointer;text-align:left;font:inherit;color:inherit}.kpi-btn:hover{border-color:#F2A93B}
+.lnk{background:none;border:0;padding:0;font:inherit;color:#B36B00;cursor:pointer;text-decoration:underline}.lnk:hover{color:#8A5300}
 `
 
 type Src = 'all' | 'samsara' | 'ruptela'
-type Ev = { k: string; t: string; text: string; src: 'Samsara' | 'Ruptela'; cls: string; nuevo?: boolean }
+type Cat = 'all' | 'separacion' | 'senal' | 'riesgo'
+type Ev = { k: string; t: string; text: string; src: 'Samsara' | 'Ruptela'; cls: string; nuevo?: boolean; unidad: string; tipo: string; velocidad?: number }
 
 const SOURCES: [Src, string][] = [['all', 'Todas las fuentes'], ['samsara', 'Samsara'], ['ruptela', 'Ruptela']]
 
 const BASE: Ev[] = [
-  { k: 'b1', t: '14:30:12', text: 'Desvío de ruta · TR-88213', src: 'Samsara', cls: 'pill p-bad' },
-  { k: 'b2', t: '14:29:40', text: 'Separación 1.1 km · AU-3321 / TR-88213', src: 'Samsara', cls: 'pill p-warn' },
-  { k: 'b3', t: '14:27:03', text: 'Pérdida de señal · TR-71540', src: 'Ruptela', cls: 'pill p-warn' },
-  { k: 'b4', t: '14:25:51', text: 'Entrada a geocerca · CEDIS Monterrey', src: 'Samsara', cls: 'pill p-info' },
-  { k: 'b5', t: '14:24:18', text: 'Frenado brusco · AU-1876', src: 'Samsara', cls: 'pill p-mute' },
-  { k: 'b6', t: '14:22:09', text: 'Parada no autorizada 6 min · TR-66012', src: 'Ruptela', cls: 'pill p-warn' },
-  { k: 'b7', t: '14:20:44', text: 'Evento de cámara: distracción · AU-2051', src: 'Samsara', cls: 'pill p-mute' },
+  { k: 'b1', t: '14:30:12', text: 'Desvío de ruta · TR-88213', src: 'Samsara', cls: 'pill p-bad', unidad: 'SRV-24817', tipo: 'Desvío de ruta' },
+  { k: 'b2', t: '14:29:40', text: 'Separación 1.1 km · AU-3321 / TR-88213', src: 'Samsara', cls: 'pill p-warn', unidad: 'SRV-24817', tipo: 'Separación custodio–tráiler' },
+  { k: 'b3', t: '14:27:03', text: 'Pérdida de señal · TR-71540', src: 'Ruptela', cls: 'pill p-warn', unidad: 'TR-71540', tipo: 'Pérdida de señal' },
+  { k: 'b4', t: '14:25:51', text: 'Entrada a geocerca · CEDIS Monterrey', src: 'Samsara', cls: 'pill p-info', unidad: 'CEDIS Monterrey', tipo: 'Geocerca' },
+  { k: 'b5', t: '14:24:18', text: 'Frenado brusco · AU-1876', src: 'Samsara', cls: 'pill p-mute', unidad: 'AU-1876', tipo: 'Frenado brusco' },
+  { k: 'b6', t: '14:22:09', text: 'Parada no autorizada 6 min · TR-66012', src: 'Ruptela', cls: 'pill p-warn', unidad: 'TR-66012', tipo: 'Parada no autorizada' },
+  { k: 'b7', t: '14:20:44', text: 'Evento de cámara: distracción · AU-2051', src: 'Samsara', cls: 'pill p-mute', unidad: 'AU-2051', tipo: 'Evento de cámara' },
+  // Alertas abiertas anteriores (las del dashboard): se ven con "Ver los N eventos" y cuentan en los contadores.
+  { k: 'b8', t: '14:19:30', text: 'Separación 1.8 km · SRV-24803 / Arco Norte', src: 'Samsara', cls: 'pill p-warn', unidad: 'SRV-24803', tipo: 'Separación custodio–tráiler' },
+  { k: 'b9', t: '14:18:02', text: 'Pérdida de señal 9 min · C-214', src: 'Ruptela', cls: 'pill p-warn', unidad: 'C-214', tipo: 'Pérdida de señal' },
+  { k: 'b10', t: '14:16:47', text: 'Pérdida de señal · TR-69320', src: 'Samsara', cls: 'pill p-warn', unidad: 'TR-69320', tipo: 'Pérdida de señal' },
 ]
 
 /** Texto y severidad por tipo de evento normalizado (adaptador Samsara/Ruptela). */
@@ -55,7 +66,7 @@ const hms = (s: number) => [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 6
 function toEv(e: EventoTelemetria, i: number): Ev {
   const [label, cls] = TIPO[e.tipo]
   const extra = e.tipo === 'ubicacion' ? ` ${e.velocidad} km/h` : ''
-  return { k: 'live' + i, t: hms(T0 + (i + 1) * 23), text: `${label}${extra} · ${e.unidad}`, src: e.fuente === 'samsara' ? 'Samsara' : 'Ruptela', cls, nuevo: true }
+  return { k: 'live' + i, t: hms(T0 + (i + 1) * 23), text: `${label}${extra} · ${e.unidad}`, src: e.fuente === 'samsara' ? 'Samsara' : 'Ruptela', cls, nuevo: true, unidad: e.unidad, tipo: label, velocidad: e.velocidad }
 }
 
 /** Puntos de la ruta de SRV-24817 en el mapa, ligados al porcentaje del replay. */
@@ -68,8 +79,17 @@ function posReplay(r: number) {
   return [438, 344]
 }
 
+const ESTADO_CLS: Record<UnidadMapa['estado'], string> = { Desvío: 'pill p-bad', 'En ruta': 'pill p-ok', Detenido: 'pill p-mute', 'Sin señal': 'pill p-warn' }
+const tel = (t: string) => 'tel:+52' + t.replace(/\D/g, '')
+
 export default function Monitoreo() {
+  const navigate = useNavigate()
+  const toast = useToast()
   const [src, setSrc] = useState<Src>('all')
+  const [cat, setCat] = useState<Cat>('all')
+  const [selId, setSelId] = useState(HERO.id)
+  const [verTodos, setVerTodos] = useState(false)
+  const [modal, setModal] = useState<{ tipo: 'llamar'; u: UnidadMapa } | { tipo: 'evento'; e: Ev } | null>(null)
   const [replay, setReplay] = useState(92)
   const [playing, setPlaying] = useState(false)
   const sim = useMemo(() => simularEventos(60).map(toEv), [])
@@ -88,13 +108,43 @@ export default function Monitoreo() {
     return () => window.clearInterval(id)
   }, [playing])
 
+  const unidades = useMemo(() => unidadesMapa.filter(u => src === 'all' || u.fuente.toLowerCase() === src), [src])
+  const conteos = useMemo(() => conteosMapa(unidades), [unidades])
+  const sel = unidadesMapa.find(u => u.id === selId) ?? HERO
+  const riesgo = enZonaRiesgo(unidades)
+
   const all = [...sim.slice(0, live).reverse(), ...BASE]
-  const events = (src === 'all' ? all : all.filter(e => e.src.toLowerCase() === src)).slice(0, 7)
+  const porFuente = src === 'all' ? all : all.filter(e => e.src.toLowerCase() === src)
+  const alertasAbiertas = porFuente.filter(e => !e.text.startsWith('Posición'))
+  const separacion = porFuente.filter(e => e.text.startsWith('Separación'))
+  const sinSenal = porFuente.filter(e => e.text.startsWith('Pérdida de señal'))
+  const feedCat = cat === 'separacion' ? separacion : cat === 'senal' ? sinSenal : porFuente
+  const events = verTodos ? feedCat : feedCat.slice(0, 7)
+  const sev = { crit: alertasAbiertas.filter(e => e.cls.includes('p-bad')).length, alta: alertasAbiertas.filter(e => e.cls.includes('p-warn')).length, media: alertasAbiertas.filter(e => e.cls.includes('p-info') || e.cls.includes('p-mute')).length }
 
   const mins = Math.round(492 + (870 - 492) * replay / 100)
   const hh = String(Math.floor(mins / 60)).padStart(2, '0'), mm = String(mins % 60).padStart(2, '0')
   const replayLabel = hh + ':' + mm + ' · ' + Math.round(replay * 2.1) + ' km recorridos'
   const [rx, ry] = posReplay(replay)
+
+  const seleccionar = (u: UnidadMapa) => { setSelId(u.id); setModal(null) }
+  /** En celular abre el marcador; en escritorio copia el número y registra la llamada en la bitácora. */
+  const llamar = (nombre: string, telefono: string) => {
+    if (window.matchMedia?.('(pointer:coarse)').matches) window.location.href = tel(telefono)
+    else navigator.clipboard?.writeText(telefono).catch(() => {})
+    toast(`Llamando a ${nombre} · ${telefono} · registrado en bitácora`)
+    setModal(null)
+  }
+  const verEnMapa = (e: Ev) => {
+    const u = unidadesMapa.find(x => x.id === e.unidad || x.auto === e.unidad || x.trailer === e.unidad)
+    if (u) { seleccionar(u); toast(`${u.id} seleccionado en el mapa`, 'info') } else toast(`${e.unidad} no tiene posición en el mapa de rutas activas`, 'warn')
+    setModal(null)
+  }
+  const kpiBtn = (k: Cat, label: string, n: number, sub: string) => (
+    <button type="button" className="card kpi-btn" aria-pressed={cat === k} onClick={() => setCat(c => (c === k ? 'all' : k))} title={cat === k ? 'Quitar filtro' : 'Filtrar el feed'} style={sx('display:flex;flex-direction:column;gap:6px' + (cat === k ? ';border-color:#F2A93B;background:#FFF8EC' : ''))}>
+      <span className="lbl">{label}</span><span style={sx("font-family:'Archivo';font-size:28px;font-weight:600")}>{n}</span><span style={sx('font-size:13px;color:#5F6B7A')}>{sub}</span>
+    </button>
+  )
 
   return (
     <Shell active="monitoreo" css={CSS} mainStyle="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
@@ -102,7 +152,7 @@ export default function Monitoreo() {
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Monitoreo</span>
           <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Mapa en vivo</h1>
-          <span style={sx('color:#5F6B7A;font-size:14px')}>128 custodios · 94 autos de custodia · 212 tráileres reportando</span>
+          <span style={sx('color:#5F6B7A;font-size:14px')}>{conteos.custodios} custodios · {conteos.autos} autos de custodia · {conteos.trailers} tráileres reportando{src !== 'all' ? ` · solo ${src === 'samsara' ? 'Samsara' : 'Ruptela'}` : ''}</span>
         </div>
         <div role="group" aria-label="Fuente de telemetría" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
           {SOURCES.map(([k, label]) => (
@@ -113,17 +163,17 @@ export default function Monitoreo() {
 
       <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · patrón de robo detectado</span><span style={sx('font-size:14px;color:#3E4A59')}>El desvío de SRV-24817 coincide 87% con 5 robos previos en Méx–Qro: salida a terracería, velocidad baja y separación del custodio. Recomiendo escalar a Reacción ahora y pre-alertar a la unidad R-03.</span></div>
+        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · patrón de robo detectado</span><span style={sx('font-size:14px;color:#3E4A59')}>El desvío de <button type="button" className="lnk" onClick={() => seleccionar(HERO)}>SRV-24817</button> coincide 87% con 5 robos previos en Méx–Qro: salida a terracería, velocidad baja y separación del custodio. Recomiendo escalar a Reacción ahora y pre-alertar a la unidad R-03.</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
           <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Incidentes por franja horaria: el pico está entre 21 y 24 horas, seguido de 00 a 03" style={sx('display:block')}><g fill="#AEB8C4"><rect x="4" y="12" width="20" height="48" rx="2"></rect><rect x="31" y="42" width="20" height="18" rx="2"></rect><rect x="58" y="54" width="20" height="6" rx="2"></rect><rect x="85" y="48" width="20" height="12" rx="2"></rect><rect x="139" y="30" width="20" height="30" rx="2"></rect><rect x="166" y="36" width="20" height="24" rx="2"></rect><rect x="193" y="6" width="20" height="54" rx="2"></rect></g><rect x="112" y="24" width="20" height="36" rx="2" fill="#D9534F"></rect></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Incidentes por franja de 3 h · rojo: ahora</figcaption>
         </figure>
-        <Link className="btn" to={ROUTES.Reaccion}>Escalar a Reacción</Link>
+        <Link className="btn" to={ROUTES.Reaccion} onClick={() => toast('Escalado a Reacción · unidad R-03 pre-alertada', 'warn')}>Escalar a Reacción</Link>
       </section>
 
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:stretch')}>
         <section className="card" style={sx('flex:999 1 560px;padding:0;overflow:hidden;position:relative;display:flex;flex-direction:column')}>
-          <svg viewBox="0 0 900 560" role="img" aria-label="Mapa de rutas activas en el centro del país" style={sx('width:100%;height:auto;display:block;background:#F7F9FB')}>
+          <svg viewBox="0 0 900 560" role="img" aria-label={`Mapa de ${unidades.length} rutas activas`} style={sx('width:100%;height:auto;display:block;background:#F7F9FB')}>
             <defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#F3F5F8" strokeWidth="1"></path></pattern></defs>
             <rect width="900" height="560" fill="url(#g)"></rect>
             <path d="M560 120L480 250L450 320L500 370L560 390L660 370M300 330L390 290L450 320M480 250L390 290M500 370L470 380L300 330M500 370L520 345L560 120" fill="none" stroke="#D5DBE3" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"></path>
@@ -133,24 +183,34 @@ export default function Monitoreo() {
             <path d="M560 390L660 370" fill="none" stroke="#3FA7C9" strokeWidth="3"></path>
             <g className="city">
               <text x="572" y="116">Monterrey</text><text x="492" y="246">San Luis Potosí</text><text x="236" y="352">Guadalajara</text><text x="352" y="280">León</text><text x="372" y="316">Querétaro</text><text x="512" y="398">CDMX</text><text x="532" y="340">Pachuca</text><text x="566" y="414">Puebla</text><text x="668" y="366">Veracruz</text>
+              <text x="790" y="500">Sureste</text><text x="80" y="190">Noroeste</text>
             </g>
-            <circle cx="438" cy="344" r="8" fill="none" stroke="#F0605D" strokeWidth="2" className="ping"></circle>
-            <rect x="432" y="338" width="12" height="12" rx="2" fill="#0B6A8A"></rect>
-            <circle cx="452" cy="352" r="7" fill="#F2A93B"></circle>
-            <path d="M438 344L452 352" stroke="#F0605D" strokeWidth="2" strokeDasharray="3 3"></path>
-            <rect x="534" y="222" width="12" height="12" rx="2" fill="#0B6A8A"></rect><circle cx="548" cy="238" r="7" fill="#F2A93B"></circle>
-            <rect x="604" y="374" width="12" height="12" rx="2" fill="#0B6A8A"></rect><circle cx="620" cy="388" r="7" fill="#F2A93B"></circle>
-            <rect x="470" y="282" width="12" height="12" rx="2" fill="#0B6A8A"></rect><circle cx="486" cy="296" r="7" fill="#F2A93B"></circle>
-            <rect x="356" y="306" width="12" height="12" rx="2" fill="#0B6A8A"></rect><circle cx="372" cy="296" r="7" fill="#F2A93B"></circle>
+            {/* Unidades activas (seed): tráiler del cliente + auto de custodia */}
+            {unidades.map(u => {
+              const esSel = u.id === sel.id
+              const esHero = u.id === HERO.id
+              const cx = esHero ? 452 : u.x + 14, cy = esHero ? 352 : u.y + 8
+              return (
+                <g key={u.id} className="marker" role="button" tabIndex={0} aria-label={`${u.id} · ${u.cliente} · ${u.estado}`} onClick={() => seleccionar(u)} onKeyDown={e => { if (e.key === 'Enter') seleccionar(u) }} opacity={u.estado === 'Sin señal' ? 0.55 : 1}>
+                  <title>{`${u.id} · ${u.cliente} · ${u.ruta} · ${u.estado}`}</title>
+                  {esHero && <circle cx="438" cy="344" r="8" fill="none" stroke="#F0605D" strokeWidth="2" className="ping"></circle>}
+                  {esSel && <circle cx={u.x + 6} cy={u.y + 6} r="16" fill="none" stroke="#121821" strokeWidth="1.5" strokeDasharray="3 3"></circle>}
+                  <rect x={u.x - 6} y={u.y - 6} width="12" height="12" rx="2" fill={u.estado === 'Desvío' ? '#B42318' : '#0B6A8A'}></rect>
+                  <circle cx={cx} cy={cy} r="7" fill="#F2A93B"></circle>
+                  {esHero && <path d="M438 344L452 352" stroke="#F0605D" strokeWidth="2" strokeDasharray="3 3"></path>}
+                </g>
+              )
+            })}
             {/* Posición del replay de SRV-24817 */}
             <g aria-label={'Replay ' + replayLabel}>
               <circle cx={rx} cy={ry} r="6" fill="#FFFFFF" stroke="#121821" strokeWidth="2"></circle>
               <circle cx={rx} cy={ry} r="2" fill="#121821"></circle>
             </g>
-            <rect x="140" y="470" width="300" height="70" rx="8" fill="#FFFFFF" stroke="#E4E8ED"></rect>
+            <rect x="140" y="470" width="340" height="70" rx="8" fill="#FFFFFF" stroke="#E4E8ED"></rect>
             <rect x="158" y="488" width="12" height="12" rx="2" fill="#0B6A8A"></rect><text x="178" y="499" className="city" style={sx('fill:#3E4A59')}>Tráiler del cliente</text>
             <circle cx="164" cy="520" r="6" fill="#F2A93B"></circle><text x="178" y="525" className="city" style={sx('fill:#3E4A59')}>Custodio / auto de custodia</text>
             <path d="M320 494H348" stroke="#F0605D" strokeWidth="3" strokeDasharray="6 5"></path><text x="356" y="499" className="city" style={sx('fill:#3E4A59')}>Desvío</text>
+            <text x="356" y="525" className="city" style={sx('fill:#3E4A59')}>{unidades.length} unidades en mapa</text>
           </svg>
           <div style={sx('padding:16px 20px;display:flex;flex-direction:column;gap:10px;border-top:1px solid #E4E8ED')}>
             <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
@@ -176,34 +236,96 @@ export default function Monitoreo() {
         </section>
 
         <aside style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:16px;min-width:0')}>
-          <div className="card" style={sx('display:flex;flex-direction:column;gap:12px;border-color:#F5C2C2')}>
-            <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:8px')}><span className="pill p-bad">Crítica · Desvío de ruta</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>14:30:12</span></div>
-            <span style={sx('font-weight:600;font-size:16px')}>SRV-24817 · Alpura · TR-88213</span>
-            <span style={sx('font-size:14px;color:#3E4A59')}>1.6 km fuera de geocerca hacia camino de terracería, km 142 Méx–Qro. Custodio a 1.1 km del tráiler. Velocidad 38 km/h.</span>
+          <div className="card" style={sx('display:flex;flex-direction:column;gap:12px;border-color:' + (sel.estado === 'Desvío' ? '#F5C2C2' : sel.estado === 'Sin señal' ? '#F3D9A8' : '#E4E8ED'))}>
+            <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:8px')}><span className={ESTADO_CLS[sel.estado]}>{sel.estado === 'Desvío' ? 'Crítica · Desvío de ruta' : `${sel.tipo} · ${sel.estado}`}</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{sel.id === HERO.id ? '14:30:12' : sel.fuente}</span></div>
+            <span style={sx('font-weight:600;font-size:16px')}>{sel.id} · {sel.cliente} · {sel.trailer}</span>
+            <span style={sx('font-size:14px;color:#3E4A59')}>{sel.detalle}</span>
+            {sel.id !== HERO.id && <span style={sx('font-size:13px;color:#5F6B7A')}>Custodios: {sel.custodios} · Auto {sel.auto} · Monitorista {sel.monitorista} · {sel.fuente}</span>}
             <div style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
-              <Link className="btn btn-pri" to={ROUTES.Reaccion}>Abrir incidente</Link>
-              <a className="btn" href="tel:+520000000000">Llamar custodio</a>
+              {sel.estado === 'Desvío' || sel.estado === 'Sin señal'
+                ? <Link className="btn btn-pri" to={ROUTES.Reaccion}>Abrir incidente</Link>
+                : <Link className="btn btn-pri" to={ROUTES.Servicios}>Ver servicio</Link>}
+              <button type="button" className="btn" onClick={() => setModal({ tipo: 'llamar', u: sel })}>Llamar custodio</button>
+              {sel.id !== HERO.id && <button type="button" className="btn" onClick={() => seleccionar(HERO)} title="Volver a la alerta crítica">Volver a SRV-24817</button>}
             </div>
           </div>
           <div className="card" style={sx('display:flex;flex-direction:column;gap:4px')}>
-            <h2 style={sx("margin:0 0 8px;font-family:'Archivo',sans-serif;font-size:16px;font-weight:600")}>Eventos entrantes</h2>
-            {events.map(e => (
-              <div key={e.k} className={e.nuevo ? 'feed-new' : undefined} style={sx('display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #EEF1F4;font-size:13px')}>
-                <span className="mono" style={sx('color:#5F6B7A')}>{e.t}</span>
-                <span style={sx('min-width:0')}>{e.text}</span>
-                <span className={e.cls}>{e.src}</span>
-              </div>
-            ))}
+            <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px')}>
+              <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:16px;font-weight:600")}>{cat === 'riesgo' ? 'Unidades en zona de riesgo' : cat === 'separacion' ? 'Separaciones' : cat === 'senal' ? 'Sin señal' : 'Eventos entrantes'}</h2>
+              {cat !== 'all' && <button type="button" className="lnk" style={sx('font-size:12px')} onClick={() => setCat('all')}>Ver todos los eventos</button>}
+            </div>
+            {cat === 'riesgo' ? (
+              <>
+                {riesgo.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A;padding:8px 0')}>Ninguna unidad en zona de riesgo con esta fuente.</span>}
+                {(verTodos ? riesgo : riesgo.slice(0, 7)).map(u => (
+                  <button key={u.id} type="button" className="feed-row" onClick={() => seleccionar(u)} style={sx('display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;font-size:13px')}>
+                    <span style={sx('min-width:0')}><strong>{u.id}</strong> · {u.cliente} · {u.ruta}</span>
+                    <span className={ESTADO_CLS[u.estado]}>{u.estado}</span>
+                  </button>
+                ))}
+                {riesgo.length > 7 && <button type="button" className="lnk" style={sx('align-self:flex-start;font-size:13px;margin-top:6px')} onClick={() => setVerTodos(v => !v)}>{verTodos ? 'Ver menos' : `Ver las ${riesgo.length}`}</button>}
+              </>
+            ) : (
+              <>
+                {events.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A;padding:8px 0')}>Sin eventos para este filtro.</span>}
+                {events.map(e => (
+                  <button key={e.k} type="button" className={'feed-row' + (e.nuevo ? ' feed-new' : '')} onClick={() => setModal({ tipo: 'evento', e })} title="Ver detalle del evento" style={sx('display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;font-size:13px')}>
+                    <span className="mono" style={sx('color:#5F6B7A')}>{e.t}</span>
+                    <span style={sx('min-width:0')}>{e.text}</span>
+                    <span className={e.cls}>{e.src}</span>
+                  </button>
+                ))}
+                {feedCat.length > 7 && <button type="button" className="lnk" style={sx('align-self:flex-start;font-size:13px;margin-top:6px')} onClick={() => setVerTodos(v => !v)}>{verTodos ? 'Ver menos' : `Ver los ${feedCat.length} eventos`}</button>}
+              </>
+            )}
           </div>
         </aside>
       </div>
 
       <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:16px')}>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Alertas abiertas</span><span style={sx("font-family:'Archivo';font-size:28px;font-weight:600")}>7</span><span style={sx('font-size:13px;color:#5F6B7A')}>1 crítica · 3 altas · 3 medias</span></div>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Separación custodio–tráiler</span><span style={sx("font-family:'Archivo';font-size:28px;font-weight:600")}>2</span><span style={sx('font-size:13px;color:#5F6B7A')}>Umbral 1 km por más de 3 min</span></div>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Sin señal</span><span style={sx("font-family:'Archivo';font-size:28px;font-weight:600")}>3</span><span style={sx('font-size:13px;color:#5F6B7A')}>2 Ruptela · 1 Samsara</span></div>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">En zona de riesgo</span><span style={sx("font-family:'Archivo';font-size:28px;font-weight:600")}>11</span><span style={sx('font-size:13px;color:#5F6B7A')}>Arco Norte y Puebla–Orizaba</span></div>
+        {kpiBtn('all', 'Alertas abiertas', alertasAbiertas.length, `${sev.crit} crítica${sev.crit === 1 ? '' : 's'} · ${sev.alta} alta${sev.alta === 1 ? '' : 's'} · ${sev.media} media${sev.media === 1 ? '' : 's'}`)}
+        {kpiBtn('separacion', 'Separación custodio–tráiler', separacion.length, 'Umbral 1 km por más de 3 min')}
+        {kpiBtn('senal', 'Sin señal', sinSenal.length, `${sinSenal.filter(e => e.src === 'Ruptela').length} Ruptela · ${sinSenal.filter(e => e.src === 'Samsara').length} Samsara`)}
+        {kpiBtn('riesgo', 'En zona de riesgo', riesgo.length, 'Arco Norte, Méx–Qro y Puebla–Orizaba')}
       </section>
+
+      <Modal open={modal?.tipo === 'llamar'} onClose={() => setModal(null)} title={`Llamar custodio · ${modal?.tipo === 'llamar' ? modal.u.id : ''}`} width={480}
+        footer={<button type="button" style={sx(btnStyle)} onClick={() => setModal(null)}>Cerrar</button>}>
+        {modal?.tipo === 'llamar' && (
+          <>
+            <span style={sx('font-size:14px;color:#3E4A59')}>{modal.u.cliente} · {modal.u.ruta} · {modal.u.trailer}</span>
+            {custodiosDeUnidad(modal.u).map(c => (
+              <div key={c.id + c.nombre} style={sx('display:flex;justify-content:space-between;align-items:center;gap:12px;background:#F3F5F8;border-radius:8px;padding:12px 14px;flex-wrap:wrap')}>
+                <div style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('font-weight:600')}>{c.nombre}</span><span style={sx('font-size:13px;color:#5F6B7A')}>{c.id} · {c.base}</span></div>
+                <button type="button" style={sx(btnPriStyle)} className="mono" onClick={() => llamar(c.nombre, c.telefono)}>Llamar {c.telefono}</button>
+              </div>
+            ))}
+            <span style={sx('font-size:13px;color:#5F6B7A')}>Monitorista a cargo: {modal.u.monitorista}. La llamada queda registrada en la bitácora del servicio.</span>
+          </>
+        )}
+      </Modal>
+
+      <Modal open={modal?.tipo === 'evento'} onClose={() => setModal(null)} title={modal?.tipo === 'evento' ? modal.e.tipo : ''} width={480}
+        footer={modal?.tipo === 'evento' ? (
+          <>
+            <button type="button" style={sx(btnStyle)} onClick={() => verEnMapa(modal.e)}>Ver en mapa</button>
+            <button type="button" style={sx(btnStyle)} onClick={() => { toast(`Evento ${modal.e.t} marcado como atendido`); setModal(null) }}>Marcar atendido</button>
+            <button type="button" style={sx(btnPriStyle)} onClick={() => { toast('Evento escalado a Reacción', 'warn'); navigate(ROUTES.Reaccion) }}>Escalar a Reacción</button>
+          </>
+        ) : undefined}>
+        {modal?.tipo === 'evento' && (
+          <>
+            <div style={sx('display:flex;justify-content:space-between;gap:8px;align-items:center')}><span className={modal.e.cls}>{modal.e.src}</span><span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{modal.e.t}</span></div>
+            <span style={sx('font-weight:600;font-size:16px')}>{modal.e.text}</span>
+            <div style={sx('display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:14px')}>
+              <span className="lbl">Unidad</span><span className="mono">{modal.e.unidad}</span>
+              <span className="lbl">Fuente</span><span>{modal.e.src} · normalizado por el adaptador de telemetría</span>
+              {modal.e.velocidad !== undefined && <><span className="lbl">Velocidad</span><span className="mono">{modal.e.velocidad} km/h</span></>}
+              <span className="lbl">Servicio</span><span>{unidadesMapa.find(x => x.id === modal.e.unidad || x.auto === modal.e.unidad)?.cliente ?? 'Sin servicio activo asociado'}</span>
+            </div>
+          </>
+        )}
+      </Modal>
     </Shell>
   )
 }

@@ -1,1 +1,275 @@
-export default function Reportes() { return <div>Reportes · pendiente</div> }
+import { useRef, useState } from 'react'
+import { Shell } from '../components/Shell'
+import { sx } from '../lib/sx'
+
+const CSS = `
+a{color:#B36B00}a:hover{color:#8A5300}
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
+.mono{font-family:'IBM Plex Mono',monospace}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-mute{background:#EEF1F4;color:#4A5868}.p-info{background:#E3F2F8;color:#0B6A8A}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn:disabled{opacity:.6;cursor:progress}
+.field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
+.field select{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+.pill-btn{border:0;cursor:pointer;font-family:inherit}
+@keyframes rep-pulse{0%,100%{opacity:.35}50%{opacity:1}}
+@media print{
+  body *{visibility:hidden}
+  #rep-preview,#rep-preview *{visibility:visible}
+  #rep-preview{position:absolute !important;left:0;top:0;width:100%;border:0;box-shadow:none}
+  #rep-preview .no-print{display:none !important}
+}
+`
+
+type Rep = {
+  id: string; cat: string; name: string; desc: string; chart: string; unit: string; fmt?: number
+  kpis: [string, string][]; data: [string, number][]; ai: string; prompt?: string
+}
+
+const R: Rep[] = [
+  { id: 'srv', cat: 'Operación', name: 'Servicios por modelo', desc: 'Servicios del trimestre por modelo de servicio y su resultado.', chart: 'Servicios por modelo', unit: '', kpis: [['Servicios', '300'], ['Sin incidente', '98.6%'], ['Puntualidad', '96.4%']], data: [['Por evento', 182], ['Dedicado', 74], ['Monitoreo', 44]], ai: 'Los servicios por evento crecieron 12% contra Q2, impulsados por Alpura y Marsh.' },
+  { id: 'pun', cat: 'Operación', name: 'Puntualidad por cliente', desc: 'Entregas a tiempo contra la ventana pactada.', chart: 'Puntualidad %', unit: '%', kpis: [['Promedio', '96.4%'], ['Mejor', 'Alpura'], ['Por mejorar', 'Bebidas del Golfo']], data: [['Alpura', 97.8], ['Marsh', 96.9], ['Autopartes Saltillo', 96.2], ['Farmacéutica Orión', 94.1], ['Bebidas del Golfo', 93.2]], ai: 'Los retrasos de Bebidas del Golfo se concentran en la entrada a Puebla entre 7:00 y 9:00.' },
+  { id: 'inc', cat: 'Seguridad', name: 'Incidentes por carretera', desc: 'Incidentes del trimestre por tramo, para riesgo de rutas y cotizador.', chart: 'Incidentes Q3', unit: '', kpis: [['Incidentes', '40'], ['Por 100 servicios', '1.4'], ['Recuperación', '72%']], data: [['Arco Norte', 7], ['Méx–Puebla–Orizaba', 6], ['Méx–Querétaro', 5], ['Querétaro–SLP', 4], ['Guadalajara–Colima', 2]], ai: 'Arco Norte duplicó incidentes contra Q2; 5 de 7 fueron de noche.' },
+  { id: 'rea', cat: 'Seguridad', name: 'Tiempo de reacción por zona', desc: 'Minutos desde la alerta hasta el equipo en sitio.', chart: 'Minutos promedio', unit: ' min', kpis: [['Promedio', '18 min'], ['Meta', '20 min'], ['Fuera de meta', 'Golfo']], data: [['Centro', 16], ['Bajío', 21], ['Occidente', 19], ['Golfo', 24], ['Noreste', 17]], ai: 'Golfo no tiene base de reacción propia; una unidad en Córdoba bajaría el tiempo a unos 15 min.' },
+  { id: 'uti', cat: 'Custodios', name: 'Utilización por zona', desc: 'Porcentaje de custodios en servicio o asignados.', chart: 'Utilización %', unit: '%', kpis: [['Promedio', '78%'], ['Disponibles', '65'], ['Docs por vencer', '14']], data: [['Bajío', 94], ['Centro', 82], ['Occidente', 80], ['Noreste', 84], ['Golfo', 80]], ai: 'Bajío está sobre 90%: es la zona con más riesgo de fatiga y de huecos de cobertura.' },
+  { id: 'cpk', cat: 'Flotilla', name: 'Costo por km por unidad', desc: 'Combustible, mantenimiento y seguro entre kilómetros GPS.', chart: 'Costo por km (MXN)', unit: '', fmt: 1, kpis: [['Promedio', '$4.10'], ['Unidades', '600'], ['En taller', '31']], data: [['AU-1876', 6.2], ['AU-1450', 5.4], ['AU-1688', 5.9], ['AU-2214', 3.9], ['AU-3321', 3.86]], ai: 'Las 3 unidades más caras coinciden con consumo anómalo o fallas recurrentes.' },
+  { id: 'ing', cat: 'Comercial', name: 'Ingresos por cliente', desc: 'Facturación del trimestre por cliente.', chart: 'Millones MXN', unit: 'M', fmt: 2, kpis: [['Ingresos', '$40.6M'], ['Clientes activos', '25'], ['Top 5', '47%']], data: [['Alpura', 14.6], ['Marsh', 11.2], ['Farmacéutica Orión', 8.4], ['Autopartes Saltillo', 6.8], ['Electrónica del Bajío', 5.6]], ai: 'La concentración en los 2 primeros clientes es de 32%; conviene diversificar en Bajío.' },
+  { id: 'cxc', cat: 'Finanzas', name: 'Antigüedad de saldos', desc: 'Cuentas por cobrar por rango de días.', chart: 'Millones MXN', unit: 'M', fmt: 1, kpis: [['Por cobrar', '$18.2M'], ['Días de cobro', '38'], ['+60 días', '$3.1M']], data: [['Al corriente', 9.8], ['1–30 días', 3.6], ['31–60 días', 1.7], ['+60 días', 3.1]], ai: '71% del saldo a más de 60 días está en Bebidas del Golfo y Grupo Textil Arrayán.' },
+  { id: 'rot', cat: 'Personas', name: 'Rotación por área', desc: 'Bajas del trimestre entre la plantilla promedio.', chart: 'Rotación trimestral %', unit: '%', fmt: 1, kpis: [['Headcount', '486'], ['Bajas', '23'], ['Rotación', '4.7%']], data: [['Custodia', 5.1], ['Monitoreo', 8.3], ['Flotilla y taller', 2.6], ['Comercial', 0], ['Oficinas', 1.9]], ai: 'Monitoreo tiene la rotación más alta; 2 de 3 bajas citan el turno nocturno fijo.' },
+]
+
+const PERIODOS = ['Q3 2026 (jul–sep)', 'Septiembre 2026', 'Año 2026']
+const PERIODO_CORTO: Record<string, string> = { 'Q3 2026 (jul–sep)': 'Q3 2026', 'Septiembre 2026': 'Septiembre 2026', 'Año 2026': 'Año 2026' }
+const ZONAS = ['Todas las zonas', 'Centro', 'Bajío']
+const CLIENTES = ['Todos los clientes', 'Alpura', 'Marsh']
+const TIPOS = ['Todos', 'Por evento', 'Dedicado', 'Monitoreo']
+
+type Sched = { r: string; to: string; f: string; n: string; fmt: string; st: 'Activo' | 'Pausado' }
+const SCHED0: Sched[] = [
+  { r: 'Dashboard directivo', to: 'Dirección (3)', f: 'Lunes 7:00', n: '12 oct 07:00', fmt: 'PDF', st: 'Activo' },
+  { r: 'Servicios y puntualidad · Alpura', to: 'Alpura logística (2)', f: 'Mensual', n: '1 nov 08:00', fmt: 'PDF', st: 'Activo' },
+  { r: 'Incidentes y recuperación · Marsh', to: 'Marsh riesgos (2)', f: 'Mensual', n: '1 nov 08:00', fmt: 'PDF + Excel', st: 'Activo' },
+  { r: 'Antigüedad de saldos', to: 'Finanzas (3)', f: 'Viernes 9:00', n: '9 oct 09:00', fmt: 'Excel', st: 'Activo' },
+  { r: 'Headcount y rotación', to: 'RH y Dirección (5)', f: 'Mensual', n: '1 nov 08:00', fmt: 'PDF', st: 'Pausado' },
+]
+
+const DEST: Record<string, string> = { Operación: 'Operaciones (4)', Seguridad: 'Seguridad (3)', Custodios: 'Operaciones (4)', Flotilla: 'Flotilla y taller (2)', Comercial: 'Comercial (3)', Finanzas: 'Finanzas (3)', Personas: 'RH y Dirección (5)', 'Generados con IA': 'Dirección (3)' }
+
+/** Reglas de la respuesta simulada de la IA: palabra clave → reporte base. */
+const KEYWORDS: [RegExp, string][] = [
+  [/incident|robo|carreter|tramo|mapa de calor/, 'inc'],
+  [/reacci|alerta|tiempo de respuesta/, 'rea'],
+  [/puntual|retras|a tiempo|ventana/, 'pun'],
+  [/utiliz|custodi|fatiga|cobertura/, 'uti'],
+  [/costo|km|kil[oó]metr|unidad|flotilla|taller|combustible/, 'cpk'],
+  [/saldo|cobr|cartera|antig/, 'cxc'],
+  [/ingreso|factur|venta|rentab/, 'ing'],
+  [/rotaci|baja|personal|headcount|rh\b|personas/, 'rot'],
+  [/servicio|evento|dedicado|monitoreo/, 'srv'],
+]
+const CLIENT_NAMES = ['Alpura', 'Marsh', 'Farmacéutica Orión', 'Autopartes Saltillo', 'Electrónica del Bajío', 'Bebidas del Golfo', 'Grupo Textil Arrayán']
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+const EXAMPLE = 'incidentes de septiembre para Marsh con mapa de calor'
+
+const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+
+function simulateAI(prompt: string, n: number): Rep {
+  const q = norm(prompt)
+  const baseId = KEYWORDS.find(([re]) => re.test(q))?.[1] ?? 'srv'
+  const base = R.find(r => r.id === baseId)!
+  const client = CLIENT_NAMES.find(c => q.includes(norm(c)))
+  const month = MONTHS.find(m => q.includes(m))
+  // Recorte determinista: un cliente ≈ 45% del volumen, un mes ≈ la mitad del trimestre (septiembre pesa más).
+  const factor = (client ? 0.45 : 1) * (month ? 0.5 : 1)
+  const isCount = base.unit === '' && !base.fmt
+  const scaled = (v: number) => isCount ? Math.ceil(v * factor) : base.unit === 'M' ? +(v * factor).toFixed(2) : v
+  const data = base.data.map(([k, v]) => [k, scaled(v)] as [string, number])
+  const scope = [client, month && month[0].toUpperCase() + month.slice(1)].filter(Boolean).join(' · ')
+  const name = base.name + (scope ? ' · ' + scope : '')
+  const total = data.reduce((a, [, v]) => a + v, 0)
+  const top = [...data].sort((a, b) => b[1] - a[1])[0]
+  const ai = (client || month)
+    ? `Con el filtro ${scope}, ${top[0]} concentra ${total ? Math.round(top[1] / total * 100) : 0}% del total. En el trimestre completo: ${base.ai}`
+    : base.ai
+  return {
+    ...base, id: 'ia-' + n, cat: 'Generados con IA', name, prompt,
+    chart: month ? base.chart.replace('Q3', month[0].toUpperCase() + month.slice(1)) : base.chart,
+    desc: `Generado a partir de: “${prompt}”.`,
+    kpis: isCount && factor !== 1 ? [[base.kpis[0][0], String(Math.round(total))], ...base.kpis.slice(1)] as [string, string][] : base.kpis,
+    data, ai,
+  }
+}
+
+/** Genera un CSV (BOM para que Excel respete acentos) y lo descarga en el navegador. */
+function downloadCSV(filename: string, rows: (string | number)[][]) {
+  const esc = (v: string | number) => { const s = String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s }
+  const blob = new Blob(['﻿' + rows.map(r => r.map(esc).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename
+  document.body.appendChild(a); a.click(); a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+const slug = (s: string) => norm(s).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+
+export default function Reportes() {
+  const [r, setR] = useState('inc')
+  const [generated, setGenerated] = useState<Rep[]>([])
+  const [prompt, setPrompt] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [periodo, setPeriodo] = useState(PERIODOS[0])
+  const [zona, setZona] = useState(ZONAS[0])
+  const [cliente, setCliente] = useState(CLIENTES[0])
+  const [tipo, setTipo] = useState(TIPOS[0])
+  const [sched, setSched] = useState<Sched[]>(SCHED0)
+  const [toast, setToast] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+  const toastTimer = useRef<number | undefined>(undefined)
+
+  const all = [...generated, ...R]
+  const cur0 = all.find(x => x.id === r) ?? R[2]
+  const max = Math.max(...cur0.data.map(d => d[1])) || 1
+  const cats: { name: string; items: Rep[] }[] = []
+  all.forEach(x => { let c = cats.find(c => c.name === x.cat); if (!c) { c = { name: x.cat, items: [] }; cats.push(c) } c.items.push(x) })
+  const fv = (v: number) => cur0.unit === 'M' ? '$' + v.toFixed(cur0.fmt) + 'M' : (cur0.fmt ? (cur0.unit ? v.toFixed(cur0.fmt) + cur0.unit : '$' + v.toFixed(2)) : v + cur0.unit)
+  const filtros = [zona !== ZONAS[0] && zona, cliente !== CLIENTES[0] && cliente, tipo !== TIPOS[0] && tipo].filter(Boolean) as string[]
+  const activos = sched.length
+
+  const flash = (msg: string) => {
+    setToast(msg)
+    window.clearTimeout(toastTimer.current)
+    toastTimer.current = window.setTimeout(() => setToast(''), 3200)
+  }
+
+  const generar = () => {
+    if (loading) return
+    const q = prompt.trim() || EXAMPLE
+    setLoading(true)
+    window.setTimeout(() => {
+      const rep = simulateAI(q, Date.now())
+      setGenerated(g => [rep, ...g])
+      setR(rep.id)
+      setLoading(false)
+      setPrompt('')
+      flash('Reporte generado con IA: ' + rep.name)
+    }, 1100)
+  }
+
+  const exportExcel = () => {
+    const rows: (string | number)[][] = [
+      ['AI27 · ' + cur0.name], [cur0.cat + ' · ' + PERIODO_CORTO[periodo]], [cur0.desc],
+      ['Filtros', [periodo, zona, cliente, 'Tipo: ' + tipo].join(' | ')], [],
+      ['Indicador', 'Valor'], ...cur0.kpis, [],
+      [cur0.chart, 'Valor'], ...cur0.data.map(([k, v]) => [k, fv(v)]), [],
+      ['Lectura de la IA', cur0.ai],
+    ]
+    downloadCSV('AI27_' + slug(cur0.name) + '.csv', rows)
+    flash('Excel descargado: AI27_' + slug(cur0.name) + '.csv')
+  }
+
+  const programar = () => {
+    if (sched.some(s => s.r === cur0.name)) { flash('“' + cur0.name + '” ya tiene un envío programado'); return }
+    setSched(s => [...s, { r: cur0.name, to: DEST[cur0.cat] ?? 'Dirección (3)', f: 'Lunes 7:00', n: '12 oct 07:00', fmt: 'PDF + Excel', st: 'Activo' }])
+    flash('Envío programado: ' + cur0.name + ' · lunes 7:00')
+  }
+
+  const toggle = (i: number) => setSched(s => s.map((x, j) => j === i ? { ...x, st: x.st === 'Activo' ? 'Pausado' : 'Activo' } : x))
+
+  return (
+    <Shell active="reportes" css={CSS} mainStyle="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
+      <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
+        <div style={sx('display:flex;flex-direction:column;gap:6px')}>
+          <span className="lbl">Administración</span>
+          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Reportes</h1>
+          <span style={sx('color:#5F6B7A;font-size:14px')}>{16 + generated.length} reportes listos · {activos} envíos programados · exporta a PDF o Excel</span>
+        </div>
+        <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}><button type="button" className="btn" onClick={programar}>Programar envío</button><button type="button" className="btn btn-pri" onClick={() => inputRef.current?.focus()}>Nuevo reporte</button></div>
+      </header>
+
+      <section aria-label="Reporte con IA" style={sx('display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+        <label style={sx('flex:1 1 360px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Pídele un reporte a la IA</span><input ref={inputRef} type="text" value={prompt} onChange={e => setPrompt(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') generar() }} placeholder="Pídele un reporte a la IA: ej. incidentes de septiembre para Marsh con mapa de calor" style={sx("flex:1;min-height:44px;background:#FFFFFF;border:1px solid #E2C48F;border-radius:8px;color:#121821;padding:0 14px;font:400 14px 'IBM Plex Sans',sans-serif")} /></label>
+        <button type="button" className="btn btn-pri" style={sx('min-height:44px')} onClick={generar} disabled={loading}>{loading ? 'Generando…' : 'Generar con IA'}</button>
+      </section>
+
+      <form style={sx('display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end')} onSubmit={e => e.preventDefault()}>
+        <label className="field">Periodo<select value={periodo} onChange={e => setPeriodo(e.target.value)}>{PERIODOS.map(o => <option key={o}>{o}</option>)}</select></label>
+        <label className="field">Zona<select value={zona} onChange={e => setZona(e.target.value)}>{ZONAS.map(o => <option key={o}>{o}</option>)}</select></label>
+        <label className="field">Cliente<select value={cliente} onChange={e => setCliente(e.target.value)}>{CLIENTES.map(o => <option key={o}>{o}</option>)}</select></label>
+        <label className="field">Tipo de servicio<select value={tipo} onChange={e => setTipo(e.target.value)}>{TIPOS.map(o => <option key={o}>{o}</option>)}</select></label>
+      </form>
+
+      <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
+        <nav aria-label="Biblioteca de reportes" className="card" style={sx('flex:1 1 280px;padding:12px;display:flex;flex-direction:column;gap:12px')}>
+          {cats.map(c => (
+            <div key={c.name} style={sx('display:flex;flex-direction:column;gap:2px')}>
+              <span className="lbl" style={sx('padding:4px 10px')}>{c.name}</span>
+              {c.items.map(x => (
+                <button key={x.id} type="button" aria-current={x.id === r} onClick={() => setR(x.id)} style={sx("text-align:left;min-height:40px;padding:0 10px;border-radius:8px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:normal;" + (x.id === r ? 'background:#FFF1DB;border:1px solid #F3D9A8;color:#121821;font-weight:500' : 'background:transparent;border:1px solid transparent;color:#3E4A59;font-weight:400'))}>{x.name}</button>
+              ))}
+            </div>
+          ))}
+        </nav>
+
+        <section id="rep-preview" className="card" style={sx('flex:999 1 560px;display:flex;flex-direction:column;gap:18px;padding:24px;position:relative')}>
+          {loading && (
+            <div aria-live="polite" style={sx('position:absolute;inset:0;background:rgba(255,255,255,.82);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;color:#8A5300;z-index:1')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('animation:rep-pulse 1s ease-in-out infinite')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+              La IA está armando el reporte…
+            </div>
+          )}
+          <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start')}>
+            <div style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">{cur0.cat} · {PERIODO_CORTO[periodo]}</span><h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>{cur0.name}</h2><span style={sx('font-size:14px;color:#3E4A59')}>{cur0.desc}</span>
+              {filtros.length > 0 && <span style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:4px')}>{filtros.map(f => <span key={f} className="pill p-info">{f}</span>)}</span>}
+            </div>
+            <div className="no-print" style={sx('display:flex;gap:8px;flex-wrap:wrap')}><button type="button" className="btn" onClick={() => window.print()}>Descargar PDF</button><button type="button" className="btn" onClick={exportExcel}>Excel</button><button type="button" className="btn" onClick={() => flash('Enviado a ' + (DEST[cur0.cat] ?? 'Dirección (3)') + ': ' + cur0.name)}>Enviar</button></div>
+          </div>
+          <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px')}>
+            {cur0.kpis.map(([k, v]) => (
+              <div key={k} style={sx('background:#F7F9FB;border:1px solid #E4E8ED;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:4px')}><span className="lbl">{k}</span><span style={sx("font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>{v}</span></div>
+            ))}
+          </div>
+          <figure style={sx('margin:0;display:flex;flex-direction:column;gap:12px')}>
+            <figcaption className="lbl">{cur0.chart}</figcaption>
+            {cur0.data.map(([k, v], i) => (
+              <div key={k} style={sx('display:grid;grid-template-columns:180px minmax(0,1fr) 90px;gap:12px;align-items:center;font-size:14px')}>
+                <span>{k}</span>
+                <div style={sx('height:16px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.max(1, Math.round(v / max * 100)) + '%;background:' + (i === 0 ? '#D08A1C' : '#2B7FA8'))}></div></div>
+                <span className="mono" style={sx('text-align:right')}>{fv(v)}</span>
+              </div>
+            ))}
+          </figure>
+          <div style={sx('display:flex;gap:10px;align-items:flex-start;background:#F7F9FB;border-radius:8px;padding:14px;font-size:14px;color:#3E4A59')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none;margin-top:2px')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+            <span><b style={sx('color:#121821')}>Lectura de la IA:</b> {cur0.ai}</span>
+          </div>
+        </section>
+      </div>
+
+      <section className="card" style={sx('padding:20px 8px 0;display:flex;flex-direction:column;gap:12px')}>
+        <h2 style={sx("margin:0;padding:0 12px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Envíos programados</h2>
+        <div style={sx('overflow-x:auto')}>
+          <table className="tbl">
+            <thead><tr><th>Reporte</th><th>Destinatarios</th><th>Frecuencia</th><th>Próximo envío</th><th>Formato</th><th>Estatus</th></tr></thead>
+            <tbody>
+              {sched.map((s, i) => (
+                <tr key={s.r}><td>{s.r}</td><td>{s.to}</td><td>{s.f}</td><td className="mono">{s.n}</td><td>{s.fmt}</td><td><button type="button" title={s.st === 'Activo' ? 'Pausar envío' : 'Reactivar envío'} onClick={() => toggle(i)} className={'pill pill-btn ' + (s.st === 'Activo' ? 'p-ok' : 'p-mute')}>{s.st}</button></td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {toast && (
+        <div role="status" style={sx('position:fixed;right:24px;bottom:24px;background:#121821;color:#FFFFFF;border-radius:8px;padding:12px 16px;font-size:14px;box-shadow:0 6px 24px rgba(18,24,33,.25);z-index:50;max-width:420px')}>{toast}</div>
+      )}
+    </Shell>
+  )
+}

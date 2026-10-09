@@ -1,8 +1,13 @@
 import { useSyncExternalStore } from 'react'
+import { supabase } from './supabase'
 
 /**
- * Estado compartido entre pantallas para el demo (en memoria + localStorage).
- * Más adelante se reemplaza por Supabase sin cambiar las pantallas: solo este módulo.
+ * Estado compartido entre pantallas (lo que el usuario crea en el demo: clientes, leads, servicios,
+ * vacaciones, trámites y decisiones de la IA).
+ *
+ * Persistencia: siempre en memoria + localStorage. Si Supabase está configurado (ver ./supabase.ts),
+ * además se guarda en la tabla `demo_estado` (una fila por colección) y se sincroniza en tiempo real
+ * entre todos los navegadores que tengan la plataforma abierta.
  */
 export type SolicitudVacaciones = {
   id: string
@@ -95,11 +100,61 @@ function load(): State {
 
 let state: State = load()
 const listeners = new Set<() => void>()
+const emit = () => listeners.forEach(l => l())
+
+type Coleccion = keyof State
+const COLECCIONES = Object.keys(initial) as Coleccion[]
 
 function set(next: State) {
+  const cambiadas = COLECCIONES.filter(k => next[k] !== state[k])
   state = next
   try { localStorage.setItem(KEY, JSON.stringify(state)) } catch { /* ignorar */ }
-  listeners.forEach(l => l())
+  emit()
+  guardarEnSupabase(cambiadas)
+}
+
+/* ─────────── Sincronización con Supabase (tabla demo_estado: coleccion text PK, datos jsonb) ─────────── */
+let sincronizando = false
+async function guardarEnSupabase(colecciones: Coleccion[]) {
+  if (!supabase || sincronizando || colecciones.length === 0) return
+  const filas = colecciones.map(c => ({ coleccion: c, datos: state[c], actualizado: new Date().toISOString() }))
+  const { error } = await supabase.from('demo_estado').upsert(filas, { onConflict: 'coleccion' })
+  if (error) console.warn('[supabase] no se pudo guardar', error.message)
+}
+
+async function cargarDeSupabase() {
+  if (!supabase) return
+  const { data, error } = await supabase.from('demo_estado').select('coleccion, datos')
+  if (error) { console.warn('[supabase] no se pudo leer', error.message); return }
+  if (!data || data.length === 0) {
+    // Primera vez: subir lo que haya en este navegador para que la base arranque con algo.
+    guardarEnSupabase(COLECCIONES.filter(c => state[c].length > 0))
+    return
+  }
+  sincronizando = true
+  const next = { ...state }
+  for (const fila of data) if (fila.coleccion in initial) (next as Record<string, unknown>)[fila.coleccion] = fila.datos ?? []
+  state = next
+  try { localStorage.setItem(KEY, JSON.stringify(state)) } catch { /* ignorar */ }
+  emit()
+  sincronizando = false
+}
+
+if (supabase) {
+  cargarDeSupabase()
+  // Cambios hechos desde otro navegador llegan en tiempo real.
+  supabase
+    .channel('demo_estado')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'demo_estado' }, payload => {
+      const fila = payload.new as { coleccion?: string; datos?: unknown } | null
+      if (!fila?.coleccion || !(fila.coleccion in initial)) return
+      sincronizando = true
+      state = { ...state, [fila.coleccion]: fila.datos ?? [] }
+      try { localStorage.setItem(KEY, JSON.stringify(state)) } catch { /* ignorar */ }
+      emit()
+      sincronizando = false
+    })
+    .subscribe()
 }
 
 export function useStore<T>(sel: (s: State) => T): T {

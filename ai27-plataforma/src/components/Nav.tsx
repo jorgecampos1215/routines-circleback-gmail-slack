@@ -1,6 +1,7 @@
 import { Logo } from './Logo'
 import { NavLink } from 'react-router-dom'
 import { sx } from '../lib/sx'
+import { supabaseActivo } from '../lib/supabase'
 
 export type NavId = 'dashboard' | 'asistente' | 'servicios' | 'ia' | 'monitoreo' | 'reaccion' | 'custodios' | 'flotilla' | 'rh' | 'cotizador' | 'crm' | 'finanzas' | 'reportes' | 'portal' | 'usuarios' | 'movil'
 
@@ -56,6 +57,7 @@ export function Nav({ active }: { active: NavId }) {
         <span style={sx('font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6B7684')}>Fuentes de telemetría</span>
         <span style={sx('display:flex;align-items:center;gap:8px')}><span style={sx('width:8px;height:8px;border-radius:50%;background:#4CC38A')} />Samsara · principal</span>
         <span style={sx('display:flex;align-items:center;gap:8px')}><span style={sx('width:8px;height:8px;border-radius:50%;background:#3FA7C9')} />Ruptela · secundaria</span>
+        <span style={sx('display:flex;align-items:center;gap:8px')}><span style={sx(`width:8px;height:8px;border-radius:50%;background:${supabaseActivo ? '#4CC38A' : '#AEB8C4'}`)} />{supabaseActivo ? 'Base de datos · Supabase' : 'Datos · demo local'}</span>
       </div>
       <div style={sx('display:flex;align-items:center;gap:10px;padding:0 8px')}>
         <span style={sx('width:36px;height:36px;border-radius:50%;background:#E9EDFB;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#0D1D41')}>DR</span>

@@ -14,6 +14,9 @@ npm run preview
 ## Marca y diseño
 Logo oficial (`public/logo.png`), azul `#475CC7`, navy `#0D1D41`, tipografía Montserrat (IBM Plex Mono para cifras). Tokens en `src/tokens.css`; componentes de UX compartidos en `src/components/Page.tsx` (PageHeader, Pasos del flujo, Section plegable).
 
+## Despliegue
+Supabase (base de datos y sincronización en tiempo real) + Vercel (hosting): pasos en [DEPLOY.md](DEPLOY.md). Sin variables de entorno la app funciona en modo demo local.
+
 ## Stack
 React 19 + TypeScript + Vite, react-router (HashRouter), Recharts. No hay backend: el estado del demo vive en `src/lib/store.ts`, en memoria y en localStorage. Está hecho para cambiarlo por Supabase sin tocar las pantallas.
 

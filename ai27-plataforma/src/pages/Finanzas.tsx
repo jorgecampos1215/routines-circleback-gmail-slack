@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Shell } from '../components/Shell'
 import { Field, Modal, Pager, btnPriStyle, btnStyle, inputStyle, usePagination, useToast } from '../components/ui'
+import { Nota, PageHeader, Section } from '../components/Page'
 import { sx } from '../lib/sx'
 import { ROUTES } from '../lib/routes'
 import { useStore } from '../lib/store'
@@ -19,17 +20,19 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap;cursor:pointer;user-select:none}
 .tbl th:hover{color:#0D1D41}
 .tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
 .btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .btn-sm{min-height:32px;padding:0 10px;font-size:13px}
 .k{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:600}
 .field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
-.field select{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
-.inv{cursor:pointer;border-radius:6px}.inv:hover{background:#FAFBFC}.inv.sel{background:#F0F3FD}
+.field select{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
+.inv{cursor:pointer;border-radius:6px}.inv:hover{background:#FAFBFC}.inv.sel{background:#F0F3FD;outline:1px solid #C7D0F2}
+.tab{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:#3E4A59;font:500 14px 'Montserrat',sans-serif;cursor:pointer}
+.tab[aria-selected="true"]{background:#E9EDFB;border-color:#C7D0F2;color:#0D1D41}
 `
 
 type By = 'cli' | 'srv' | 'uni'
-const TABS: [By, string, string, Renta[]][] = [['cli', 'Por cliente', 'Cliente', rentaPorCliente], ['srv', 'Por servicio', 'Tipo de servicio', rentaPorServicio], ['uni', 'Por unidad', 'Unidad', rentaPorUnidad]]
+const TABS: [By, string, string, Renta[]][] = [['cli', 'Por cliente', 'Cliente', rentaPorCliente], ['srv', 'Por tipo de servicio', 'Tipo de servicio', rentaPorServicio], ['uni', 'Por unidad', 'Unidad', rentaPorUnidad]]
 type SortKey = 'n' | 'rev' | 'cost' | 'm' | 'pct'
 
 const fmt = (n: number) => (Math.abs(n) >= 1e6 ? '$' + (n / 1e6).toFixed(2) + 'M' : Math.abs(n) >= 1e3 ? '$' + (n / 1e3).toFixed(1) + 'K' : '$' + Math.round(n))
@@ -82,6 +85,7 @@ export default function Finanzas() {
   const pend = facturas.filter(x => x.estatus !== 'Cobrada')
   const lista = verTodas ? facturas : facturas.slice(0, 5)
   const clientesAll = [...clientes.map(c => c.nombre), ...nuevos.map(n => n.nombre)]
+  const variacion = periodo === 'Agosto 2026' ? '+2.9% vs julio' : periodo === 'Septiembre 2026' ? '+3.7% vs agosto' : periodo === 'Q3 2026 (jul–sep)' ? '+9.8% vs Q2' : '+14% vs 2025'
 
   function exportExcel() {
     const out: (string | number)[][] = [
@@ -137,48 +141,58 @@ export default function Finanzas() {
   const bucket = (l: string, v: number, bad = false) => (
     <div style={sx((bad ? 'background:#FDECEC' : 'background:#F3F5F8') + ';border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:2px')}><span style={sx('font-size:12px;color:' + (bad ? '#B42318' : '#5F6B7A'))}>{l}</span><span className="mono">{fmtM1(v)}</span></div>
   )
+  const riesgo60 = b.mas60 ? Math.round((facturas.filter(x => ['Bebidas del Golfo', 'Grupo Textil Arrayán'].includes(x.cliente) && x.estatus !== 'Cobrada' && x.dias > 60).reduce((a, x) => a + x.monto, 0) / b.mas60) * 100) : 0
 
   return (
     <Shell active="finanzas" css={CSS}>
-      <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
-        <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-          <span className="lbl">ERP ligero · {ETIQUETA[periodo]}</span>
-          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Finanzas</h1>
-          <span style={sx('color:#5F6B7A;font-size:14px')}>Registro de facturación sin timbrado CFDI en el demo</span>
-        </div>
-        <div style={sx('display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end')}>
-          <label className="field">Periodo<select value={periodo} onChange={e => setPeriodo(e.target.value as Periodo)}>{PERIODOS.map(p => <option key={p}>{p}</option>)}</select></label>
-          <button type="button" className="btn" onClick={exportExcel}>Exportar a Excel</button>
-        </div>
-      </header>
+      <PageHeader seccion={`Finanzas · ${ETIQUETA[periodo]}`} titulo="Finanzas"
+        descripcion="Cuánto ingresa, cuánto cuesta operar y qué falta por cobrar. Para Dirección y Finanzas: aquí registras pagos, envías recordatorios y ves qué clientes y servicios dejan margen."
+        accion={{ label: 'Registrar pago', onClick: abrirPago }}
+        secundarias={<><label className="field" style={sx('flex-direction:row;align-items:center;gap:8px')}>Periodo<select value={periodo} onChange={e => setPeriodo(e.target.value as Periodo)}>{PERIODOS.map(p => <option key={p}>{p}</option>)}</select></label></>} />
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+      <section aria-label="Sugerencia de la IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · proyección de cobranza</span><span style={sx('font-size:14px;color:#3E4A59')}>Con el historial de pago de cada cliente, se esperan cobrar $7.9M en octubre. Bebidas del Golfo y Grupo Textil Arrayán concentran {b.mas60 ? Math.round((facturas.filter(x => ['Bebidas del Golfo', 'Grupo Textil Arrayán'].includes(x.cliente) && x.estatus !== 'Cobrada' && x.dias > 60).reduce((a, x) => a + x.monto, 0) / b.mas60) * 100) : 0}% del riesgo a más de 60 días: sugiero condicionar nuevos servicios a pago.</span></div>
+        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>Sugerencia de la IA: condicionar nuevos servicios a Bebidas del Golfo y Grupo Textil Arrayán</span><span style={sx('font-size:14px;color:#3E4A59')}>Concentran {riesgo60}% del saldo a más de 60 días. Con el historial de pago de cada cliente, se esperan cobrar $7.9M en octubre.</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
           <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Cobranza acumulada proyectada por semana de octubre: 1.8, 3.9, 5.6 y 7.9 millones" style={sx('display:block')}><g><rect x="8" y="49" width="40" height="11" rx="2" fill="#2B9A66"></rect><rect x="60" y="36.3" width="40" height="23.7" rx="2" fill="#2B9A66"></rect><rect x="112" y="26" width="40" height="34" rx="2" fill="#9FD6BB"></rect><rect x="164" y="12" width="40" height="48" rx="2" fill="#9FD6BB"></rect></g><text x="166" y="9" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#17784A">$7.9M</text></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Cobranza acumulada de octubre · claro: proyectado</figcaption>
         </figure>
-        <Link className="btn" to={ROUTES.AsistenteIA}>Preguntarle a la IA</Link>
+        <button type="button" className="btn" onClick={abrirRec}>Enviar recordatorio de pago</button>
       </section>
 
-      <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px')}>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Ingresos</span><span className="k">{fmtM1(ingresos)}</span><span style={sx('font-size:13px;color:#17784A')}>{periodo === 'Agosto 2026' ? '+2.9% vs julio' : periodo === 'Septiembre 2026' ? '+3.7% vs agosto' : periodo === 'Q3 2026 (jul–sep)' ? '+9.8% vs Q2' : '+14% vs 2025'}</span></div>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Gastos</span><span className="k">{fmtM1(gastos)}</span><span style={sx('font-size:13px;color:#5F6B7A')}>{Math.round(gastos / ingresos * 100)}% de ingresos</span></div>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Margen operativo</span><span className="k">{Math.round(margen / ingresos * 100)}%</span><span style={sx('font-size:13px;color:#5F6B7A')}>{fmtM1(margen)}</span></div>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Cuentas por cobrar</span><span className="k">{fmtM1(b.total)}</span><span style={sx('font-size:13px;color:#B42318')}>{fmtM1(b.mas60)} a más de 60 días</span></div>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Días de cobro</span><span className="k">{dias}</span><span style={sx('font-size:13px;color:#5F6B7A')}>meta 30</span></div>
+      <section aria-label="Indicadores" style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:12px')}>
+        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Ingresos</span><span className="k">{fmtM1(ingresos)}</span><span style={sx('font-size:13px;color:#17784A')}>{variacion}</span></div>
+        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Margen operativo</span><span className="k">{Math.round(margen / ingresos * 100)}%</span><span style={sx('font-size:13px;color:#5F6B7A')}>{fmtM1(margen)} · gastos {fmtM1(gastos)} ({Math.round(gastos / ingresos * 100)}% de ingresos)</span></div>
+        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Por cobrar</span><span className="k">{fmtM1(b.total)}</span><span style={sx('font-size:13px;color:#B42318')}>{fmtM1(b.mas60)} con más de 60 días</span></div>
+        <div className="card" style={sx('display:flex;flex-direction:column;gap:6px')}><span className="lbl">Días de cobro</span><span className="k" style={sx('color:' + (dias > 30 ? '#9A5B00' : '#17784A'))}>{dias}</span><span style={sx('font-size:13px;color:#5F6B7A')}>promedio · meta 30 días</span></div>
       </section>
 
-      <section className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
-        <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Rentabilidad <span style={sx('font-size:13px;color:#5F6B7A;font-weight:400;font-family:IBM Plex Sans,sans-serif')}>· {rows.length} {by === 'cli' ? 'clientes' : by === 'srv' ? 'modelos' : 'unidades'} · {ETIQUETA[periodo]}</span></h2>
-          <div role="tablist" aria-label="Agrupar por" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
-            {TABS.map(([k, label]) => (
-              <button key={k} type="button" role="tab" aria-selected={k === by} className="btn" style={sx(k === by ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => { setBy(k); pg.setPage(0) }}>{label}</button>
-            ))}
-          </div>
+      <Section titulo="Cuentas por cobrar" ayuda="Facturas pendientes por antigüedad. Elige una y registra el pago o envía un recordatorio."
+        acciones={<><button type="button" className="btn btn-sm" onClick={abrirRec}>Enviar recordatorio</button><button type="button" className="btn btn-sm" onClick={() => setFactOpen(true)}>Nueva factura</button></>}>
+        <div style={sx('display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px')}>
+          {bucket('Al corriente', b.corriente)}{bucket('1–30 días', b.d30)}{bucket('31–60 días', b.d60)}{bucket('Más de 60 días', b.mas60, true)}
         </div>
+        <div style={sx('display:grid;grid-template-columns:90px minmax(0,1fr) 100px auto;gap:10px;padding:4px 4px 0;font-size:12px;color:#5F6B7A')}><span>Factura</span><span>Concepto</span><span style={sx('text-align:right')}>Monto</span><span>Estatus</span></div>
+        {lista.map(i => {
+          const [cls, txt] = estatusPill(i)
+          return (
+            <div key={i.id} className={'inv' + (selInv === i.id ? ' sel' : '')} onClick={() => setSelInv(s => (s === i.id ? null : i.id))} title="Seleccionar para registrar pago o recordatorio" style={sx('display:grid;grid-template-columns:90px minmax(0,1fr) 100px auto;gap:10px;align-items:center;padding:8px 4px;border-top:1px solid #EEF1F4;font-size:14px')}>
+              <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{i.id}</span><span style={sx('overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{i.concepto}</span><span className="mono" style={sx('text-align:right')}>{fmt(i.monto)}</span><span className={cls}>{txt}</span>
+            </div>
+          )
+        })}
+        <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
+          <button type="button" className="btn btn-sm" onClick={() => setVerTodas(v => !v)}>{verTodas ? 'Ver solo las 5 recientes' : `Ver las ${facturas.length} facturas · ${pend.length} pendientes`}</button>
+          <Nota>{selInv ? `Factura ${selInv} seleccionada: “Registrar pago” y “Enviar recordatorio” la usarán.` : 'Sin factura seleccionada: las acciones toman la más antigua pendiente.'}</Nota>
+        </div>
+      </Section>
+
+      <Section titulo="Rentabilidad" ayuda={`Qué deja margen y qué no: ${rows.length} ${by === 'cli' ? 'clientes' : by === 'srv' ? 'tipos de servicio' : 'unidades'} en ${ETIQUETA[periodo]}. Haz clic en un encabezado para ordenar.`}
+        acciones={<><button type="button" className="btn btn-sm" onClick={exportExcel} title="Descarga KPIs, rentabilidad, gastos y facturas del periodo">Exportar a Excel</button><div role="tablist" aria-label="Agrupar por" style={sx('display:flex;gap:4px;flex-wrap:wrap')}>
+          {TABS.map(([k, label]) => (
+            <button key={k} type="button" role="tab" aria-selected={k === by} className="tab" onClick={() => { setBy(k); pg.setPage(0) }}>{label}</button>
+          ))}
+        </div></>}>
         <div style={sx('overflow-x:auto')}>
           <table className="tbl">
             <thead><tr><th onClick={() => toggleSort('n')}>{firstCol}{arrow('n')}</th><th onClick={() => toggleSort('rev')}>Ingresos{arrow('rev')}</th><th onClick={() => toggleSort('cost')}>Costo directo{arrow('cost')}</th><th onClick={() => toggleSort('m')}>Margen{arrow('m')}</th><th style={sx('min-width:200px')} onClick={() => toggleSort('pct')}>% margen{arrow('pct')}</th></tr></thead>
@@ -192,49 +206,27 @@ export default function Finanzas() {
           </table>
         </div>
         {rows.length > 25 && <Pager {...pg} />}
-      </section>
+        <Nota>Margen = ingresos menos costo directo (nómina operativa, combustible, casetas, taller). Verde: 30% o más; azul: menos de 30%; rojo: pérdida.</Nota>
+      </Section>
 
-      <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px')}>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
-          <h2 style={sx("margin:0 0 4px;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Gastos por categoría <span style={sx('font-size:13px;color:#5F6B7A;font-weight:400;font-family:IBM Plex Sans,sans-serif')}>· {ETIQUETA[periodo]}</span></h2>
-          {GASTOS.map(([k, v]) => (
-            <div key={k} style={sx('display:grid;grid-template-columns:150px minmax(0,1fr) 80px;gap:12px;align-items:center;font-size:14px')}>
-              <span>{k}</span><div style={sx('height:10px;border-radius:5px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.round(v * f / gmax * 100) + '%;background:#3FA7C9')}></div></div><span className="mono" style={sx('text-align:right')}>{fmtM1(v * f)}</span>
-            </div>
-          ))}
-          <div style={sx('display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#5F6B7A;border-top:1px solid #EEF1F4;padding-top:8px')}><span>Total gastos directos</span><span className="mono">{fmtM1(GASTOS.reduce((a, g) => a + g[1], 0) * f)}</span></div>
-        </div>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
-          <div style={sx('display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center')}>
-            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Cuentas por cobrar</h2>
-            <div style={sx('display:flex;gap:6px;flex-wrap:wrap')}>
-              <button type="button" className="btn btn-sm" onClick={abrirPago}>Registrar pago</button>
-              <button type="button" className="btn btn-sm" onClick={abrirRec}>Enviar recordatorio</button>
-              <button type="button" className="btn btn-sm btn-pri" onClick={() => setFactOpen(true)}>Nueva factura</button>
-            </div>
+      <Section titulo="Gastos por categoría" ayuda={`En qué se va el dinero en ${ETIQUETA[periodo]}.`} plegable abierto={false}>
+        {GASTOS.map(([k, v]) => (
+          <div key={k} style={sx('display:grid;grid-template-columns:150px minmax(0,1fr) 80px;gap:12px;align-items:center;font-size:14px')}>
+            <span>{k}</span><div style={sx('height:10px;border-radius:5px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.round(v * f / gmax * 100) + '%;background:#3FA7C9')}></div></div><span className="mono" style={sx('text-align:right')}>{fmtM1(v * f)}</span>
           </div>
-          <div style={sx('display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px')}>
-            {bucket('Al corriente', b.corriente)}{bucket('1–30 d', b.d30)}{bucket('31–60 d', b.d60)}{bucket('+60 d', b.mas60, true)}
-          </div>
-          {lista.map(i => {
-            const [cls, txt] = estatusPill(i)
-            return (
-              <div key={i.id} className={'inv' + (selInv === i.id ? ' sel' : '')} onClick={() => setSelInv(s => (s === i.id ? null : i.id))} title="Seleccionar para registrar pago o recordatorio" style={sx('display:grid;grid-template-columns:90px minmax(0,1fr) 100px auto;gap:10px;align-items:center;padding:8px 4px;border-top:1px solid #EEF1F4;font-size:14px')}>
-                <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{i.id}</span><span style={sx('overflow:hidden;text-overflow:ellipsis;white-space:nowrap')}>{i.concepto}</span><span className="mono" style={sx('text-align:right')}>{fmt(i.monto)}</span><span className={cls}>{txt}</span>
-              </div>
-            )
-          })}
-          <button type="button" className="btn btn-sm" style={sx('align-self:flex-start')} onClick={() => setVerTodas(v => !v)}>{verTodas ? 'Ver solo las 5 recientes' : `Ver las ${facturas.length} facturas · ${pend.length} pendientes`}</button>
-        </div>
-      </section>
+        ))}
+        <div style={sx('display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#5F6B7A;border-top:1px solid #EEF1F4;padding-top:8px')}><span>Total gastos directos</span><span className="mono">{fmtM1(GASTOS.reduce((a, g) => a + g[1], 0) * f)}</span></div>
+        <Nota>¿Dudas sobre una cifra? <Link to={ROUTES.AsistenteIA}>Pregúntale a la IA</Link>.</Nota>
+      </Section>
 
       <Modal open={pagoOpen} onClose={() => setPagoOpen(false)} title="Registrar pago" footer={<><button type="button" style={sx(btnStyle)} onClick={() => setPagoOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={registrarPago}>Registrar</button></>}>
         <Field label="Factura"><select style={sx(inputStyle)} value={pago.id} onChange={e => { const fx = facturas.find(x => x.id === e.target.value); setPago({ ...pago, id: e.target.value, monto: fx ? String(fx.monto) : '' }) }}>{pend.map(x => <option key={x.id} value={x.id}>{x.id} · {x.cliente} · {fmt(x.monto)} · {x.dias} días</option>)}</select></Field>
         <div style={sx('display:grid;grid-template-columns:1fr 1fr;gap:12px')}>
-          <Field label="Monto recibido (MXN)"><input style={sx(inputStyle)} value={pago.monto} onChange={e => setPago({ ...pago, monto: e.target.value })} /></Field>
+          <Field label="Monto recibido (MXN)"><input style={sx(inputStyle)} value={pago.monto} onChange={e => setPago({ ...pago, monto: e.target.value })} autoFocus /></Field>
           <Field label="Fecha"><input type="date" style={sx(inputStyle)} value={pago.fecha} onChange={e => setPago({ ...pago, fecha: e.target.value })} /></Field>
         </div>
         <Field label="Método"><select style={sx(inputStyle)} value={pago.metodo} onChange={e => setPago({ ...pago, metodo: e.target.value })}>{['Transferencia SPEI', 'Cheque', 'Compensación', 'Efectivo'].map(m => <option key={m}>{m}</option>)}</select></Field>
+        <Nota>Si el monto cubre la factura completa queda “Cobrada”; si es menor, se registra como pago parcial.</Nota>
       </Modal>
 
       <Modal open={recOpen} onClose={() => setRecOpen(false)} title="Enviar recordatorio de pago" footer={<><button type="button" style={sx(btnStyle)} onClick={() => setRecOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={enviarRec}>Enviar</button></>}>
@@ -247,7 +239,7 @@ export default function Finanzas() {
         <Field label="Cliente"><select style={sx(inputStyle)} value={nueva.cliente} onChange={e => setNueva({ ...nueva, cliente: e.target.value })}>{clientesAll.map(c => <option key={c}>{c}</option>)}</select></Field>
         <Field label="Concepto"><input style={sx(inputStyle)} value={nueva.concepto} onChange={e => setNueva({ ...nueva, concepto: e.target.value })} placeholder={`${nueva.cliente} · servicios octubre`} /></Field>
         <Field label="Monto (MXN antes de IVA)"><input style={sx(inputStyle)} value={nueva.monto} onChange={e => setNueva({ ...nueva, monto: e.target.value })} placeholder="1,250,000" /></Field>
-        <span style={sx('font-size:13px;color:#5F6B7A')}>En el demo la factura se registra sin timbrado CFDI.</span>
+        <Nota>En el demo la factura se registra sin timbrado CFDI.</Nota>
       </Modal>
     </Shell>
   )

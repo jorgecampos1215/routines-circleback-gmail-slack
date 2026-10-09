@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Shell } from '../components/Shell'
 import { sx } from '../lib/sx'
 import { Field, Modal, btnPriStyle, btnStyle, inputStyle, useToast } from '../components/ui'
+import { Nota, PageHeader, Section } from '../components/Page'
 import { usuarios as USUARIOS_SEED, type Usuario } from '../data/usuarios'
 import { descargar, toCSV } from '../data/rh'
 
@@ -15,16 +16,24 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
 .tbl td{padding:8px 12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.tbl tbody tr:hover td{background:#FAFBFC}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
 .btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .btn-sm{min-height:32px;padding:0 10px;font-size:13px}
+.btn-ok{background:#E3F6EC;border-color:#BFE8D0;color:#17784A}
+.th-act{text-align:center;cursor:pointer}
+.th-act:hover{color:#0D1D41}
+.th-act small{display:block;text-transform:none;letter-spacing:0;font-size:11px;color:#8A95A3;font-weight:400;margin-top:2px}
 `
 
 const SR = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)'
 const SEL = "min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif"
 
 const MODS = ['Dashboard', 'Servicios', 'Asignación IA', 'Monitoreo', 'Reacción', 'Custodios (datos sensibles)', 'Flotilla y taller', 'Cotizador', 'CRM', 'RH', 'Finanzas', 'Usuarios y roles']
+/** Nombre que ve el usuario en el menú (lenguaje de la operación). */
+const MOD_LABEL: Record<string, string> = { 'Dashboard': 'Inicio (tablero)', 'Servicios': 'Servicios', 'Asignación IA': 'Asignar custodios', 'Monitoreo': 'Mapa en vivo', 'Reacción': 'Incidentes', 'Custodios (datos sensibles)': 'Custodios (datos sensibles)', 'Flotilla y taller': 'Flotilla y taller', 'Cotizador': 'Cotizaciones', 'CRM': 'Clientes', 'RH': 'Equipo', 'Finanzas': 'Finanzas', 'Usuarios y roles': 'Usuarios' }
 const ACTS = ['Ver', 'Crear', 'Editar', 'Aprobar']
+const ACT_HELP: Record<string, string> = { Ver: 'abrir la pantalla', Crear: 'agregar registros', Editar: 'cambiar registros', Aprobar: 'autorizar (tarifas, gastos, altas)' }
 const R: Record<string, string[]> = {
   'Dirección':        ['1111', '1111', '1111', '1111', '1111', '1001', '1001', '1111', '1111', '1001', '1111', '1111'],
   'Operaciones':      ['1000', '1111', '1111', '1110', '1110', '1010', '1000', '1000', '1000', '0000', '0000', '0000'],
@@ -115,10 +124,12 @@ export default function Usuarios() {
   }
   const descartar = () => { setPerms(saved); setScope(savedScope); toast('Cambios descartados', 'info') }
   const cur = scope[role]
+  const nPermisos = perms[role].flat().filter(Boolean).length
 
   const open = (m: typeof modal, f: Record<string, string> = {}) => { setForm(f); setModal(m) }
   const F = (k: string) => form[k] ?? ''
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setForm(f => ({ ...f, [k]: e.target.value }))
+  const abrirInvitar = () => open('invitar', { rol: role, zona: scope[role].zone })
 
   const invitar = () => {
     const nombre = F('nombre').trim(), correo = F('correo').trim()
@@ -162,75 +173,72 @@ export default function Usuarios() {
 
   return (
     <Shell active="usuarios" css={CSS}>
-      <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
-        <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-          <span className="lbl">Administración</span>
-          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Usuarios y roles</h1>
-          <span style={sx('color:#5F6B7A;font-size:14px')}>{activos} usuarios · {roles.length} roles · permisos por módulo, acción, zona y cliente</span>
+      <PageHeader seccion="Administración" titulo="Usuarios"
+        descripcion={`Quién entra a la plataforma y qué puede hacer: cada persona tiene un rol, y el rol dice qué pantallas ve y si puede crear, editar o aprobar. ${activos} usuarios en ${roles.length} roles.`}
+        accion={{ label: 'Invitar usuario', onClick: abrirInvitar }}
+        secundarias={<button type="button" className="btn" onClick={() => open('rol', { base: role })}>Nuevo rol</button>} />
+
+      {changes.length > 0 && (
+        <div role="status" style={sx('display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:#FFF3DC;border:1px solid #F3D9A4;border-radius:10px;padding:12px 16px;font-size:14px;color:#0D1D41')}>
+          <span><b>{changes.length} {changes.length === 1 ? 'rol con cambios' : 'roles con cambios'} sin guardar.</b> Los permisos nuevos aplican hasta que guardes.</span>
+          <span style={sx('display:flex;gap:8px')}><button type="button" className="btn btn-sm" onClick={descartar}>Descartar</button><button type="button" className="btn btn-sm btn-ok" onClick={guardar}>Guardar cambios</button></span>
         </div>
-        <div style={sx('display:flex;gap:12px;flex-wrap:wrap;align-items:center')}>
-          {changes.length > 0 && <button type="button" className="pill p-warn" onClick={descartar} title="Descartar cambios" style={sx('border:0;cursor:pointer;font-family:inherit')}>{changes.length} {changes.length === 1 ? 'rol con cambios' : 'roles con cambios'} sin guardar · descartar</button>}
-          <button type="button" className="btn" onClick={() => open('rol', { base: role })}>Nuevo rol</button>
-          <button type="button" className="btn" onClick={() => open('invitar', { rol: role, zona: scope[role].zone })}>Invitar usuario</button>
-          <button type="button" className="btn btn-pri" onClick={guardar}>Guardar cambios</button>
-        </div>
-      </header>
+      )}
 
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
         <nav aria-label="Roles" className="card" style={sx('flex:1 1 240px;padding:10px;display:flex;flex-direction:column;gap:4px')}>
+          <span className="lbl" style={sx('padding:6px 12px 4px')}>Roles · {roles.length}</span>
           {roles.map(name => (
             <button key={name} type="button" aria-current={name === role ? 'true' : undefined} onClick={() => setRole(name)}
               style={sx("display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;border:0;cursor:pointer;font:500 14px 'Montserrat',sans-serif;text-align:left;" + (name === role ? 'background:#E9EDFB;color:#0D1D41' : 'background:transparent;color:#2A3442'))}>
-              <span>{name}</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{counts[name]}</span>
+              <span>{name}</span><span className="mono" title={`${counts[name]} usuarios activos`} style={sx('font-size:12px;color:#5F6B7A')}>{counts[name]}</span>
             </button>
           ))}
+          <Nota>El número es cuántos usuarios activos tienen ese rol. Elige uno para ver y editar sus permisos.</Nota>
         </nav>
 
-        <section className="card" style={sx('flex:999 1 560px;display:flex;flex-direction:column;gap:16px')}>
-          <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end')}>
-            <div style={sx('display:flex;flex-direction:column;gap:4px')}>
-              <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:20px;font-weight:600")}>{role}</h2>
-              <span style={sx('font-size:13px;color:#5F6B7A')}>{desc[role]} <button type="button" onClick={() => { setUQ(''); setModal('usuarios') }} style={sx('background:none;border:0;padding:0;cursor:pointer;color:#3448A8;font:inherit;text-decoration:underline')}>Ver {counts[role]} {counts[role] === 1 ? 'usuario' : 'usuarios'}</button></span>
+        <div style={sx('flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px')}>
+          <Section titulo={`Permisos del rol ${role}`} ayuda={`${desc[role]} ${nPermisos} permisos activos.`}
+            acciones={<button type="button" className="btn btn-sm" onClick={() => { setUQ(''); setModal('usuarios') }}>Ver {counts[role]} {counts[role] === 1 ? 'usuario' : 'usuarios'}</button>}>
+            <Nota>Marca una casilla para dar el permiso y desmárcala para quitarlo. Haz clic en el nombre de una pantalla para marcar toda la fila, o en un encabezado para marcar toda la columna. Después, guarda.</Nota>
+            <div style={sx('overflow-x:auto')}>
+              <table className="tbl">
+                <thead><tr><th>Pantalla</th>{ACTS.map((a, j) => <th key={a} className="th-act" title={`Marcar/desmarcar “${a}” en todas las pantallas`} onClick={() => { const all = perms[role].every(r => r[j]); const p = { ...perms, [role]: perms[role].map(r => { const c = r.slice(); c[j] = !all; return c }) }; setPerms(p) }}>{a}<small>{ACT_HELP[a]}</small></th>)}</tr></thead>
+                <tbody>
+                  {MODS.map((mod, i) => (
+                    <tr key={mod}><td style={sx('cursor:pointer')} title="Marcar/desmarcar toda la fila" onClick={() => { const all = perms[role][i].every(Boolean); const p = { ...perms, [role]: perms[role].map((r, k) => (k === i ? r.map(() => !all) : r)) }; setPerms(p) }}>{MOD_LABEL[mod] ?? mod}</td>
+                      {ACTS.map((a, j) => (
+                        <td key={a} style={sx('text-align:center')}><label style={sx('display:inline-flex;min-width:44px;min-height:36px;align-items:center;justify-content:center;cursor:pointer')}><span style={sx(SR)}>{a + ' ' + mod}</span><input type="checkbox" checked={perms[role][i][j]} onChange={() => toggle(i, j)} style={sx('width:18px;height:18px;accent-color:#475CC7')} /></label></td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          </Section>
+
+          <Section titulo="Alcance del rol" ayuda="Hasta dónde llega lo que ve: solo su zona, solo sus clientes o toda la empresa." plegable abierto={false}>
             <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
-              <label style={sx('display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A')}>Alcance por zona<select style={sx(SEL)} value={cur.zone} onChange={e => setRoleScope('zone', e.target.value)}>{ZONAS.map(z => <option key={z}>{z}</option>)}</select></label>
-              <label style={sx('display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A')}>Alcance por cliente<select style={sx(SEL)} value={cur.client} onChange={e => setRoleScope('client', e.target.value)}>{CLIENTES.map(c => <option key={c}>{c}</option>)}</select></label>
+              <label style={sx('display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A')}>Zonas que puede ver<select style={sx(SEL)} value={cur.zone} onChange={e => setRoleScope('zone', e.target.value)}>{ZONAS.map(z => <option key={z}>{z}</option>)}</select></label>
+              <label style={sx('display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A')}>Clientes que puede ver<select style={sx(SEL)} value={cur.client} onChange={e => setRoleScope('client', e.target.value)}>{CLIENTES.map(c => <option key={c}>{c}</option>)}</select></label>
             </div>
-          </div>
-          <div style={sx('overflow-x:auto')}>
-            <table className="tbl">
-              <thead><tr><th>Módulo</th>{ACTS.map((a, j) => <th key={a} style={sx('text-align:center;cursor:pointer')} title={`Marcar/desmarcar “${a}” en todos los módulos`} onClick={() => { const all = perms[role].every(r => r[j]); const p = { ...perms, [role]: perms[role].map(r => { const c = r.slice(); c[j] = !all; return c }) }; setPerms(p) }}>{a}</th>)}</tr></thead>
-              <tbody>
-                {MODS.map((mod, i) => (
-                  <tr key={mod}><td style={sx('cursor:pointer')} title="Marcar/desmarcar toda la fila" onClick={() => { const all = perms[role][i].every(Boolean); const p = { ...perms, [role]: perms[role].map((r, k) => (k === i ? r.map(() => !all) : r)) }; setPerms(p) }}>{mod}</td>
-                    {ACTS.map((a, j) => (
-                      <td key={a} style={sx('text-align:center')}><label style={sx('display:inline-flex;min-width:44px;min-height:36px;align-items:center;justify-content:center;cursor:pointer')}><span style={sx(SR)}>{a + ' ' + mod}</span><input type="checkbox" checked={perms[role][i][j]} onChange={() => toggle(i, j)} style={sx('width:18px;height:18px;accent-color:#475CC7')} /></label></td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+            <Nota>Ejemplo: un monitorista con alcance “Centro y Bajío” solo ve los servicios y custodios de esas zonas en el mapa en vivo.</Nota>
+          </Section>
+        </div>
       </div>
 
-      <section className="card" style={sx('display:flex;flex-direction:column;gap:10px')}>
-        <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0 0 4px;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Bitácora de auditoría</h2>
-          <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
-            <label style={sx('display:flex')}><span style={sx(SR)}>Buscar en bitácora</span><input type="search" placeholder="Buscar en la bitácora" value={fQ} onChange={e => setFQ(e.target.value)} style={sx(SEL + ';min-width:220px')} /></label>
-            <label style={sx('display:flex')}><span style={sx(SR)}>Filtrar por actor</span><select style={sx(SEL)} value={fActor} onChange={e => setFActor(e.target.value)}>{actores.map(a => <option key={a}>{a}</option>)}</select></label>
-            <button type="button" className="btn" onClick={exportar}>Exportar</button>
-          </div>
-        </div>
-        {auditView.length === 0 && <span style={sx('font-size:14px;color:#5F6B7A;padding:8px 0;border-top:1px solid #EEF1F4')}>Sin eventos para ese filtro.</span>}
+      <Section titulo="Bitácora de cambios" ayuda="Quién hizo qué y cuándo en toda la plataforma. Sirve para auditoría." plegable abierto={false}
+        acciones={<><label style={sx('display:flex')}><span style={sx(SR)}>Buscar en bitácora</span><input type="search" placeholder="Buscar en la bitácora" value={fQ} onChange={e => setFQ(e.target.value)} style={sx(SEL + ';min-width:220px;min-height:34px')} /></label>
+          <label style={sx('display:flex')}><span style={sx(SR)}>Filtrar por quién</span><select style={sx(SEL + ';min-height:34px')} value={fActor} onChange={e => setFActor(e.target.value)}>{actores.map(a => <option key={a}>{a}</option>)}</select></label>
+          <button type="button" className="btn btn-sm" onClick={exportar}>Exportar CSV</button></>}>
+        {auditView.length === 0 && <span style={sx('font-size:14px;color:#5F6B7A;padding:8px 0;border-top:1px solid #EEF1F4')}>Sin eventos para ese filtro. Prueba con otra palabra o quita el filtro de quién.</span>}
         {auditView.map((a, k) => (
           <div key={a.t + a.what + k} style={sx('display:grid;grid-template-columns:140px 180px minmax(0,1fr);gap:12px;padding:8px 0;border-top:1px solid #EEF1F4;font-size:14px')}>
             <span className="mono" style={sx('color:#5F6B7A;font-size:13px')}>{a.t}</span><span>{a.who}</span><span style={sx('color:#3E4A59')}>{a.what}</span>
           </div>
         ))}
         <span style={sx('font-size:12px;color:#5F6B7A')}>{auditView.length} de {audit.length} eventos</span>
-      </section>
+      </Section>
 
       <Modal open={modal === 'invitar'} onClose={() => setModal(null)} title="Invitar usuario" footer={<><button type="button" style={sx(btnStyle)} onClick={() => setModal(null)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={invitar}>Enviar invitación</button></>}>
         <Field label="Nombre completo"><input style={sx(inputStyle)} value={F('nombre')} onChange={set('nombre')} placeholder="Ej. Sofía Campos" autoFocus /></Field>
@@ -239,16 +247,17 @@ export default function Usuarios() {
           <Field label="Rol"><select style={sx(inputStyle)} value={F('rol')} onChange={set('rol')}>{roles.map(r => <option key={r}>{r}</option>)}</select></Field>
           <Field label="Zona"><select style={sx(inputStyle)} value={F('zona')} onChange={set('zona')}>{ZONAS.map(z => <option key={z}>{z}</option>)}</select></Field>
         </div>
-        <span style={sx('font-size:13px;color:#5F6B7A')}>Recibe un correo con liga de acceso válida 48 horas. Hereda los permisos del rol.</span>
+        <Nota>Recibe un correo con liga de acceso válida 48 horas y entra con los permisos del rol elegido.</Nota>
       </Modal>
 
       <Modal open={modal === 'rol'} onClose={() => setModal(null)} title="Nuevo rol" footer={<><button type="button" style={sx(btnStyle)} onClick={() => setModal(null)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={crearRol}>Crear rol</button></>}>
         <Field label="Nombre del rol"><input style={sx(inputStyle)} value={F('nombre')} onChange={set('nombre')} placeholder="Ej. Supervisor de monitoreo" autoFocus /></Field>
         <Field label="Copiar permisos de"><select style={sx(inputStyle)} value={F('base')} onChange={set('base')}>{roles.map(r => <option key={r}>{r}</option>)}</select></Field>
         <Field label="Descripción"><textarea rows={2} style={sx(inputStyle + ';padding:10px 12px;min-height:60px')} value={F('desc')} onChange={set('desc')} placeholder="Qué puede hacer este rol" /></Field>
+        <Nota>El rol nuevo empieza con los permisos del rol que copies; después los ajustas en la tabla.</Nota>
       </Modal>
 
-      <Modal open={modal === 'usuarios'} onClose={() => setModal(null)} title={`Usuarios con rol ${role}`} width={720} footer={<><button type="button" style={sx(btnStyle)} onClick={() => { setModal(null); open('invitar', { rol: role, zona: scope[role].zone }) }}>Invitar usuario</button><button type="button" style={sx(btnPriStyle)} onClick={() => setModal(null)}>Listo</button></>}>
+      <Modal open={modal === 'usuarios'} onClose={() => setModal(null)} title={`Usuarios con rol ${role}`} width={720} footer={<><button type="button" style={sx(btnStyle)} onClick={() => { setModal(null); abrirInvitar() }}>Invitar usuario</button><button type="button" style={sx(btnPriStyle)} onClick={() => setModal(null)}>Listo</button></>}>
         <label style={sx('display:flex')}><span style={sx(SR)}>Buscar usuario</span><input type="search" placeholder="Buscar por nombre, correo o zona" value={uQ} onChange={e => setUQ(e.target.value)} style={sx(inputStyle)} /></label>
         <div style={sx('overflow-x:auto')}>
           <table className="tbl">
@@ -262,7 +271,7 @@ export default function Usuarios() {
                   <td><span style={sx('display:flex;gap:6px')}>{u.estatus === 'Invitado' && <button type="button" className="btn btn-sm" onClick={() => reenviar(u)}>Reenviar</button>}<button type="button" className="btn btn-sm" onClick={() => toggleUser(u)}>{u.estatus === 'Inactivo' ? 'Reactivar' : 'Desactivar'}</button></span></td>
                 </tr>
               ))}
-              {usersRol.length === 0 && <tr><td colSpan={6} style={sx('color:#5F6B7A')}>Sin usuarios con ese criterio.</td></tr>}
+              {usersRol.length === 0 && <tr><td colSpan={6} style={sx('color:#5F6B7A')}>Sin usuarios con ese criterio. Prueba con otro nombre o invita a alguien nuevo.</td></tr>}
             </tbody>
           </table>
         </div>

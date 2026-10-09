@@ -11,6 +11,9 @@ npm run build      # genera dist/ estático (se puede abrir desde cualquier host
 npm run preview
 ```
 
+## Marca y diseño
+Logo oficial (`public/logo.png`), azul `#475CC7`, navy `#0D1D41`, tipografía Montserrat (IBM Plex Mono para cifras). Tokens en `src/tokens.css`; componentes de UX compartidos en `src/components/Page.tsx` (PageHeader, Pasos del flujo, Section plegable).
+
 ## Stack
 React 19 + TypeScript + Vite, react-router (HashRouter), Recharts. No hay backend: el estado del demo vive en `src/lib/store.ts`, en memoria y en localStorage. Está hecho para cambiarlo por Supabase sin tocar las pantallas.
 
@@ -25,19 +28,19 @@ React 19 + TypeScript + Vite, react-router (HashRouter), Recharts. No hay backen
 ## Rutas
 | Ruta | Pantalla |
 |---|---|
-| `#/` | Dashboard directivo |
+| `#/` | Inicio (dashboard directivo) |
 | `#/flujo` | Flujo del demo (guion) |
 | `#/asistente` | Asistente IA |
 | `#/servicios` | Servicios |
-| `#/asignacion` | Asignación IA |
-| `#/monitoreo` | Monitoreo en vivo |
-| `#/reaccion` · `#/reaccion/reporte` | Reacción y reporte post-incidente |
+| `#/asignacion` | Asignar custodios (IA) |
+| `#/monitoreo` | Mapa en vivo |
+| `#/reaccion` · `#/reaccion/reporte` | Incidentes y reporte post-incidente |
 | `#/custodios` | Custodios |
 | `#/flotilla` | Flotilla y taller |
-| `#/personas` · `#/mi-portal` | RH y portal del colaborador |
+| `#/personas` · `#/mi-portal` | Equipo (RH) y portal del colaborador |
 | `#/usuarios` | Usuarios y roles |
 | `#/cotizador` · `#/cotizador/pdf` | Cotizador y cotización PDF |
 | `#/clientes` | Clientes y CRM |
 | `#/finanzas` | Finanzas |
 | `#/reportes` | Reportes |
-| `#/custodio` | Vista móvil del custodio |
+| `#/custodio` | App del custodio (vista móvil) |

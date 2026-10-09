@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/Shell'
+import { PageHeader, Section, Nota } from '../components/Page'
 import { sx } from '../lib/sx'
 import { ROUTES } from '../lib/routes'
 import { Pager, usePagination, useToast } from '../components/ui'
@@ -22,6 +23,11 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 .tbl td{padding:10px;border-bottom:1px solid #EEF1F4}
 .row-link{cursor:pointer}.row-link:hover td{background:#F0F3FD}
 .bar-row{cursor:pointer;border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left}.bar-row:hover span:first-child{color:#0D1D41}
+.chip{display:flex;align-items:center;gap:10px;text-align:left;min-height:60px;padding:12px 16px;border-radius:12px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 15px 'Montserrat',sans-serif;line-height:1.35;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.chip:hover{border-color:#475CC7;box-shadow:0 2px 10px rgba(71,92,199,.12)}
+.chip.on{border-color:#475CC7;background:#E9EDFB}
+.chip .q{width:28px;height:28px;border-radius:50%;background:#E9EDFB;color:#3448A8;display:inline-flex;align-items:center;justify-content:center;flex:none;font:600 13px 'Montserrat',sans-serif}
+.chip.on .q{background:#475CC7;color:#FFFFFF}
 `
 
 type Kind = 'bars' | 'group' | 'table' | 'line' | 'docs' | 'zona'
@@ -106,48 +112,51 @@ export default function AsistenteIA() {
     setTurnos(ts => [...ts, { id: Date.now(), asked: t, p: resolver(t) }])
     setInput('')
   }
-  const nueva = () => { setTurnos([{ id: Date.now(), asked: null, p: P[0] }]); setInput(''); toast('Nueva conversación iniciada', 'info') }
+  const nueva = () => { setTurnos([{ id: Date.now(), asked: null, p: P[0] }]); setInput(''); toast('Conversación reiniciada', 'info') }
 
   return (
     <Shell active="asistente" css={CSS} mainStyle="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
-      <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
-        <div style={sx('display:flex;flex-direction:column;gap:6px;flex:1 1 420px')}>
-          <span className="lbl">Inteligencia artificial</span>
-          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Asistente IA</h1>
-          <span style={sx('color:#5F6B7A;font-size:14px')}>Pregunta lo que necesites de la plataforma: servicios, custodios, flotilla, incidentes, clientes o finanzas. Responde con datos, gráficas y acciones.</span>
+      <PageHeader
+        seccion="Asistente"
+        titulo="Pregúntale a la operación"
+        descripcion="Escribe una pregunta en tus palabras y te responde con la cifra, una gráfica o tabla, y un botón para ir a la pantalla donde se resuelve."
+        secundarias={<>
+          {pins.length > 0 && <Link className="btn" to={ROUTES.Main}>{pins.length} fijada{pins.length === 1 ? '' : 's'} en Inicio</Link>}
+          <button type="button" className="btn" onClick={nueva}>Empezar de nuevo</button>
+        </>}
+      >
+        <Nota>Puede responder sobre servicios, custodios, flotilla, incidentes, clientes y finanzas. Usa los datos de la plataforma (GPS de Samsara y Ruptela, CRM, finanzas) y respeta los permisos de tu rol.</Nota>
+      </PageHeader>
+
+      <Section titulo="Preguntas que puedes hacer" ayuda="Toca una para ver la respuesta, o escribe la tuya abajo.">
+        <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:10px')}>
+          {P.map((p, n) => {
+            const on = p === last.p && last.asked === null
+            return (
+              <button key={n} type="button" className={'chip' + (on ? ' on' : '')} onClick={() => pick(n)} aria-pressed={on}>
+                <span className="q" aria-hidden="true">{n + 1}</span>
+                <span>{p.q}</span>
+              </button>
+            )
+          })}
         </div>
-        <div style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
-          {pins.length > 0 && <Link className="btn" to={ROUTES.Main}>{pins.length} en el dashboard</Link>}
-          <button type="button" className="btn" onClick={nueva}>Nueva conversación</button>
-        </div>
-      </header>
+      </Section>
 
-      <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
-        <aside className="card" style={sx('flex:1 1 260px;padding:14px;display:flex;flex-direction:column;gap:6px')}>
-          <span className="lbl" style={sx('padding:4px 8px 8px')}>Preguntas sugeridas</span>
-          {P.map((p, n) => (
-            <button key={n} type="button" onClick={() => pick(n)} style={sx("text-align:left;min-height:44px;padding:10px 12px;border-radius:8px;cursor:pointer;font:400 14px 'Montserrat',sans-serif;line-height:1.4;" + (p === last.p && last.asked === null ? 'background:#E9EDFB;border:1px solid #C7D0F2;color:#0D1D41' : 'background:transparent;border:1px solid transparent;color:#3E4A59'))}>{p.q}</button>
-          ))}
-          <span className="lbl" style={sx('padding:16px 8px 4px')}>Fuentes que consulta</span>
-          <span style={sx('font-size:13px;color:#3E4A59;padding:0 8px;line-height:1.6')}>Servicios, custodios, telemetría Samsara y Ruptela, incidentes, flotilla, CRM y finanzas. Respeta los permisos del rol de quien pregunta.</span>
-        </aside>
+      <section className="card" aria-label="Conversación" style={sx('display:flex;flex-direction:column;gap:18px;padding:24px;border-color:#C7D0F2')}>
+        <form style={sx('display:flex;gap:10px;flex-wrap:wrap')} onSubmit={e => { e.preventDefault(); ask() }}>
+          <label style={sx('flex:1 1 320px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Tu pregunta</span><input type="text" value={input} onChange={e => setInput(e.target.value)} placeholder="Escribe tu pregunta. Ej. ¿cuántos custodios hay libres en Bajío?" style={sx("flex:1;min-height:48px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:10px;color:#0D1D41;padding:0 14px;font:400 15px 'Montserrat',sans-serif")} /></label>
+          <button type="submit" className="btn btn-pri" style={sx('min-height:48px')}>Preguntar</button>
+        </form>
 
-        <section className="card" style={sx('flex:999 1 560px;display:flex;flex-direction:column;gap:18px;padding:24px')}>
-          {turnos.map(t => (
-            <Respuesta key={t.id} turno={t} pinned={pins.some(x => x.key === (t.p.zona ? 'zona-' + t.p.zona : t.p.q))} onPin={() => {
-              const key = t.p.zona ? 'zona-' + t.p.zona : t.p.q
-              const ya = pins.some(x => x.key === key)
-              togglePin({ key, q: t.p.q, a: t.p.a, to: t.p.to })
-              toast(ya ? 'Insight quitado del dashboard' : 'Insight agregado al dashboard', ya ? 'info' : 'ok')
-            }} onExport={() => { descargarCSV(`asistente-${t.p.kind}.csv`, csvDe(t.p)); toast('Respuesta exportada a CSV') }} navigate={navigate} />
-          ))}
-
-          <form style={sx('display:flex;gap:10px;border-top:1px solid #EEF1F4;padding-top:18px;flex-wrap:wrap')} onSubmit={e => { e.preventDefault(); ask() }}>
-            <label style={sx('flex:1 1 320px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Pregunta para el asistente</span><input type="text" value={input} onChange={e => setInput(e.target.value)} placeholder="Ej. ¿qué custodios tienen documentos por vencer este mes?" style={sx("flex:1;min-height:48px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:10px;color:#0D1D41;padding:0 14px;font:400 15px 'Montserrat',sans-serif")} /></label>
-            <button type="submit" className="btn btn-pri" style={sx('min-height:48px')}>Preguntar</button>
-          </form>
-        </section>
-      </div>
+        {turnos.map(t => (
+          <Respuesta key={t.id} turno={t} pinned={pins.some(x => x.key === (t.p.zona ? 'zona-' + t.p.zona : t.p.q))} onPin={() => {
+            const key = t.p.zona ? 'zona-' + t.p.zona : t.p.q
+            const ya = pins.some(x => x.key === key)
+            togglePin({ key, q: t.p.q, a: t.p.a, to: t.p.to })
+            toast(ya ? 'Respuesta quitada de Inicio' : 'Respuesta fijada en Inicio', ya ? 'info' : 'ok')
+          }} onExport={() => { descargarCSV(`asistente-${t.p.kind}.csv`, csvDe(t.p)); toast('Respuesta exportada a CSV') }} navigate={navigate} />
+        ))}
+      </section>
     </Shell>
   )
 }
@@ -177,17 +186,21 @@ function Respuesta({ turno, pinned, onPin, onExport, navigate }: { turno: Turno;
 
   return (
     <>
-      <div style={sx('align-self:flex-end;max-width:80%;background:#0D1D41;color:#FFFFFF;border-radius:14px 14px 4px 14px;padding:12px 16px;font-size:15px')}>{turno.asked ?? cur.q}</div>
+      <div style={sx('display:flex;flex-direction:column;gap:4px;border-top:1px solid #EEF1F4;padding-top:16px')}>
+        <span className="lbl">Tu pregunta</span>
+        <span style={sx("font-family:'Montserrat',sans-serif;font-size:17px;font-weight:600;line-height:1.35")}>{turno.asked ?? cur.q}</span>
+      </div>
 
       <div style={sx('display:flex;gap:12px;align-items:flex-start')}>
         <span style={sx('width:36px;height:36px;border-radius:50%;background:#E9EDFB;display:flex;align-items:center;justify-content:center;flex:none')}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
         </span>
         <div style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:16px')}>
-          {turno.asked !== null && cur.kind !== 'zona' && (
-            <span style={sx('font-size:13px;color:#5F6B7A')}>Respuesta más cercana: «{cur.q}»</span>
+          {turno.asked !== null && (
+            <span style={sx('font-size:13px;color:#5F6B7A')}>Entendí tu pregunta como: «{cur.q}»</span>
           )}
-          <p style={sx('margin:0;font-size:15px;line-height:1.6;text-wrap:pretty')}>{cur.a}</p>
+          <span className="lbl">Respuesta</span>
+          <p style={sx('margin:-10px 0 0;font-size:15px;line-height:1.6;text-wrap:pretty')}>{cur.a}</p>
 
           {cur.kind === 'bars' && (
             <figure style={sx('margin:0;background:#F7F9FB;border:1px solid #E4E8ED;border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px')}>
@@ -278,8 +291,8 @@ function Respuesta({ turno, pinned, onPin, onExport, navigate }: { turno: Turno;
 
           <div style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
             <Link className="btn" to={cur.to}>{cur.act}</Link>
-            <button type="button" className="btn" onClick={onPin} style={sx(pinned ? 'border-color:#475CC7;color:#0D1D41' : '')}>{pinned ? 'Agregado al dashboard ✓' : 'Agregar al dashboard'}</button>
-            <button type="button" className="btn" onClick={onExport}>Exportar</button>
+            <button type="button" className="btn" onClick={onPin} style={sx(pinned ? 'border-color:#475CC7;color:#0D1D41' : '')}>{pinned ? 'Fijada en Inicio ✓' : 'Fijar en Inicio'}</button>
+            <button type="button" className="btn" onClick={onExport}>Exportar a CSV</button>
           </div>
         </div>
       </div>

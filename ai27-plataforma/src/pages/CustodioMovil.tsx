@@ -11,16 +11,17 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 @media (max-width:430px){.cm-wrap{padding:0!important;align-items:flex-start!important;background:#F6F7F9!important}.cm-phone{width:100%!important;height:100vh!important;min-height:844px;border-radius:0!important;box-shadow:none!important}}
 @keyframes ai27-panic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,48,44,.55)}50%{box-shadow:0 0 0 14px rgba(201,48,44,0)}}
 @keyframes ai27-ring{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-.cm-sm{min-height:36px;border-radius:10px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 13px 'Montserrat',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;text-decoration:none}
+.cm-sm{min-height:44px;border-radius:10px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:600 14px 'Montserrat',sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;text-decoration:none}
 .cm-sm.pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
-.cm-link{background:none;border:0;padding:0;color:#3448A8;font:500 13px 'Montserrat',sans-serif;cursor:pointer;text-decoration:underline}
-.cm-item{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;padding:0 4px;border-top:1px solid #EEF1F4;font-size:14px;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left;cursor:pointer;color:#0D1D41;font-family:'Montserrat',sans-serif}
+.cm-link{background:none;border:0;padding:0;color:#3448A8;font:600 13px 'Montserrat',sans-serif;cursor:pointer;text-decoration:underline}
+.cm-item{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:52px;padding:0 4px;border-top:1px solid #EEF1F4;font-size:14px;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left;cursor:pointer;color:#0D1D41;font-family:'Montserrat',sans-serif}
 `
 
 const HOLD_MS = 3000
 const now = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') }
-const base = "min-height:72px;border-radius:12px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer"
-const ACTS: [string, string][] = [['Check-in', 'check-in'], ['Parada', 'parada'], ['Evidencia', 'foto de evidencia']]
+const base = "min-height:80px;border-radius:12px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:600 14px 'Montserrat',sans-serif;line-height:1.25;cursor:pointer;padding:8px 6px;text-align:center"
+/** [texto del botón, qué se registra]. Verbos cortos: el custodio lee el botón con el teléfono en una mano. */
+const ACTS: [string, string][] = [['Marcar llegada', 'llegada'], ['Registrar parada', 'parada'], ['Subir foto', 'foto de evidencia']]
 
 /** Custodio del diseño (C-1043 Raúl Medina) desde seed: documentos, turnos, teléfono, servicios acumulados. */
 const YO = custodios.find(c => c.id === 'C-1043') ?? custodios[2]
@@ -47,14 +48,14 @@ function Hoja({ title, children, onClose }: { title: string; children: ReactNode
 export default function CustodioMovil() {
   const toast = useToast()
   const navigate = useNavigate()
-  const [last, setLast] = useState('Último registro: check-in 13:52 en CEDIS Tultitlán')
+  const [last, setLast] = useState('Último registro: llegada a CEDIS Tultitlán, 13:52')
   const [progress, setProgress] = useState(0) // 0..1 mientras se mantiene presionado
   const [alerta, setAlerta] = useState<string | null>(null) // hora de la alerta activa
   const [sheet, setSheet] = useState<Sheet>(null)
   const [turnoConfirmado, setTurnoConfirmado] = useState(false)
   const [llamando, setLlamando] = useState(0)
   const [bitacora, setBitacora] = useState<Entrada[]>([
-    { hora: '13:52', txt: 'Check-in en CEDIS Tultitlán · enviado al monitorista', tipo: 'ok' },
+    { hora: '13:52', txt: 'Llegada a CEDIS Tultitlán · avisado a monitoreo', tipo: 'ok' },
     { hora: '13:40', txt: 'Inicio de servicio SRV-24803 · Marsh', tipo: 'info' },
     { hora: '13:05', txt: 'Evidencia: sellos del tráiler TR-71188 (2 fotos)', tipo: 'ok' },
     { hora: '12:30', txt: 'Llegada a CEDIS Tultitlán · 15 min antes de la cita', tipo: 'ok' },
@@ -80,8 +81,8 @@ export default function CustodioMovil() {
       stopHold()
       firedRef.current = true
       setAlerta(t)
-      setLast('ALERTA DE PÁNICO enviada a las ' + t + ' · monitoreo y equipo de reacción notificados con tu ubicación')
-      registrar('ALERTA DE PÁNICO enviada · monitoreo y reacción notificados', 'bad')
+      setLast('Alerta enviada a las ' + t + '. Monitoreo y el equipo de reacción ya tienen tu ubicación.')
+      registrar('Alerta de pánico enviada · monitoreo y reacción avisados', 'bad')
       if ('vibrate' in navigator) navigator.vibrate?.([200, 100, 200])
       return
     }
@@ -95,8 +96,8 @@ export default function CustodioMovil() {
   const cancelAlert = () => {
     if (!alerta) return
     setAlerta(null)
-    setLast('Alerta cancelada a las ' + now() + ' · el monitorista confirmará por llamada')
-    registrar('Alerta cancelada · el monitorista confirmará por llamada', 'warn')
+    setLast('Alerta cancelada a las ' + now() + '. Monitoreo te llamará para confirmar.')
+    registrar('Alerta cancelada · monitoreo llamará para confirmar', 'warn')
   }
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }, [])
 
@@ -109,7 +110,7 @@ export default function CustodioMovil() {
   const colgar = () => {
     const dur = llamando
     setSheet(null)
-    if (dur >= 3) { registrar(`Llamada con ${SERVICIO.monitorista} (${dur} s)`, 'info'); toast(`Llamada con ${SERVICIO.monitorista} registrada en bitácora`, 'info') } else toast('Llamada cancelada', 'info')
+    if (dur >= 3) { registrar(`Llamada con ${SERVICIO.monitorista} (${dur} s)`, 'info'); toast(`Llamada con ${SERVICIO.monitorista} guardada en tu historial`, 'info') } else toast('Llamada cancelada', 'info')
   }
 
   const secs = Math.ceil(HOLD_MS / 1000 - progress * HOLD_MS / 1000)
@@ -125,10 +126,10 @@ export default function CustodioMovil() {
         <header style={sx('display:flex;justify-content:space-between;align-items:center')}>
           <div style={sx('display:flex;flex-direction:column;gap:2px')}>
             <span style={sx('font-size:13px;color:#5F6B7A')}>{YO.nombre} · {YO.id}</span>
-            <span style={sx("font-family:'Montserrat',sans-serif;font-size:22px;font-weight:600")}>{alerta ? 'Alerta activa' : 'En servicio'}</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;font-size:22px;font-weight:600")}>{alerta ? 'Ayuda en camino' : 'En servicio'}</span>
           </div>
           <div style={sx('display:flex;align-items:center;gap:8px')}>
-            <span style={sx('display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#E3F6EC;color:#17784A;font-size:12px;font-weight:500')}><span style={sx('width:8px;height:8px;border-radius:50%;background:#4CC38A')}></span>GPS activo</span>
+            <span style={sx('display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#E3F6EC;color:#17784A;font-size:12px;font-weight:500')}><span style={sx('width:8px;height:8px;border-radius:50%;background:#4CC38A')}></span>GPS encendido</span>
             <button type="button" aria-label="Menú" onClick={() => setSheet('menu')} style={sx('width:34px;height:34px;border-radius:10px;border:1px solid #D5DBE3;background:#FFFFFF;cursor:pointer;display:inline-flex;align-items:center;justify-content:center')}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D1D41" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg></button>
           </div>
         </header>
@@ -139,29 +140,29 @@ export default function CustodioMovil() {
           <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;font-size:13px')}>
             <div style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Tráiler</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>{SERVICIO.trailer}</span></div>
             <div style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Unidad</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>{SERVICIO.unidad}</span></div>
-            <div style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Distancia al tráiler</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>120 m</span></div>
-            <div style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Llegada estimada</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>16:05</span></div>
+            <div style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Tráiler a</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>120 m</span></div>
+            <div style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Llegas a las</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>16:05</span></div>
           </div>
           <div style={sx('display:flex;gap:8px')}>
-            <button type="button" className="cm-sm" style={sx('flex:1')} onClick={() => setSheet('ruta')}>Ver ruta</button>
-            <button type="button" className="cm-sm" style={sx('flex:1')} onClick={() => setSheet('llamada')}>Llamar monitorista</button>
+            <button type="button" className="cm-sm" style={sx('flex:1')} onClick={() => setSheet('ruta')}>Ver mi ruta</button>
+            <button type="button" className="cm-sm" style={sx('flex:1')} onClick={() => setSheet('llamada')}>Llamar a monitoreo</button>
           </div>
         </section>
 
         <section aria-label="Registro" style={sx('display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px')}>
           {ACTS.map(([label, what]) => (
-            <button key={label} type="button" onClick={() => { const t = now(); setLast('Registrado: ' + what + ' a las ' + t + ' · enviado al monitorista'); registrar(`${label}: ${what} · enviado al monitorista`) ; toast(`${label} registrado a las ${t}`) }} style={sx(base)}>{label}</button>
+            <button key={label} type="button" onClick={() => { const t = now(); setLast('Registrado: ' + what + ' a las ' + t + '. Monitoreo ya lo vio.'); registrar(`${label}: ${what} · avisado a monitoreo`); toast(`Listo: ${what} a las ${t}`) }} style={sx(base)}>{label}</button>
           ))}
         </section>
         <div style={sx('display:flex;justify-content:space-between;gap:8px;align-items:flex-start')}>
           <span role="status" style={sx('font-size:13px;min-height:18px;' + (alerta ? 'color:#B42318;font-weight:500' : 'color:#5F6B7A'))}>{last}</span>
-          <button type="button" className="cm-link" style={sx('flex:none')} onClick={() => setSheet('historial')}>Historial ({bitacora.length})</button>
+          <button type="button" className="cm-link" style={sx('flex:none')} onClick={() => setSheet('historial')}>Ver historial ({bitacora.length})</button>
         </div>
 
         <button
           type="button"
           style={sx(panicStyle)}
-          aria-label={alerta ? 'Alerta de pánico activa. Toca para cancelar' : 'Botón de pánico. Mantén presionado 3 segundos'}
+          aria-label={alerta ? 'Alerta enviada. Toca para cancelar si fue un error' : 'Pedir ayuda. Mantén presionado 3 segundos'}
           onPointerDown={e => { if (alerta) firedRef.current = false; else { e.currentTarget.setPointerCapture?.(e.pointerId); startHold() } }}
           onPointerUp={stopHold}
           onPointerCancel={stopHold}
@@ -172,14 +173,14 @@ export default function CustodioMovil() {
           onContextMenu={e => e.preventDefault()}
         >
           <span aria-hidden="true" style={sx('position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.22);pointer-events:none;width:' + (progress * 100).toFixed(1) + '%')}></span>
-          <span style={sx('position:relative')}>{alerta ? 'ALERTA ENVIADA' : progress > 0 ? 'PÁNICO · ' + secs : 'PÁNICO'}</span>
+          <span style={sx('position:relative')}>{alerta ? 'ALERTA ENVIADA' : progress > 0 ? 'PIDIENDO AYUDA · ' + secs : 'PEDIR AYUDA'}</span>
           <span style={sx("font:400 13px 'Montserrat',sans-serif;opacity:.9;position:relative")}>
-            {alerta ? 'Enviada ' + alerta + ' · toca para cancelar si fue error' : progress > 0 ? 'Sigue presionando…' : 'Mantén presionado 3 segundos'}
+            {alerta ? 'Enviada a las ' + alerta + '. Toca para cancelar si fue un error.' : progress > 0 ? 'No sueltes…' : 'Botón de pánico: mantén presionado 3 segundos'}
           </span>
         </button>
 
-        <button type="button" onClick={() => setSheet('turno')} aria-label="Ver próximo turno" style={sx("text-align:left;background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;font-size:14px;cursor:pointer;color:#0D1D41;font-family:'Montserrat',sans-serif")}>
-          <span style={sx('display:flex;justify-content:space-between;gap:8px')}><span style={sx('font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A')}>Próximo turno</span>{turnoConfirmado && <span style={sx('font-size:12px;color:#17784A;font-weight:500')}>Confirmado ✓</span>}</span>
+        <button type="button" onClick={() => setSheet('turno')} aria-label="Ver mi próximo turno" style={sx("text-align:left;background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;font-size:14px;cursor:pointer;color:#0D1D41;font-family:'Montserrat',sans-serif")}>
+          <span style={sx('display:flex;justify-content:space-between;gap:8px')}><span style={sx('font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A')}>Mi próximo turno</span>{turnoConfirmado && <span style={sx('font-size:12px;color:#17784A;font-weight:500')}>Confirmado ✓</span>}</span>
           <span>Jueves 8 oct · 06:00 · Alpura Cuautitlán</span>
           <div style={sx('display:flex;justify-content:space-between;gap:8px;border-top:1px solid #EEF1F4;padding-top:8px')}><span>Licencia federal</span><span style={sx('color:' + docColor(lic?.estado ?? 'ok'))}>{lic?.v.startsWith('vigente') ? 'vigente' : lic?.v ?? 'vigente'}</span></div>
         </button>
@@ -190,12 +191,12 @@ export default function CustodioMovil() {
               <span style={sx("width:44px;height:44px;border-radius:50%;background:#E9EDFB;color:#0D1D41;display:inline-flex;align-items:center;justify-content:center;font:600 15px 'Montserrat',sans-serif")}>{YO.nombre.split(' ').map(x => x[0]).join('')}</span>
               <span style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('font-weight:600')}>{YO.nombre}</span><span style={sx('font-size:12px;color:#5F6B7A')}>{YO.id} · {YO.base} · ★ {YO.calificacion} · {YO.serviciosAcumulados} servicios</span></span>
             </div>
-            <button type="button" className="cm-item" onClick={() => setSheet('docs')}><span>Mis documentos</span><span style={sx('font-size:12px;color:' + (YO.documentos.every(d => d.estado === 'ok') ? '#17784A' : '#0D1D41'))}>{YO.documentos.every(d => d.estado === 'ok') ? 'Al día' : 'Revisar'} ›</span></button>
-            <button type="button" className="cm-item" onClick={() => setSheet('turno')}><span>Mis turnos de la semana</span><span style={sx('color:#5F6B7A')}>›</span></button>
-            <button type="button" className="cm-item" onClick={() => setSheet('historial')}><span>Historial del servicio</span><span style={sx('color:#5F6B7A')}>{bitacora.length} ›</span></button>
-            <button type="button" className="cm-item" onClick={() => { setSheet(null); toast(`Horas de la semana: ${YO.horasSemana} h · ${YO.horasSemana > 48 ? 'exceso de horas, avisa a tu coordinador' : 'dentro del límite'}`, YO.horasSemana > 48 ? 'warn' : 'info') }}><span>Mis horas</span><span style={sx("font-family:'IBM Plex Mono',monospace;font-size:13px")}>{YO.horasSemana} h ›</span></button>
-            <button type="button" className="cm-item" onClick={() => { setSheet(null); toast('Solicitud enviada a RH: se te contactará al ' + YO.telefono, 'info') }}><span>Solicitar vacaciones</span><span style={sx('color:#5F6B7A')}>›</span></button>
-            <Link to={ROUTES.Main} className="cm-item" style={sx('text-decoration:none')}><span>Ir al centro de operación</span><span style={sx('color:#5F6B7A')}>›</span></Link>
+            <button type="button" className="cm-item" onClick={() => setSheet('docs')}><span>Ver mis documentos</span><span style={sx('font-size:12px;color:' + (YO.documentos.every(d => d.estado === 'ok') ? '#17784A' : '#0D1D41'))}>{YO.documentos.every(d => d.estado === 'ok') ? 'Al día' : 'Revisar'} ›</span></button>
+            <button type="button" className="cm-item" onClick={() => setSheet('turno')}><span>Ver mis turnos</span><span style={sx('color:#5F6B7A')}>›</span></button>
+            <button type="button" className="cm-item" onClick={() => setSheet('historial')}><span>Ver historial del servicio</span><span style={sx('color:#5F6B7A')}>{bitacora.length} ›</span></button>
+            <button type="button" className="cm-item" onClick={() => { setSheet(null); toast(`Llevas ${YO.horasSemana} h esta semana · ${YO.horasSemana > 48 ? 'son muchas, avisa a tu coordinador' : 'vas dentro del límite'}`, YO.horasSemana > 48 ? 'warn' : 'info') }}><span>Ver mis horas</span><span style={sx("font-family:'IBM Plex Mono',monospace;font-size:13px")}>{YO.horasSemana} h ›</span></button>
+            <button type="button" className="cm-item" onClick={() => { setSheet(null); toast('Pedido enviado a Equipo. Te llaman al ' + YO.telefono, 'info') }}><span>Pedir vacaciones</span><span style={sx('color:#5F6B7A')}>›</span></button>
+            <Link to={ROUTES.Main} className="cm-item" style={sx('text-decoration:none')}><span>Ir a la plataforma</span><span style={sx('color:#5F6B7A')}>›</span></Link>
             <button type="button" className="cm-item" style={sx('color:#B42318')} onClick={() => { toast('Sesión cerrada', 'info'); navigate(ROUTES.PortalColaborador) }}><span>Cerrar sesión</span></button>
           </Hoja>
         )}
@@ -205,11 +206,11 @@ export default function CustodioMovil() {
               <div key={d.k} style={sx('display:flex;justify-content:space-between;gap:8px;border-top:1px solid #EEF1F4;padding:10px 0;font-size:14px')}><span>{d.k}</span><span style={sx('color:' + docColor(d.estado) + ';font-weight:500')}>{d.v}</span></div>
             ))}
             <span style={sx('font-size:12px;color:#5F6B7A')}>Certificaciones: {YO.certificaciones.join(', ')} · Portación: {YO.portacion ? 'sí' : 'no'} · Ingreso: {YO.ingreso}</span>
-            <button type="button" className="cm-sm pri" onClick={() => { setSheet(null); toast('Solicitud de renovación enviada a RH', 'info') }}>Solicitar renovación</button>
+            <button type="button" className="cm-sm pri" onClick={() => { setSheet(null); toast('Pedido de renovación enviado a Equipo', 'info') }}>Pedir renovación</button>
           </Hoja>
         )}
         {sheet === 'ruta' && (
-          <Hoja title={`Ruta · ${SERVICIO.origen} → ${SERVICIO.destino}`} onClose={() => setSheet(null)}>
+          <Hoja title={`Mi ruta · ${SERVICIO.origen} → ${SERVICIO.destino}`} onClose={() => setSheet(null)}>
             <div style={sx('display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:13px')}>
               <div style={sx('background:#F3F5F8;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Distancia</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>{RUTA.km} km</span></div>
               <div style={sx('background:#F3F5F8;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Tiempo</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>{tiempoTexto(RUTA.minutos)}</span></div>
@@ -228,41 +229,41 @@ export default function CustodioMovil() {
               <div key={k} style={sx('display:flex;justify-content:space-between;gap:8px;font-size:14px;border-top:1px solid #EEF1F4;padding:8px 0')}><span>{k}</span><span style={sx("font-family:'IBM Plex Mono',monospace;color:" + (t === 'ok' ? '#17784A' : '#5F6B7A'))}>{h}</span></div>
             ))}
             <div style={sx('display:flex;gap:8px')}>
-              <button type="button" className="cm-sm" style={sx('flex:1')} onClick={() => { registrar('Desvío reportado en ' + RUTA.tramo + ' · monitorista avisado', 'warn'); setSheet(null); toast('Desvío reportado al monitorista', 'warn') }}>Reportar desvío</button>
-              <Link to={ROUTES.Monitoreo} className="cm-sm pri" style={sx('flex:1')}>Abrir en monitoreo</Link>
+              <button type="button" className="cm-sm" style={sx('flex:1')} onClick={() => { registrar('Desvío avisado en ' + RUTA.tramo + ' · monitoreo enterado', 'warn'); setSheet(null); toast('Desvío avisado a monitoreo', 'warn') }}>Avisar desvío</button>
+              <Link to={ROUTES.Monitoreo} className="cm-sm pri" style={sx('flex:1')}>Ver en el mapa en vivo</Link>
             </div>
           </Hoja>
         )}
         {sheet === 'llamada' && (
-          <Hoja title="Llamar al monitorista" onClose={colgar}>
+          <Hoja title="Llamar a monitoreo" onClose={colgar}>
             <div style={sx('display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 0')}>
               <span style={sx("width:72px;height:72px;border-radius:50%;background:#E3F2F8;color:#0B6A8A;display:inline-flex;align-items:center;justify-content:center;font:600 22px 'Montserrat',sans-serif;animation:ai27-ring 1.2s ease-in-out infinite")}>{SERVICIO.monitorista.split(' ').map(x => x[0]).join('')}</span>
               <span style={sx('font-weight:600;font-size:17px')}>{SERVICIO.monitorista} · Monitoreo</span>
               <span style={sx("font-family:'IBM Plex Mono',monospace;color:#5F6B7A")}>{SERVICIO.telMonitoreo} · {llamando < 3 ? 'Llamando…' : `En llamada · ${String(Math.floor(llamando / 60)).padStart(2, '0')}:${String(llamando % 60).padStart(2, '0')}`}</span>
-              <span style={sx('font-size:13px;color:#5F6B7A;text-align:center')}>El monitorista ve tu ubicación y el servicio {SERVICIO.id} en pantalla.</span>
+              <span style={sx('font-size:13px;color:#5F6B7A;text-align:center')}>Monitoreo ya ve tu ubicación y tu servicio {SERVICIO.id} en pantalla.</span>
             </div>
             <div style={sx('display:flex;gap:8px')}>
-              <a href={'tel:' + SERVICIO.telMonitoreo.replace(/\s/g, '')} className="cm-sm" style={sx('flex:1')} onClick={() => toast('Abriendo el marcador del teléfono', 'info')}>Usar el teléfono</a>
+              <a href={'tel:' + SERVICIO.telMonitoreo.replace(/\s/g, '')} className="cm-sm" style={sx('flex:1')} onClick={() => toast('Abriendo el teléfono', 'info')}>Marcar desde el teléfono</a>
               <button type="button" className="cm-sm" style={sx('flex:1;background:#C9302C;border-color:#C9302C;color:#FFFFFF')} onClick={colgar}>Colgar</button>
             </div>
           </Hoja>
         )}
         {sheet === 'historial' && (
-          <Hoja title="Historial" onClose={() => setSheet(null)}>
-            <span style={sx('font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A')}>Bitácora de hoy · {SERVICIO.id}</span>
+          <Hoja title="Historial de hoy" onClose={() => setSheet(null)}>
+            <span style={sx('font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A')}>Lo que registraste hoy · {SERVICIO.id}</span>
             {bitacora.map((e, i) => (
               <div key={i} style={sx('display:flex;gap:10px;font-size:14px;border-top:1px solid #EEF1F4;padding:8px 0')}><span style={sx("font-family:'IBM Plex Mono',monospace;color:" + (e.tipo === 'bad' ? '#B42318' : e.tipo === 'warn' ? '#0D1D41' : '#5F6B7A') + ';flex:none')}>{e.hora}</span><span>{e.txt}</span></div>
             ))}
-            <span style={sx('font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;margin-top:6px')}>Servicios recientes</span>
+            <span style={sx('font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;margin-top:6px')}>Tus últimos servicios</span>
             {historialSeed.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A')}>Sin servicios previos en el trimestre</span>}
             {historialSeed.map(s => (
               <div key={s.id} style={sx('display:flex;justify-content:space-between;gap:8px;font-size:13px;border-top:1px solid #EEF1F4;padding:8px 0')}><span><span style={sx("font-family:'IBM Plex Mono',monospace;color:#3E4A59")}>{s.id}</span> · {s.cliente} · {s.ruta}</span><span style={sx('color:#5F6B7A;flex:none')}>{s.inicio.slice(5, 10)}</span></div>
             ))}
-            <button type="button" className="cm-sm" onClick={() => { setSheet(null); toast('Bitácora enviada a tu correo y al monitorista', 'info') }}>Enviar bitácora</button>
+            <button type="button" className="cm-sm" onClick={() => { setSheet(null); toast('Historial enviado a tu correo y a monitoreo', 'info') }}>Enviar mi historial</button>
           </Hoja>
         )}
         {sheet === 'turno' && (
-          <Hoja title="Próximo turno" onClose={() => setSheet(null)}>
+          <Hoja title="Mi próximo turno" onClose={() => setSheet(null)}>
             <span style={sx('font-weight:600;font-size:16px')}>Jueves 8 oct · 06:00 · Alpura Cuautitlán</span>
             <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;font-size:13px')}>
               <div style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('color:#5F6B7A')}>Servicio</span><span style={sx("font-family:'IBM Plex Mono',monospace")}>SRV-24817</span></div>
@@ -277,8 +278,8 @@ export default function CustodioMovil() {
               ))}
             </div>
             <div style={sx('display:flex;gap:8px')}>
-              <button type="button" className="cm-sm" style={sx('flex:1')} onClick={() => { setSheet(null); toast('Solicitud de cambio enviada a tu coordinador', 'info') }}>Pedir cambio</button>
-              <button type="button" className="cm-sm pri" style={sx('flex:1')} disabled={turnoConfirmado} onClick={() => { setTurnoConfirmado(true); setSheet(null); toast('Turno del jueves 8 oct confirmado') }}>{turnoConfirmado ? 'Turno confirmado' : 'Confirmar turno'}</button>
+              <button type="button" className="cm-sm" style={sx('flex:1')} onClick={() => { setSheet(null); toast('Pedido de cambio enviado a tu coordinador', 'info') }}>Pedir cambio de turno</button>
+              <button type="button" className="cm-sm pri" style={sx('flex:1')} disabled={turnoConfirmado} onClick={() => { setTurnoConfirmado(true); setSheet(null); toast('Turno del jueves 8 oct confirmado') }}>{turnoConfirmado ? 'Turno confirmado ✓' : 'Confirmar turno'}</button>
             </div>
           </Hoja>
         )}

@@ -1,61 +1,79 @@
 import { Link } from 'react-router-dom'
 import { sx } from '../lib/sx'
 import { ROUTES } from '../lib/routes'
+import { Logo } from '../components/Logo'
 
 const CSS = `
 a{color:#3448A8}a:hover{color:#0D1D41}
+.paso{display:flex;gap:16px;align-items:center;padding:18px 20px;background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;min-height:88px;box-sizing:border-box}
+.paso .n{width:40px;height:40px;border-radius:50%;background:#475CC7;color:#FFFFFF;display:inline-flex;align-items:center;justify-content:center;font:600 16px 'Montserrat',sans-serif;flex:none}
+.paso .t{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:600;line-height:1.3}
+.paso .d{font-size:14px;color:#5F6B7A;line-height:1.4}
+.paso .btn{flex:none}
+.extra{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:10px;border:1px dashed #C3CBD5;background:#FFFFFF;color:#0D1D41;text-decoration:none;font-size:14px;font-weight:500}
+.extra:hover{border-color:#475CC7;color:#0D1D41}
 `
+
+/** Los 7 pasos del guion, en el orden en que se muestran al cliente (15 a 20 minutos). */
+const PASOS: { to: string; titulo: string; linea: string }[] = [
+  { to: ROUTES.Main, titulo: 'Inicio: ¿cómo va la operación hoy?', linea: 'La foto del día: indicadores, alertas y custodios por zona.' },
+  { to: ROUTES.Cotizador, titulo: 'Cotizar un servicio', linea: 'Distancia, riesgo y margen en segundos; la cotización sale en PDF.' },
+  { to: ROUTES.AsignacionIA, titulo: 'Asignar custodios', linea: 'La IA sugiere quién va y en qué unidad; el coordinador confirma.' },
+  { to: ROUTES.Monitoreo, titulo: 'Ver el mapa en vivo', linea: 'El GPS de Samsara detecta un desvío y dispara la alerta.' },
+  { to: ROUTES.Reaccion, titulo: 'Atender el incidente', linea: 'Aviso a autoridades, equipo de reacción R-03 y recuperación.' },
+  { to: ROUTES.ReporteIncidente, titulo: 'Enviar el reporte al cliente', linea: 'Cierre del incidente y envío del informe a Alpura.' },
+  { to: ROUTES.AsistenteIA, titulo: 'Preguntarle a la operación', linea: 'Preguntas en lenguaje natural con gráficas; se fijan en Inicio.' },
+]
+
+/** Pantallas que alimentan el guion; se abren si el cliente pregunta por ellas. */
+const EXTRAS: { to: string; label: string }[] = [
+  { to: ROUTES.Servicios, label: 'Servicios y bitácora' },
+  { to: ROUTES.Custodios, label: 'Custodios' },
+  { to: ROUTES.CustodioMovil, label: 'App del custodio' },
+  { to: ROUTES.CRM, label: 'Clientes' },
+  { to: ROUTES.Flotilla, label: 'Flotilla y taller' },
+  { to: ROUTES.RH, label: 'Equipo' },
+  { to: ROUTES.Finanzas, label: 'Finanzas' },
+]
 
 export default function Flujo() {
   return (
-    <>
+    <div style={sx("min-height:100vh;background:#F6F7F9;font-family:'Montserrat',system-ui,sans-serif;color:#0D1D41;padding:32px 16px 64px;box-sizing:border-box")}>
       <style>{CSS}</style>
-      <div style={sx("position: relative; width: 2000px; height: 940px; background: #F6F7F9; font-family: 'Montserrat', system-ui, sans-serif; color: #0D1D41")}>
-      <svg width="79" height="8" viewBox="0 0 79 8" preserveAspectRatio="none" style={sx("position: absolute; left: 304px; top: 304px; width: 79px; height: 8px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><defs><marker id="dc-arrow-head-filled-1" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3448A8" stroke="none" style={sx("stroke: none; fill: #3448A8; fill: context-stroke")}/></marker></defs><path d="M 0 4 L 75 4" markerEnd="url(#dc-arrow-head-filled-1)"></path></svg>
-      <svg width="79" height="8" viewBox="0 0 79 8" preserveAspectRatio="none" style={sx("position: absolute; left: 624px; top: 304px; width: 79px; height: 8px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><defs><marker id="dc-arrow-head-filled-2" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3448A8" stroke="none" style={sx("stroke: none; fill: #3448A8; fill: context-stroke")}/></marker></defs><path d="M 0 4 L 75 4" markerEnd="url(#dc-arrow-head-filled-2)"></path></svg>
-      <svg width="79" height="8" viewBox="0 0 79 8" preserveAspectRatio="none" style={sx("position: absolute; left: 944px; top: 304px; width: 79px; height: 8px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><defs><marker id="dc-arrow-head-filled-3" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3448A8" stroke="none" style={sx("stroke: none; fill: #3448A8; fill: context-stroke")}/></marker></defs><path d="M 0 4 L 75 4" markerEnd="url(#dc-arrow-head-filled-3)"></path></svg>
-      <svg width="79" height="8" viewBox="0 0 79 8" preserveAspectRatio="none" style={sx("position: absolute; left: 1264px; top: 304px; width: 79px; height: 8px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><defs><marker id="dc-arrow-head-filled-4" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3448A8" stroke="none" style={sx("stroke: none; fill: #3448A8; fill: context-stroke")}/></marker></defs><path d="M 0 4 L 75 4" markerEnd="url(#dc-arrow-head-filled-4)"></path></svg>
-      <svg width="79" height="8" viewBox="0 0 79 8" preserveAspectRatio="none" style={sx("position: absolute; left: 1584px; top: 304px; width: 79px; height: 8px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><defs><marker id="dc-arrow-head-filled-5" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3448A8" stroke="none" style={sx("stroke: none; fill: #3448A8; fill: context-stroke")}/></marker></defs><path d="M 0 4 L 75 4" markerEnd="url(#dc-arrow-head-filled-5)"></path></svg>
-      <svg width="8" height="103" viewBox="0 0 8 103" preserveAspectRatio="none" style={sx("position: absolute; left: 500px; top: 376px; width: 8px; height: 103px; overflow: visible; fill: none; stroke: #8A95A3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6")}><defs><marker id="dc-arrow-head-filled-6" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8A95A3" stroke="none" style={sx("stroke: none; fill: #8A95A3; fill: context-stroke")}/></marker></defs><path d="M 4 0 L 4 99" markerEnd="url(#dc-arrow-head-filled-6)"></path></svg>
-      <svg width="8" height="103" viewBox="0 0 8 103" preserveAspectRatio="none" style={sx("position: absolute; left: 820px; top: 377px; width: 8px; height: 103px; overflow: visible; fill: none; stroke: #8A95A3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6")}><defs><marker id="dc-arrow-head-filled-7" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8A95A3" stroke="none" style={sx("stroke: none; fill: #8A95A3; fill: context-stroke")}/></marker></defs><path d="M 4 103 L 4 4" markerEnd="url(#dc-arrow-head-filled-7)"></path></svg>
-      <svg width="8" height="103" viewBox="0 0 8 103" preserveAspectRatio="none" style={sx("position: absolute; left: 1140px; top: 377px; width: 8px; height: 103px; overflow: visible; fill: none; stroke: #8A95A3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6")}><defs><marker id="dc-arrow-head-filled-8" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8A95A3" stroke="none" style={sx("stroke: none; fill: #8A95A3; fill: context-stroke")}/></marker></defs><path d="M 4 103 L 4 4" markerEnd="url(#dc-arrow-head-filled-8)"></path></svg>
-      <svg width="8" height="292" viewBox="0 0 8 292" preserveAspectRatio="none" style={sx("position: absolute; left: 1780px; top: 376px; width: 8px; height: 292px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><path d="M 4 0 L 4 292"></path></svg>
-      <svg width="640" height="8" viewBox="0 0 640 8" preserveAspectRatio="none" style={sx("position: absolute; left: 1144px; top: 664px; width: 640px; height: 8px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><path d="M 0 4 L 640 4"></path></svg>
-      <svg width="8" height="51" viewBox="0 0 8 51" preserveAspectRatio="none" style={sx("position: absolute; left: 1140px; top: 668px; width: 8px; height: 51px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><defs><marker id="dc-arrow-head-filled-9" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3448A8" stroke="none" style={sx("stroke: none; fill: #3448A8; fill: context-stroke")}/></marker></defs><path d="M 4 0 L 4 47" markerEnd="url(#dc-arrow-head-filled-9)"></path></svg>
-      <svg width="8" height="51" viewBox="0 0 8 51" preserveAspectRatio="none" style={sx("position: absolute; left: 1460px; top: 668px; width: 8px; height: 51px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><defs><marker id="dc-arrow-head-filled-10" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3448A8" stroke="none" style={sx("stroke: none; fill: #3448A8; fill: context-stroke")}/></marker></defs><path d="M 4 0 L 4 47" markerEnd="url(#dc-arrow-head-filled-10)"></path></svg>
-      <svg width="8" height="51" viewBox="0 0 8 51" preserveAspectRatio="none" style={sx("position: absolute; left: 1780px; top: 668px; width: 8px; height: 51px; overflow: visible; fill: none; stroke: #3448A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round")}><defs><marker id="dc-arrow-head-filled-11" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3448A8" stroke="none" style={sx("stroke: none; fill: #3448A8; fill: context-stroke")}/></marker></defs><path d="M 4 0 L 4 47" markerEnd="url(#dc-arrow-head-filled-11)"></path></svg>
-      <svg width="8" height="103" viewBox="0 0 8 103" preserveAspectRatio="none" style={sx("position: absolute; left: 180px; top: 377px; width: 8px; height: 103px; overflow: visible; fill: none; stroke: #8A95A3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6")}><defs><marker id="dc-arrow-head-filled-12" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8A95A3" stroke="none" style={sx("stroke: none; fill: #8A95A3; fill: context-stroke")}/></marker></defs><path d="M 4 103 L 4 4" markerEnd="url(#dc-arrow-head-filled-12)"></path></svg>
-      <svg width="8" height="103" viewBox="0 0 8 103" preserveAspectRatio="none" style={sx("position: absolute; left: 500px; top: 617px; width: 8px; height: 103px; overflow: visible; fill: none; stroke: #8A95A3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6")}><defs><marker id="dc-arrow-head-filled-13" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#8A95A3" stroke="none" style={sx("stroke: none; fill: #8A95A3; fill: context-stroke")}/></marker></defs><path d="M 4 103 L 4 4" markerEnd="url(#dc-arrow-head-filled-13)"></path></svg>
-      
-      <div style={sx("position: absolute; left: 64px; top: 64px; font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 600")}>Flujo completo del demo AI27</div>
-      <div style={sx("position: absolute; left: 64px; top: 120px; width: 1100px; font-size: 16px; line-height: 24px; color: #5F6B7A")}>Guion de 15 a 20 minutos. Haz clic en cualquier paso para abrir su pantalla; dentro de cada pantalla, el botón principal te lleva al siguiente paso.</div>
-      
-      <Link to={ROUTES.Main} style={sx("position: absolute; left: 64px; top: 240px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-top: 4px solid #475CC7; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>PASO 1</b><br /><b style={sx("font-size: 17px")}>Dashboard directivo</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Foto de la operación hoy y alertas priorizadas</span></span></Link>
-      <Link to={ROUTES.Cotizador} style={sx("position: absolute; left: 384px; top: 240px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-top: 4px solid #475CC7; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>PASO 2</b><br /><b style={sx("font-size: 17px")}>Cotizador</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Distancia, riesgo y margen; sale en PDF</span></span></Link>
-      <Link to={ROUTES.AsignacionIA} style={sx("position: absolute; left: 704px; top: 240px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-top: 4px solid #475CC7; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>PASO 3</b><br /><b style={sx("font-size: 17px")}>Asignación por IA</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>La IA recomienda custodios y unidad; el coordinador asigna</span></span></Link>
-      <Link to={ROUTES.Monitoreo} style={sx("position: absolute; left: 1024px; top: 240px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-top: 4px solid #475CC7; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>PASO 4</b><br /><b style={sx("font-size: 17px")}>Monitoreo en vivo</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Samsara dispara una alerta de desvío</span></span></Link>
-      <Link to={ROUTES.Reaccion} style={sx("position: absolute; left: 1344px; top: 240px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-top: 4px solid #475CC7; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>PASO 5</b><br /><b style={sx("font-size: 17px")}>Reacción</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Autoridades, equipo R-03 y recuperación</span></span></Link>
-      <Link to={ROUTES.ReporteIncidente} style={sx("position: absolute; left: 1664px; top: 240px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-top: 4px solid #475CC7; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>PASO 6</b><br /><b style={sx("font-size: 17px")}>Reporte al cliente</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Cierre del incidente y envío a Alpura</span></span></Link>
-      
-      <Link to={ROUTES.Servicios} style={sx("position: absolute; left: 384px; top: 480px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px dashed #C3CBD5; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #5F6B7A")}>MÓDULO</b><br /><b style={sx("font-size: 17px")}>Servicios y bitácora</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Evento, dedicado o monitoreo</span></span></Link>
-      <Link to={ROUTES.Custodios} style={sx("position: absolute; left: 704px; top: 480px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px dashed #C3CBD5; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #5F6B7A")}>MÓDULO</b><br /><b style={sx("font-size: 17px")}>Control de custodios</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Expedientes, estatus y turnos</span></span></Link>
-      <Link to={ROUTES.CustodioMovil} style={sx("position: absolute; left: 1024px; top: 480px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px dashed #C3CBD5; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #5F6B7A")}>MÓVIL</b><br /><b style={sx("font-size: 17px")}>Vista custodio</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Check-in, evidencias y botón de pánico</span></span></Link>
-      <Link to={ROUTES.AsistenteIA} style={sx("position: absolute; left: 64px; top: 480px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #F0F3FD; border: 1px dashed #B9C4EE; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>IA</b><br /><b style={sx("font-size: 17px")}>Asistente IA</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Preguntas en lenguaje natural con gráficas</span></span></Link>
-      <Link to={ROUTES.CRM} style={sx("position: absolute; left: 384px; top: 720px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px dashed #C3CBD5; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #5F6B7A")}>MÓDULO</b><br /><b style={sx("font-size: 17px")}>Clientes y CRM</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Vista 360, contratos y pipeline</span></span></Link>
-      
-      <Link to={ROUTES.Flotilla} style={sx("position: absolute; left: 1024px; top: 720px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>VISTA RÁPIDA</b><br /><b style={sx("font-size: 17px")}>Flotilla y taller</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Unidades, órdenes y combustible</span></span></Link>
-      <Link to={ROUTES.RH} style={sx("position: absolute; left: 1344px; top: 720px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>VISTA RÁPIDA</b><br /><b style={sx("font-size: 17px")}>Personas (RH)</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Toda la empresa: perfiles, altas y bajas</span></span></Link>
-      <Link to={ROUTES.Finanzas} style={sx("position: absolute; left: 1664px; top: 720px; width: 240px; height: 136px; box-sizing: border-box; padding: 16px; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E4E8ED; border-radius: 12px; text-decoration: none; color: #0D1D41; line-height: 1.45")}><span><b style={sx("font-size: 12px; letter-spacing: .06em; color: #0D1D41")}>VISTA RÁPIDA</b><br /><b style={sx("font-size: 17px")}>Rentabilidad</b><br /><span style={sx("font-size: 14px; color: #5F6B7A")}>Margen por cliente, servicio y unidad</span></span></Link>
-      
-      <div style={sx("position: absolute; left: 516px; top: 420px; width: 172px; font-size: 13px; line-height: 16px; color: #5F6B7A")}>se convierte en servicio</div>
-      <div style={sx("position: absolute; left: 836px; top: 420px; width: 180px; font-size: 13px; line-height: 16px; color: #5F6B7A")}>disponibilidad y expediente</div>
-      <div style={sx("position: absolute; left: 1156px; top: 420px; width: 140px; font-size: 13px; line-height: 16px; color: #5F6B7A")}>check-ins y pánico</div>
-      <div style={sx("position: absolute; left: 1569px; top: 640px; width: 110px; text-align: center; font-size: 13px; line-height: 16px; color: #0D1D41")}>vistas rápidas</div>
-      
-      <div style={sx("position: absolute; left: 196px; top: 420px; width: 150px; font-size: 13px; line-height: 16px; color: #5F6B7A")}>pregunta y grafica</div>
-      <div style={sx("position: absolute; left: 516px; top: 660px; width: 190px; font-size: 13px; line-height: 16px; color: #5F6B7A")}>contratos y tarifas</div>
-      <div style={sx("position: absolute; left: 64px; top: 720px; width: 280px; font-size: 14px; line-height: 22px; color: #3E4A59")}><b>Cómo leerlo.</b> Línea ámbar: ruta principal del guion. Línea punteada: módulos que alimentan un paso. Personas (RH) y Usuarios y roles están en el menú lateral.</div>
+      <div style={sx('max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:24px')}>
+        <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;justify-content:space-between')}>
+          <div style={sx('display:flex;flex-direction:column;gap:8px;max-width:620px')}>
+            <Link to={ROUTES.Main} aria-label="Inicio" style={sx('display:inline-flex;text-decoration:none')}><Logo /></Link>
+            <span className="lbl">Demo</span>
+            <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;letter-spacing:-.01em")}>Guion del demo</h1>
+            <p style={sx('margin:0;color:#5F6B7A;font-size:15px;line-height:1.5')}>Siete pasos de 15 a 20 minutos en total. Abre cada paso en orden; dentro de cada pantalla, el botón azul te lleva al siguiente.</p>
+          </div>
+          <Link to={ROUTES.Main} className="btn">Volver a Inicio</Link>
+        </header>
+
+        <ol style={sx('list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px')}>
+          {PASOS.map((p, i) => (
+            <li key={p.to} className="paso">
+              <span className="n" aria-hidden="true">{i + 1}</span>
+              <span style={sx('display:flex;flex-direction:column;gap:3px;flex:1;min-width:0')}>
+                <span className="t">{p.titulo}</span>
+                <span className="d">{p.linea}</span>
+              </span>
+              <Link to={p.to} className={'btn' + (i === 0 ? ' btn-pri' : '')} aria-label={`Abrir paso ${i + 1}: ${p.titulo}`}>Abrir</Link>
+            </li>
+          ))}
+        </ol>
+
+        <section className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
+          <div style={sx('display:flex;flex-direction:column;gap:2px')}>
+            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:17px;font-weight:600")}>Si el cliente pregunta por más</h2>
+            <span style={sx('font-size:13px;color:#5F6B7A')}>Pantallas que alimentan el guion. Todas están también en el menú lateral.</span>
+          </div>
+          <div style={sx('display:flex;flex-wrap:wrap;gap:8px')}>
+            {EXTRAS.map(e => <Link key={e.to} to={e.to} className="extra">{e.label} <span aria-hidden="true" style={sx('color:#475CC7')}>›</span></Link>)}
+          </div>
+        </section>
       </div>
-    </>
+    </div>
   )
 }

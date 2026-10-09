@@ -43,11 +43,11 @@ const DISENO: CotizacionPayload = {
 
 const CSS = `
 body{margin:0;background:#FFFFFF}
-a{color:#8A5300}a:hover{color:#5A3600}
+a{color:#0D1D41}a:hover{color:#5A3600}
 .pdf-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;width:816px;max-width:100%;box-sizing:border-box;margin:0 auto;padding:16px 0}
-.pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.pdf-btn:hover{color:#121821}
-.pdf-btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.pdf-btn:hover{color:#0D1D41}
+.pdf-btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .pdf-sheet{margin:0 auto 40px;box-shadow:0 1px 3px rgba(18,24,33,.08),0 8px 24px rgba(18,24,33,.08);border:1px solid #E4E8ED}
 @page{size:letter;margin:0}
 @media print{
@@ -111,7 +111,7 @@ export default function CotizacionPDF() {
       <div className="pdf-bar">
         <Link className="pdf-btn" to={ROUTES.Cotizador}>← Volver al cotizador</Link>
         <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
-          {p.formato && <span style={sx("font:400 13px 'IBM Plex Sans',sans-serif;color:#5F6B7A")}>Formato: {p.formato}</span>}
+          {p.formato && <span style={sx("font:400 13px 'Montserrat',sans-serif;color:#5F6B7A")}>Formato: {p.formato}</span>}
           <button type="button" className="pdf-btn" onClick={copiar}>Copiar liga</button>
           <button type="button" className="pdf-btn" onClick={() => setMail(true)}>Enviar por correo</button>
           <button type="button" className="pdf-btn" onClick={aceptar}>Marcar aceptada</button>
@@ -119,17 +119,17 @@ export default function CotizacionPDF() {
         </div>
       </div>
 
-      <div className="pdf-sheet" style={sx("width:816px;height:1056px;box-sizing:border-box;padding:56px 72px 48px;background:#FFFFFF;color:#121821;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;display:flex;flex-direction:column;gap:22px")}>
-        <header style={sx('display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:18px;border-bottom:3px solid #D08A1C')}>
+      <div className="pdf-sheet" style={sx("width:816px;height:1056px;box-sizing:border-box;padding:56px 72px 48px;background:#FFFFFF;color:#0D1D41;font-family:'Montserrat',system-ui,sans-serif;font-size:14px;line-height:1.5;display:flex;flex-direction:column;gap:22px")}>
+        <header style={sx('display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:18px;border-bottom:3px solid #3448A8')}>
           <div style={sx('display:flex;align-items:center;gap:10px')}>
-            <Logo size={36} />
+            <Logo height={31} />
             <div style={sx('display:flex;flex-direction:column;line-height:1.2')}>
-              <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:24px")}>AI27</span>
+              <span style={sx("font-family:'Montserrat',sans-serif;font-weight:700;font-size:24px")}>AI27</span>
               <span style={sx('font-size:12px;color:#5F6B7A')}>Seguridad y custodia de carga en tránsito</span>
             </div>
           </div>
           <div style={sx('display:flex;flex-direction:column;align-items:flex-end;gap:2px')}>
-            <span style={sx("font-family:'Archivo',sans-serif;font-size:22px;font-weight:600;letter-spacing:.04em")}>COTIZACIÓN</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;font-size:22px;font-weight:600;letter-spacing:.04em")}>COTIZACIÓN</span>
             <span style={sx("font-family:'IBM Plex Mono',monospace;font-size:13px")}>{folio}</span>
           </div>
         </header>
@@ -157,7 +157,7 @@ export default function CotizacionPDF() {
 
         <table style={sx('width:100%;border-collapse:collapse')}>
           <thead>
-            <tr style={sx('background:#121821;color:#FFFFFF')}>
+            <tr style={sx('background:#0D1D41;color:#FFFFFF')}>
               <th style={sx('text-align:left;padding:10px 12px;font-weight:500;font-size:13px')}>Concepto</th>
               <th style={sx('text-align:right;padding:10px 12px;font-weight:500;font-size:13px')}>Cant.</th>
               <th style={sx('text-align:right;padding:10px 12px;font-weight:500;font-size:13px')}>Importe</th>
@@ -172,21 +172,21 @@ export default function CotizacionPDF() {
 
         <section style={sx('display:flex;justify-content:flex-end')}>
           <div style={sx("width:300px;display:grid;grid-template-columns:1fr auto;gap:6px 16px;font-family:'IBM Plex Mono',monospace")}>
-            <span style={sx("font-family:'IBM Plex Sans',sans-serif;color:#3E4A59")}>Subtotal</span><span style={sx('text-align:right')}>{money(p.subtotal)}</span>
-            <span style={sx("font-family:'IBM Plex Sans',sans-serif;color:#3E4A59")}>IVA 16%</span><span style={sx('text-align:right')}>{money(iva)}</span>
-            <span style={sx("font-family:'Archivo',sans-serif;font-weight:600;font-size:18px;border-top:2px solid #121821;padding-top:8px")}>Total MXN</span><span style={sx('text-align:right;font-weight:600;font-size:18px;border-top:2px solid #121821;padding-top:8px')}>{money(total)}</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;color:#3E4A59")}>Subtotal</span><span style={sx('text-align:right')}>{money(p.subtotal)}</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;color:#3E4A59")}>IVA 16%</span><span style={sx('text-align:right')}>{money(iva)}</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;font-weight:600;font-size:18px;border-top:2px solid #0D1D41;padding-top:8px")}>Total MXN</span><span style={sx('text-align:right;font-weight:600;font-size:18px;border-top:2px solid #0D1D41;padding-top:8px')}>{money(total)}</span>
           </div>
         </section>
 
         <section style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px')}>
           <div style={sx('display:flex;flex-direction:column;gap:4px')}>
-            <span style={sx("font-family:'Archivo',sans-serif;font-weight:600;font-size:15px")}>Incluye</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;font-weight:600;font-size:15px")}>Incluye</span>
             <span>Bitácora del servicio con evidencias fotográficas</span>
             <span>Acceso al portal para ver el servicio en vivo</span>
             <span>Reporte post-incidente en caso de evento</span>
           </div>
           <div style={sx('display:flex;flex-direction:column;gap:4px')}>
-            <span style={sx("font-family:'Archivo',sans-serif;font-weight:600;font-size:15px")}>Condiciones</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;font-weight:600;font-size:15px")}>Condiciones</span>
             <span>Precios en pesos mexicanos más IVA</span>
             <span>Forma de pago: [CONDICIONES DE PAGO]</span>
             <span>Cancelación: [POLÍTICA DE CANCELACIÓN]</span>
@@ -194,8 +194,8 @@ export default function CotizacionPDF() {
         </section>
 
         <section style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px;margin-top:auto')}>
-          <div style={sx('display:flex;flex-direction:column;gap:4px;border-top:1px solid #121821;padding-top:8px')}><span style={sx('font-weight:600')}>Acepta por el cliente</span><span style={sx('color:#3E4A59')}>Nombre, firma y fecha</span></div>
-          <div style={sx('display:flex;flex-direction:column;gap:4px;border-top:1px solid #121821;padding-top:8px')}><span style={sx('font-weight:600')}>Por AI27</span><span style={sx('color:#3E4A59')}>[NOMBRE Y CARGO]</span></div>
+          <div style={sx('display:flex;flex-direction:column;gap:4px;border-top:1px solid #0D1D41;padding-top:8px')}><span style={sx('font-weight:600')}>Acepta por el cliente</span><span style={sx('color:#3E4A59')}>Nombre, firma y fecha</span></div>
+          <div style={sx('display:flex;flex-direction:column;gap:4px;border-top:1px solid #0D1D41;padding-top:8px')}><span style={sx('font-weight:600')}>Por AI27</span><span style={sx('color:#3E4A59')}>[NOMBRE Y CARGO]</span></div>
         </section>
 
         <footer style={sx('display:flex;justify-content:space-between;gap:16px;font-size:12px;color:#5F6B7A;border-top:1px solid #E4E8ED;padding-top:10px')}>
@@ -207,7 +207,7 @@ export default function CotizacionPDF() {
         <Field label="Para"><input style={sx(inputStyle)} value={para} onChange={e => setPara(e.target.value)} /></Field>
         <Field label="Asunto"><input style={sx(inputStyle)} value={asunto} onChange={e => setAsunto(e.target.value)} /></Field>
         <Field label="Mensaje"><textarea rows={6} style={sx(inputStyle + ';padding:10px 12px;resize:vertical')} value={msg} onChange={e => setMsg(e.target.value)} /></Field>
-        <span style={sx("font:400 13px 'IBM Plex Sans',sans-serif;color:#5F6B7A")}>Adjunto: {folio}.pdf · {money(total)} MXN con IVA</span>
+        <span style={sx("font:400 13px 'Montserrat',sans-serif;color:#5F6B7A")}>Adjunto: {folio}.pdf · {money(total)} MXN con IVA</span>
       </Modal>
     </div>
   )

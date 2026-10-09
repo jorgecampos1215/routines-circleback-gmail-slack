@@ -9,19 +9,19 @@ import { margenPorCliente, incidentesPorCarretera, coberturaManana, combustibleA
 import type { Zona } from '../data/seed'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-bad{background:#FDE8E8;color:#B42318}.p-warn{background:#FFF1DB;color:#8A5300}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.p-ok{background:#E3F6EC;color:#17784A}.p-bad{background:#FDE8E8;color:#B42318}.p-warn{background:#FFF3DC;color:#9A5B00}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;border-bottom:1px solid #E4E8ED;cursor:pointer;user-select:none}
 .tbl td{padding:10px;border-bottom:1px solid #EEF1F4}
-.row-link{cursor:pointer}.row-link:hover td{background:#FFF8EC}
-.bar-row{cursor:pointer;border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left}.bar-row:hover span:first-child{color:#8A5300}
+.row-link{cursor:pointer}.row-link:hover td{background:#F0F3FD}
+.bar-row{cursor:pointer;border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left}.bar-row:hover span:first-child{color:#0D1D41}
 `
 
 type Kind = 'bars' | 'group' | 'table' | 'line' | 'docs' | 'zona'
@@ -60,7 +60,7 @@ const P: Prompt[] = [
     keys: ['documento', 'documentos', 'vencer', 'vencen', 'vence', 'licencia', 'portacion', 'confianza', 'renovar', 'vigencia'] },
 ]
 const LINEA: [string, number, number][] = [['Abr', 12.1, 8.6], ['May', 12.4, 8.7], ['Jun', 12.6, 8.9], ['Jul', 12.9, 9.0], ['Ago', 13.6, 9.4], ['Sep', 14.1, 9.7]]
-const groups = carreteras.filas.map(({ k, a, b }) => ({ k, a, b, v: a + ' → ' + b, b1: 'height:8px;border-radius:3px;background:#AEB8C4;width:' + Math.round(a / carreteras.max * 100) + '%', b2: 'height:8px;border-radius:3px;background:#D08A1C;width:' + Math.round(b / carreteras.max * 100) + '%' }))
+const groups = carreteras.filas.map(({ k, a, b }) => ({ k, a, b, v: a + ' → ' + b, b1: 'height:8px;border-radius:3px;background:#AEB8C4;width:' + Math.round(a / carreteras.max * 100) + '%', b2: 'height:8px;border-radius:3px;background:#3448A8;width:' + Math.round(b / carreteras.max * 100) + '%' }))
 
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ')
 const STOP = new Set(['que', 'los', 'las', 'del', 'por', 'con', 'una', 'uno', 'para', 'hay', 'como', 'cual', 'cuales', 'cuantos', 'cuantas', 'este', 'esta', 'nos', 'mas', 'dame', 'muestrame'])
@@ -113,7 +113,7 @@ export default function AsistenteIA() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px;flex:1 1 420px')}>
           <span className="lbl">Inteligencia artificial</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Asistente IA</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Asistente IA</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>Pregunta lo que necesites de la plataforma: servicios, custodios, flotilla, incidentes, clientes o finanzas. Responde con datos, gráficas y acciones.</span>
         </div>
         <div style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
@@ -126,7 +126,7 @@ export default function AsistenteIA() {
         <aside className="card" style={sx('flex:1 1 260px;padding:14px;display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl" style={sx('padding:4px 8px 8px')}>Preguntas sugeridas</span>
           {P.map((p, n) => (
-            <button key={n} type="button" onClick={() => pick(n)} style={sx("text-align:left;min-height:44px;padding:10px 12px;border-radius:8px;cursor:pointer;font:400 14px 'IBM Plex Sans',sans-serif;line-height:1.4;" + (p === last.p && last.asked === null ? 'background:#FFF1DB;border:1px solid #F3D9A8;color:#121821' : 'background:transparent;border:1px solid transparent;color:#3E4A59'))}>{p.q}</button>
+            <button key={n} type="button" onClick={() => pick(n)} style={sx("text-align:left;min-height:44px;padding:10px 12px;border-radius:8px;cursor:pointer;font:400 14px 'Montserrat',sans-serif;line-height:1.4;" + (p === last.p && last.asked === null ? 'background:#E9EDFB;border:1px solid #C7D0F2;color:#0D1D41' : 'background:transparent;border:1px solid transparent;color:#3E4A59'))}>{p.q}</button>
           ))}
           <span className="lbl" style={sx('padding:16px 8px 4px')}>Fuentes que consulta</span>
           <span style={sx('font-size:13px;color:#3E4A59;padding:0 8px;line-height:1.6')}>Servicios, custodios, telemetría Samsara y Ruptela, incidentes, flotilla, CRM y finanzas. Respeta los permisos del rol de quien pregunta.</span>
@@ -143,7 +143,7 @@ export default function AsistenteIA() {
           ))}
 
           <form style={sx('display:flex;gap:10px;border-top:1px solid #EEF1F4;padding-top:18px;flex-wrap:wrap')} onSubmit={e => { e.preventDefault(); ask() }}>
-            <label style={sx('flex:1 1 320px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Pregunta para el asistente</span><input type="text" value={input} onChange={e => setInput(e.target.value)} placeholder="Ej. ¿qué custodios tienen documentos por vencer este mes?" style={sx("flex:1;min-height:48px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:10px;color:#121821;padding:0 14px;font:400 15px 'IBM Plex Sans',sans-serif")} /></label>
+            <label style={sx('flex:1 1 320px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Pregunta para el asistente</span><input type="text" value={input} onChange={e => setInput(e.target.value)} placeholder="Ej. ¿qué custodios tienen documentos por vencer este mes?" style={sx("flex:1;min-height:48px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:10px;color:#0D1D41;padding:0 14px;font:400 15px 'Montserrat',sans-serif")} /></label>
             <button type="submit" className="btn btn-pri" style={sx('min-height:48px')}>Preguntar</button>
           </form>
         </section>
@@ -167,7 +167,7 @@ function csvDe(p: Prompt): string {
 function Respuesta({ turno, pinned, onPin, onExport, navigate }: { turno: Turno; pinned: boolean; onPin: () => void; onExport: () => void; navigate: ReturnType<typeof useNavigate> }) {
   const cur = turno.p
   const max = cur.data ? Math.max(...cur.data.map(d => d[1])) : 1
-  const bars = (cur.data || []).map(([k, v], j) => ({ k, v: cur.fmt!(v), bar: 'height:100%;width:' + Math.round(v / max * 100) + '%;background:' + (cur.kind === 'bars' && cur.to === ROUTES.Flotilla && v < 6.5 ? '#D9534F' : (j === 0 && cur.to === ROUTES.Finanzas ? '#D08A1C' : '#2B7FA8')) }))
+  const bars = (cur.data || []).map(([k, v], j) => ({ k, v: cur.fmt!(v), bar: 'height:100%;width:' + Math.round(v / max * 100) + '%;background:' + (cur.kind === 'bars' && cur.to === ROUTES.Flotilla && v < 6.5 ? '#D9534F' : (j === 0 && cur.to === ROUTES.Finanzas ? '#3448A8' : '#475CC7')) }))
   const [sort, setSort] = useState<{ k: string; dir: 1 | -1 }>({ k: 'diff', dir: 1 })
   const filas = useMemo(() => [...cobertura.filas].sort((a, b) => { const va = a[sort.k as keyof typeof a], vb = b[sort.k as keyof typeof b]; return (typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb))) * sort.dir }), [sort])
   const th = (k: string, label: string) => <th onClick={() => setSort(s => ({ k, dir: s.k === k ? (s.dir === 1 ? -1 : 1) : 1 }))} title="Ordenar">{label}{sort.k === k ? (sort.dir === 1 ? ' ↑' : ' ↓') : ''}</th>
@@ -177,11 +177,11 @@ function Respuesta({ turno, pinned, onPin, onExport, navigate }: { turno: Turno;
 
   return (
     <>
-      <div style={sx('align-self:flex-end;max-width:80%;background:#121821;color:#FFFFFF;border-radius:14px 14px 4px 14px;padding:12px 16px;font-size:15px')}>{turno.asked ?? cur.q}</div>
+      <div style={sx('align-self:flex-end;max-width:80%;background:#0D1D41;color:#FFFFFF;border-radius:14px 14px 4px 14px;padding:12px 16px;font-size:15px')}>{turno.asked ?? cur.q}</div>
 
       <div style={sx('display:flex;gap:12px;align-items:flex-start')}>
-        <span style={sx('width:36px;height:36px;border-radius:50%;background:#FFF1DB;display:flex;align-items:center;justify-content:center;flex:none')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+        <span style={sx('width:36px;height:36px;border-radius:50%;background:#E9EDFB;display:flex;align-items:center;justify-content:center;flex:none')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
         </span>
         <div style={sx('flex:1;min-width:0;display:flex;flex-direction:column;gap:16px')}>
           {turno.asked !== null && cur.kind !== 'zona' && (
@@ -205,7 +205,7 @@ function Respuesta({ turno, pinned, onPin, onExport, navigate }: { turno: Turno;
           {cur.kind === 'group' && (
             <figure style={sx('margin:0;background:#F7F9FB;border:1px solid #E4E8ED;border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px')}>
               <figcaption style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap')}><span className="lbl">Incidentes por carretera · Q2 vs Q3 2026</span>
-                <span style={sx('display:flex;gap:14px;font-size:12px;color:#3E4A59')}><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#AEB8C4')}></span>Q2</span><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#D08A1C')}></span>Q3</span></span>
+                <span style={sx('display:flex;gap:14px;font-size:12px;color:#3E4A59')}><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#AEB8C4')}></span>Q2</span><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#3448A8')}></span>Q3</span></span>
               </figcaption>
               {groups.map(g => (
                 <button type="button" className="bar-row" key={g.k} title={'Ver incidentes en ' + g.k} onClick={() => navigate(ROUTES.Reaccion)} style={sx('display:grid;grid-template-columns:170px minmax(0,1fr) 60px;gap:12px;align-items:center;font-size:14px')}>
@@ -220,17 +220,17 @@ function Respuesta({ turno, pinned, onPin, onExport, navigate }: { turno: Turno;
           {cur.kind === 'line' && (
             <figure style={sx('margin:0;background:#F7F9FB;border:1px solid #E4E8ED;border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:10px')}>
               <figcaption style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap')}><span className="lbl">Ingresos vs gastos · millones MXN</span>
-                <span style={sx('display:flex;gap:14px;font-size:12px;color:#3E4A59')}><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:14px;height:3px;background:#D08A1C')}></span>Ingresos</span><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:14px;height:3px;background:#2B7FA8')}></span>Gastos</span></span>
+                <span style={sx('display:flex;gap:14px;font-size:12px;color:#3E4A59')}><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:14px;height:3px;background:#3448A8')}></span>Ingresos</span><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:14px;height:3px;background:#475CC7')}></span>Gastos</span></span>
               </figcaption>
               <svg viewBox="0 0 640 230" role="img" aria-label="Ingresos suben de 12.1 a 14.1 millones y gastos de 8.6 a 9.7 millones entre abril y septiembre" style={sx('width:100%;height:auto;display:block;cursor:pointer')} onClick={() => navigate(ROUTES.Finanzas)}>
                 <g stroke="#E4E8ED" strokeWidth="1"><path d="M30 200H620M30 148.6H620M30 97.1H620M30 45.7H620"></path></g>
                 <g fontFamily="IBM Plex Mono, monospace" fontSize="11" fill="#5F6B7A"><text x="0" y="204">8</text><text x="0" y="152">10</text><text x="0" y="101">12</text><text x="0" y="49">14</text></g>
-                <polyline points={LINEA.map(([, i], n) => `${40 + n * 112},${200 - (i - 8) * 25.7}`).join(' ')} fill="none" stroke="#D08A1C" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round"></polyline>
-                <polyline points={LINEA.map(([, , g], n) => `${40 + n * 112},${200 - (g - 8) * 25.7}`).join(' ')} fill="none" stroke="#2B7FA8" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round"></polyline>
-                <g fill="#D08A1C">{LINEA.map(([m, i], n) => <circle key={m} cx={40 + n * 112} cy={200 - (i - 8) * 25.7} r="4"><title>{m}: ingresos ${i}M</title></circle>)}</g>
-                <g fill="#2B7FA8">{LINEA.map(([m, , g], n) => <circle key={m} cx={40 + n * 112} cy={200 - (g - 8) * 25.7} r="4"><title>{m}: gastos ${g}M</title></circle>)}</g>
+                <polyline points={LINEA.map(([, i], n) => `${40 + n * 112},${200 - (i - 8) * 25.7}`).join(' ')} fill="none" stroke="#3448A8" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round"></polyline>
+                <polyline points={LINEA.map(([, , g], n) => `${40 + n * 112},${200 - (g - 8) * 25.7}`).join(' ')} fill="none" stroke="#475CC7" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round"></polyline>
+                <g fill="#3448A8">{LINEA.map(([m, i], n) => <circle key={m} cx={40 + n * 112} cy={200 - (i - 8) * 25.7} r="4"><title>{m}: ingresos ${i}M</title></circle>)}</g>
+                <g fill="#475CC7">{LINEA.map(([m, , g], n) => <circle key={m} cx={40 + n * 112} cy={200 - (g - 8) * 25.7} r="4"><title>{m}: gastos ${g}M</title></circle>)}</g>
                 <g fontFamily="IBM Plex Sans, sans-serif" fontSize="12" fill="#3E4A59" textAnchor="middle">{LINEA.map(([m], n) => <text key={m} x={40 + n * 112} y="224">{m}</text>)}</g>
-                <g fontFamily="IBM Plex Mono, monospace" fontSize="11" textAnchor="middle"><text x="600" y="32" fill="#8A5300">14.1</text><text x="600" y="145" fill="#1E6488">9.7</text></g>
+                <g fontFamily="IBM Plex Mono, monospace" fontSize="11" textAnchor="middle"><text x="600" y="32" fill="#0D1D41">14.1</text><text x="600" y="145" fill="#1E6488">9.7</text></g>
               </svg>
             </figure>
           )}
@@ -278,7 +278,7 @@ function Respuesta({ turno, pinned, onPin, onExport, navigate }: { turno: Turno;
 
           <div style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
             <Link className="btn" to={cur.to}>{cur.act}</Link>
-            <button type="button" className="btn" onClick={onPin} style={sx(pinned ? 'border-color:#F2A93B;color:#8A5300' : '')}>{pinned ? 'Agregado al dashboard ✓' : 'Agregar al dashboard'}</button>
+            <button type="button" className="btn" onClick={onPin} style={sx(pinned ? 'border-color:#475CC7;color:#0D1D41' : '')}>{pinned ? 'Agregado al dashboard ✓' : 'Agregar al dashboard'}</button>
             <button type="button" className="btn" onClick={onExport}>Exportar</button>
           </div>
         </div>

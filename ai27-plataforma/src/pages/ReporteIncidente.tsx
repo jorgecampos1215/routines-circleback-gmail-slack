@@ -8,11 +8,11 @@ import { useToast } from '../components/ui'
 import { casoPorId, fmt } from '../data/reaccion'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 @media print{
   @page{size:letter;margin:12mm}
   html,body{background:#FFFFFF !important}
@@ -34,7 +34,7 @@ const TL0 = [
 ]
 const EVID0 = ['Foto de sellos', 'Recorrido del replay', 'Acta del MP']
 const EVID = 'aspect-ratio:4/3;background:#F3F5F8;border:1px dashed #C3CBD5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#5F6B7A'
-const H3 = "margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600"
+const H3 = "margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600"
 
 export default function ReporteIncidente() {
   const toast = useToast()
@@ -56,7 +56,7 @@ export default function ReporteIncidente() {
   const descargar = () => { toast(`Generando PDF del reporte ${caso.id}…`, 'info'); setTimeout(() => window.print(), 150) }
 
   return (
-    <div className="ri-wrap" style={sx("font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap")}>
+    <div className="ri-wrap" style={sx("font-family:'Montserrat',system-ui,sans-serif;color:#0D1D41;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap")}>
       <style>{CSS}</style>
       <div className="ri-noprint" style={sx('flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4')}>
         <Nav active="reaccion" />
@@ -65,7 +65,7 @@ export default function ReporteIncidente() {
         <header className="ri-noprint" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
           <div style={sx('display:flex;flex-direction:column;gap:6px')}>
             <span className="lbl">Reacción · paso final</span>
-            <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Reporte post-incidente</h1>
+            <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Reporte post-incidente</h1>
           </div>
           <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
             <Link className="btn" to={volverTo}>Volver al incidente</Link>
@@ -75,17 +75,17 @@ export default function ReporteIncidente() {
         </header>
 
         <article className="ri-doc" style={sx('background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;max-width:880px;width:100%;box-sizing:border-box;padding:56px 64px;display:flex;flex-direction:column;gap:28px;align-self:center')}>
-          <div style={sx('display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;border-bottom:2px solid #121821;padding-bottom:20px')}>
+          <div style={sx('display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;border-bottom:2px solid #0D1D41;padding-bottom:20px')}>
             <div style={sx('display:flex;align-items:center;gap:10px')}>
-              <Logo size={30} />
-              <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:22px")}>AI27</span>
+              <Logo height={26} />
+              <span style={sx("font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px")}>AI27</span>
             </div>
             <div style={sx('display:flex;flex-direction:column;gap:2px;text-align:right;font-size:13px;color:#3E4A59')}>
               <span className="mono">{caso.id} · {caso.servicio}</span><span>Emitido {caso.cerrado}</span>
             </div>
           </div>
           <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:26px;font-weight:600;text-wrap:balance")}>{caso.tituloReporte}</h2>
+            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:26px;font-weight:600;text-wrap:balance")}>{caso.tituloReporte}</h2>
             <span style={sx('font-size:15px;color:#3E4A59')}>Para: {caso.cliente} · Gerencia de logística y seguridad corporativa</span>
           </div>
           <dl style={sx('margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:16px;background:#F7F9FB;border-radius:8px;padding:18px')}>

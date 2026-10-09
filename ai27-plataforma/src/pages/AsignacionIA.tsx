@@ -10,22 +10,22 @@ import { coberturaPorZona, sugerirCobertura, PICOS_48H, type Cobertura } from '.
 import type { Zona } from '../data/seed'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
-.field select,.field input{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+.field select,.field input{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
 .track{height:6px;border-radius:3px;background:#EBEEF2;overflow:hidden}
-.gap{cursor:pointer;border:1px solid transparent;text-align:left;font:inherit;color:inherit}.gap:hover{border-color:#F2A93B}
+.gap{cursor:pointer;border:1px solid transparent;text-align:left;font:inherit;color:inherit}.gap:hover{border-color:#475CC7}
 `
 
 type Dec = 'Asignado' | 'Descartado'
-const bar = (v: number) => 'height:100%;width:' + v + '%;background:' + (v >= 80 ? '#4CC38A' : v >= 60 ? '#3FA7C9' : '#F2A93B')
+const bar = (v: number) => 'height:100%;width:' + v + '%;background:' + (v >= 80 ? '#4CC38A' : v >= 60 ? '#3FA7C9' : '#475CC7')
 const PASO = 4
 
 /** Última decisión registrada por custodio para este servicio (el store guarda la más reciente primero). */
@@ -109,13 +109,13 @@ export default function AsignacionIA() {
     <Shell active="ia" css={CSS}>
       <header style={sx('display:flex;flex-direction:column;gap:6px')}>
         <span className="lbl">Nuevo servicio · paso 2 de 3</span>
-        <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Asignar custodios y unidad</h1>
+        <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Asignar custodios y unidad</h1>
         <span style={sx('color:#5F6B7A;font-size:14px')}>Cotización COT-1182 aceptada por {form.cliente} y convertida en servicio sin recapturar.</span>
       </header>
 
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
         <section className="card" style={sx('flex:1 1 300px;display:flex;flex-direction:column;gap:16px')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Servicio {SERVICIO.id}</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Servicio {SERVICIO.id}</h2>
           <label className="field">Cliente<input type="text" value={form.cliente} onChange={e => setForm(f => ({ ...f, cliente: e.target.value }))} /></label>
           <label className="field">Origen<input type="text" value={form.origen} onChange={e => setForm(f => ({ ...f, origen: e.target.value }))} /></label>
           <label className="field">Destino<input type="text" value={form.destino} onChange={e => setForm(f => ({ ...f, destino: e.target.value }))} /></label>
@@ -130,7 +130,7 @@ export default function AsignacionIA() {
           <div style={sx('display:flex;flex-direction:column;gap:8px;font-size:14px;background:#F3F5F8;border-radius:8px;padding:14px')}>
             <span className="lbl">Requisitos del cliente</span>
             <span>Portación vigente · evaluación de confianza &lt; 12 meses · experiencia en carga de alto valor</span>
-            <label style={sx('display:flex;gap:8px;align-items:center;font-size:13px;color:#3E4A59;cursor:pointer')}><input type="checkbox" checked={soloCumplen} onChange={e => { setSoloCumplen(e.target.checked); setVisibles(PASO) }} style={sx('accent-color:#F2A93B')} />Mostrar solo quienes cumplen todos los requisitos ({LIST.filter(c => c.cumple).length})</label>
+            <label style={sx('display:flex;gap:8px;align-items:center;font-size:13px;color:#3E4A59;cursor:pointer')}><input type="checkbox" checked={soloCumplen} onChange={e => { setSoloCumplen(e.target.checked); setVisibles(PASO) }} style={sx('accent-color:#475CC7')} />Mostrar solo quienes cumplen todos los requisitos ({LIST.filter(c => c.cumple).length})</label>
           </div>
           <div style={sx('display:flex;justify-content:space-between;align-items:center;font-size:14px')}>
             <span>Riesgo de la ruta</span><span className={riesgo.factor >= 1.4 ? 'pill p-bad' : riesgo.factor >= 1.2 ? 'pill p-warn' : 'pill p-ok'}>{riesgo.factor >= 1.4 ? 'Alto' : riesgo.factor >= 1.2 ? 'Medio' : 'Bajo'} · {riesgo.factor.toFixed(1)}</span>
@@ -139,8 +139,8 @@ export default function AsignacionIA() {
         </section>
 
         <section style={sx('flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px')}>
-          <div className="card" style={sx('display:flex;gap:12px;align-items:flex-start;border-color:#F3D9A8')}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F2A93B" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none;margin-top:2px')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+          <div className="card" style={sx('display:flex;gap:12px;align-items:flex-start;border-color:#C7D0F2')}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475CC7" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none;margin-top:2px')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
             <div style={sx('display:flex;flex-direction:column;gap:4px')}>
               <span style={sx('font-weight:600')}>Recomendación: {top.join(' + ')} con unidad {unidad?.id}</span>
               <span style={sx('font-size:14px;color:#3E4A59')}>Evalué {resumen.zona} custodios de {SERVICIO.zona} y {resumen.apoyo} de {SERVICIO.zonaApoyo}; {resumen.disponibles} están disponibles y {resumen.cumplen} cumplen todos los requisitos y la ventana de descanso. Este es el ranking.</span>
@@ -152,7 +152,7 @@ export default function AsignacionIA() {
             return (
               <article key={c.id} className="card" style={sx(d === 'Asignado' ? 'border-color:#9ED9BC' : d === 'Descartado' ? 'opacity:.55' : '')}>
                 <div style={sx('display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start')}>
-                  <span style={sx('width:48px;height:48px;border-radius:50%;background:#FFF1DB;display:flex;align-items:center;justify-content:center;font-weight:600;color:#8A5300;flex:none')}>{c.name.split(' ').map(s => s[0]).join('')}</span>
+                  <span style={sx('width:48px;height:48px;border-radius:50%;background:#E9EDFB;display:flex;align-items:center;justify-content:center;font-weight:600;color:#0D1D41;flex:none')}>{c.name.split(' ').map(s => s[0]).join('')}</span>
                   <div style={sx('flex:1 1 260px;display:flex;flex-direction:column;gap:6px;min-width:0')}>
                     <div style={sx('display:flex;gap:10px;align-items:center;flex-wrap:wrap')}>
                       <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>#{i + 1}</span>
@@ -169,7 +169,7 @@ export default function AsignacionIA() {
                     </div>
                   </div>
                   <div style={sx('display:flex;flex-direction:column;align-items:flex-end;gap:10px')}>
-                    <span style={sx("font-family:'Archivo',sans-serif;font-size:28px;font-weight:600")} title="Promedio de los 4 factores">{c.score}</span>
+                    <span style={sx("font-family:'Montserrat',sans-serif;font-size:28px;font-weight:600")} title="Promedio de los 4 factores">{c.score}</span>
                     <div style={sx('display:flex;gap:8px')}>
                       <button type="button" className="btn btn-pri" aria-pressed={d === 'Asignado'} onClick={() => set(c, 'Asignado')}>Asignar</button>
                       <button type="button" className="btn" aria-pressed={d === 'Descartado'} onClick={() => set(c, 'Descartado')}>Descartar</button>
@@ -201,7 +201,7 @@ export default function AsignacionIA() {
 
       <section className="card" style={sx('display:flex;flex-direction:column;gap:14px;border-color:#FBE3CF')}>
         <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Detección de huecos · próximas 48 h</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Detección de huecos · próximas 48 h</h2>
           <Link className="btn" to={ROUTES.Custodios}>Ver calendario de turnos</Link>
         </div>
         <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:12px')}>
@@ -218,8 +218,8 @@ export default function AsignacionIA() {
       <Modal open={modal === 'unidad'} onClose={() => setModal(null)} title="Elegir unidad de custodia" width={560} footer={<button type="button" style={sx(btnPriStyle)} onClick={() => { setModal(null); toast(`Unidad ${unidadId} seleccionada`) }}>Usar esta unidad</button>}>
         <span style={sx('font-size:14px;color:#3E4A59')}>Unidades disponibles en {SERVICIO.zona} (seed). La sugerida está primero.</span>
         {UNIDADES.map(u => (
-          <label key={u.id} style={sx('display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:8px;cursor:pointer;background:' + (u.id === unidadId ? '#FFF1DB' : '#F3F5F8'))}>
-            <input type="radio" name="unidad" checked={u.id === unidadId} onChange={() => setUnidadId(u.id)} style={sx('accent-color:#F2A93B')} />
+          <label key={u.id} style={sx('display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:8px;cursor:pointer;background:' + (u.id === unidadId ? '#E9EDFB' : '#F3F5F8'))}>
+            <input type="radio" name="unidad" checked={u.id === unidadId} onChange={() => setUnidadId(u.id)} style={sx('accent-color:#475CC7')} />
             <span style={sx('display:flex;flex-direction:column;gap:2px;flex:1')}><span style={sx('font-weight:600')}>{u.id} · {u.vehiculo}</span><span style={sx('font-size:13px;color:#5F6B7A')}>{u.placas} · GPS {u.gps} · póliza {u.poliza} · {u.km.toLocaleString('es-MX')} km</span></span>
           </label>
         ))}

@@ -8,19 +8,19 @@ import { useToast } from '../components/ui'
 import { YO, recibos, money, descargarReciboPDF, descargarReciboXML, descargarConstancia } from '../data/portal'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;padding:22px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-mute{background:#EEF1F4;color:#4A5868}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-mute{background:#EEF1F4;color:#4A5868}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
 .tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#3E4A59}
-.field select,.field input,.field textarea{min-height:44px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 15px 'IBM Plex Sans',sans-serif;box-sizing:border-box}
+.field select,.field input,.field textarea{min-height:44px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 15px 'Montserrat',sans-serif;box-sizing:border-box}
 .field textarea{padding:10px 12px;resize:vertical}
 `
 
@@ -106,16 +106,16 @@ export default function PortalColaborador() {
     toast(`Documento "${f.name}" subido · RH lo revisará`)
   }
 
-  const tabStyle = (on: boolean) => "min-height:40px;padding:0 14px;border-radius:8px;border:0;cursor:pointer;font:500 14px 'IBM Plex Sans',sans-serif;" + (on ? 'background:#FFF1DB;color:#8A5300' : 'background:transparent;color:#3E4A59')
+  const tabStyle = (on: boolean) => "min-height:40px;padding:0 14px;border-radius:8px;border:0;cursor:pointer;font:500 14px 'Montserrat',sans-serif;" + (on ? 'background:#E9EDFB;color:#0D1D41' : 'background:transparent;color:#3E4A59')
 
   return (
-    <div style={sx("font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh")}>
+    <div style={sx("font-family:'Montserrat',system-ui,sans-serif;color:#0D1D41;background:#F6F7F9;min-height:100vh")}>
       <style>{CSS}</style>
       <header style={sx('background:#FFFFFF;border-bottom:1px solid #E4E8ED')}>
         <div style={sx('max-width:1120px;margin:0 auto;padding:14px 24px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between')}>
           <div style={sx('display:flex;align-items:center;gap:10px')}>
-            <Logo size={28} />
-            <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:19px")}>AI27</span>
+            <Logo height={24} />
+            <span style={sx("font-family:'Montserrat',sans-serif;font-weight:700;font-size:19px")}>AI27</span>
             <span style={sx('font-size:14px;color:#5F6B7A;padding-left:10px;border-left:1px solid #E4E8ED')}>Mi portal</span>
           </div>
           <nav aria-label="Secciones del portal" style={sx('display:flex;gap:4px;flex-wrap:wrap')}>
@@ -134,23 +134,23 @@ export default function PortalColaborador() {
         {tab === 'home' && (
           <div style={sx('display:flex;flex-direction:column;gap:22px')}>
             <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-              <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:30px;font-weight:600")}>Hola, Luis</h1>
+              <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:30px;font-weight:600")}>Hola, Luis</h1>
               <span style={sx('color:#5F6B7A;font-size:15px')}>Aquí puedes pedir vacaciones y permisos, descargar tus recibos y consultar tus documentos.</span>
             </div>
             <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px')}>
               <div className="card" style={sx('display:flex;flex-direction:column;gap:8px')}>
                 <span className="lbl">Vacaciones disponibles</span>
-                <span style={sx("font-family:'Archivo',sans-serif;font-size:34px;font-weight:600")}>{left} días</span>
-                <div style={sx('height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;background:#2B7FA8;width:' + Math.round(used / 14 * 100) + '%')}></div></div>
+                <span style={sx("font-family:'Montserrat',sans-serif;font-size:34px;font-weight:600")}>{left} días</span>
+                <div style={sx('height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;background:#475CC7;width:' + Math.round(used / 14 * 100) + '%')}></div></div>
                 <span style={sx('font-size:13px;color:#5F6B7A')}>{used} usados de 14 · periodo 2026</span>
               </div>
-              <div className="card" style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Próximo pago</span><span style={sx("font-family:'Archivo',sans-serif;font-size:34px;font-weight:600")}>15 oct</span><span style={sx('font-size:13px;color:#5F6B7A')}>Quincena 19 · depósito en nómina</span></div>
-              <div className="card" style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Mis solicitudes</span><span style={sx("font-family:'Archivo',sans-serif;font-size:34px;font-weight:600")}>{pending}</span><span style={sx('font-size:13px;color:#5F6B7A')}>pendientes de aprobación</span></div>
-              <div className="card" style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Mi turno</span><span style={sx("font-family:'Archivo',sans-serif;font-size:22px;font-weight:600")}>Vespertino</span><span style={sx('font-size:13px;color:#5F6B7A')}>14:00 a 22:00 · descanso miércoles</span></div>
+              <div className="card" style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Próximo pago</span><span style={sx("font-family:'Montserrat',sans-serif;font-size:34px;font-weight:600")}>15 oct</span><span style={sx('font-size:13px;color:#5F6B7A')}>Quincena 19 · depósito en nómina</span></div>
+              <div className="card" style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Mis solicitudes</span><span style={sx("font-family:'Montserrat',sans-serif;font-size:34px;font-weight:600")}>{pending}</span><span style={sx('font-size:13px;color:#5F6B7A')}>pendientes de aprobación</span></div>
+              <div className="card" style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Mi turno</span><span style={sx("font-family:'Montserrat',sans-serif;font-size:22px;font-weight:600")}>Vespertino</span><span style={sx('font-size:13px;color:#5F6B7A')}>14:00 a 22:00 · descanso miércoles</span></div>
             </section>
             <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px')}>
               <div className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
-                <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>¿Qué necesitas?</h2>
+                <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>¿Qué necesitas?</h2>
                 <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px')}>
                   <button type="button" className="btn" onClick={() => { setType('Vacaciones'); setSent(false); setTab('vac') }}>Pedir vacaciones</button>
                   <button type="button" className="btn" onClick={() => { setType('Permiso con goce'); setSent(false); setTab('vac') }}>Pedir un permiso</button>
@@ -159,7 +159,7 @@ export default function PortalColaborador() {
                 </div>
               </div>
               <div className="card" style={sx('display:flex;flex-direction:column;gap:10px')}>
-                <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Avisos de RH</h2>
+                <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Avisos de RH</h2>
                 {AVISOS.map(([t, d], i) => (
                   <button key={t} type="button" aria-pressed={!!avisosOk[i]} onClick={() => { setAvisosOk(a => ({ ...a, [i]: !a[i] })); toast(avisosOk[i] ? 'Aviso marcado como pendiente' : i === 0 ? 'Asistencia confirmada · recordatorio agregado a tu calendario' : 'Aviso marcado como atendido') }}
                     style={sx('padding:10px 0;border:0;border-top:1px solid #EEF1F4;font-size:14px;display:flex;flex-direction:column;gap:2px;background:none;cursor:pointer;font-family:inherit;color:inherit;text-align:left')}>
@@ -174,10 +174,10 @@ export default function PortalColaborador() {
         {tab === 'vac' && (
           <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
             <section className="card" style={sx('flex:1 1 380px;display:flex;flex-direction:column;gap:16px')}>
-              <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>Nueva solicitud</h1>
+              <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>Nueva solicitud</h1>
               <div role="group" aria-label="Tipo de solicitud" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
                 {TYPES.map(t => (
-                  <button key={t} type="button" aria-pressed={t === type} className="btn" style={sx(t === type ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '')} onClick={() => { setType(t); setSent(false) }}>{t}</button>
+                  <button key={t} type="button" aria-pressed={t === type} className="btn" style={sx(t === type ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => { setType(t); setSent(false) }}>{t}</button>
                 ))}
               </div>
               <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px')}>
@@ -199,7 +199,7 @@ export default function PortalColaborador() {
             </section>
             <section className="card" style={sx('flex:999 1 460px;display:flex;flex-direction:column;gap:14px')}>
               <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-                <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:20px;font-weight:600")}>Mis solicitudes</h2>
+                <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:20px;font-weight:600")}>Mis solicitudes</h2>
                 <span style={sx('font-size:14px;color:#3E4A59')}>{left} días disponibles</span>
               </div>
               {reqs.map(r => (
@@ -219,7 +219,7 @@ export default function PortalColaborador() {
 
         {tab === 'pay' && (
           <section className="card" style={sx('display:flex;flex-direction:column;gap:14px;padding:22px 10px 4px')}>
-            <h1 style={sx("margin:0;padding:0 12px;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>Mis recibos de nómina</h1>
+            <h1 style={sx("margin:0;padding:0 12px;font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>Mis recibos de nómina</h1>
             <div style={sx('overflow-x:auto')}>
               <table className="tbl">
                 <thead><tr><th>Periodo</th><th>Fecha de pago</th><th style={sx('text-align:right')}>Percepciones</th><th style={sx('text-align:right')}>Deducciones</th><th style={sx('text-align:right')}>Neto</th><th>Descargar</th></tr></thead>
@@ -237,7 +237,7 @@ export default function PortalColaborador() {
         {tab === 'docs' && (
           <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px')}>
             <section className="card" style={sx('display:flex;flex-direction:column;gap:10px')}>
-              <h1 style={sx("margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:22px;font-weight:600")}>Mis documentos</h1>
+              <h1 style={sx("margin:0 0 4px;font-family:'Montserrat',sans-serif;font-size:22px;font-weight:600")}>Mis documentos</h1>
               {docs.map(d => (
                 <button key={d.n} type="button" title="Descargar" onClick={() => { descargarConstancia(d.n, ''); toast(`Descargando ${d.n} (PDF)`, 'info') }} style={sx('display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border:0;border-top:1px solid #EEF1F4;font-size:14px;background:none;cursor:pointer;font-family:inherit;color:inherit;text-align:left')}><span>{d.n}</span><span className={d.cls}>{d.s}</span></button>
               ))}
@@ -245,7 +245,7 @@ export default function PortalColaborador() {
               <button type="button" className="btn" style={sx('align-self:flex-start')} onClick={() => docRef.current?.click()}>Subir documento</button>
             </section>
             <section className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
-              <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:20px;font-weight:600")}>Solicitar a RH</h2>
+              <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:20px;font-weight:600")}>Solicitar a RH</h2>
               <label className="field">Trámite<select value={tramite} onChange={e => setTramite(e.target.value)}>{TRAMITES.map(x => <option key={x}>{x}</option>)}</select></label>
               <label className="field">Para qué la necesitas<input type="text" placeholder="Ej. trámite de crédito Infonavit" value={paraQue} onChange={e => setParaQue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') enviarTramite() }} /></label>
               <button type="button" className="btn btn-pri" style={sx('align-self:flex-start')} onClick={enviarTramite}>Enviar a RH</button>

@@ -7,26 +7,26 @@ import { sx, fmtMXN } from '../lib/sx'
 import { ZONAS, cargasCombustible as SEED_CARGAS, incidentes, ordenesTaller as SEED_OT, unidades, type CargaCombustible, type EstatusUnidad, type OrdenTaller, type Unidad, type Zona } from '../data/seed'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap;cursor:pointer;user-select:none}
-.tbl th:hover{color:#121821}
+.tbl th:hover{color:#0D1D41}
 .tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.tbl tr.sel td{background:#FFF8EC}
+.tbl tr.sel td{background:#F0F3FD}
 .tbl tbody tr{cursor:pointer}
 .tbl tbody tr:hover td{background:#FAFBFC}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
-.k{font-family:'Archivo',sans-serif;font-size:26px;font-weight:600}
-.kpi{cursor:pointer;text-align:left;font-family:inherit;color:#121821}
-.kpi:hover{border-color:#F2A93B}
-.venc{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid #EEF1F4;font-size:14px;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;cursor:pointer;font-family:inherit;color:#121821;text-align:left}
-.venc:hover{color:#8A5300}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
+.k{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:600}
+.kpi{cursor:pointer;text-align:left;font-family:inherit;color:#0D1D41}
+.kpi:hover{border-color:#475CC7}
+.venc{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid #EEF1F4;font-size:14px;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;cursor:pointer;font-family:inherit;color:#0D1D41;text-align:left}
+.venc:hover{color:#0D1D41}
 `
 
 const ST: Record<string, string> = { 'Operando': 'pill p-info', 'Disponible': 'pill p-ok', 'En taller': 'pill p-warn', 'Siniestrada': 'pill p-bad', 'Baja': 'pill p-mute', 'Abierta': 'pill p-warn', 'Cerrada': 'pill p-ok', 'En aseguradora': 'pill p-info', 'Normal': 'pill p-ok', 'Anómalo': 'pill p-bad' }
@@ -162,7 +162,7 @@ export default function Flotilla() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Recursos</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Flotilla y taller</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Flotilla y taller</h1>
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
           <button type="button" className="btn" onClick={() => setMImport(true)}>Importar cargas de tarjeta</button>
@@ -170,11 +170,11 @@ export default function Flotilla() {
         </div>
       </header>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · mantenimiento predictivo y combustible</span><span style={sx('font-size:14px;color:#3E4A59')}>AU-1876 y AU-1688 rinden 35% menos que la flotilla y sus km de GPS no cuadran con las cargas: posible fuga o uso no autorizado. <button type="button" onClick={() => { setSelU('AU-1450'); verUnidades('Todos'); setQ('AU-1450') }} style={sx('background:none;border:0;padding:0;font:inherit;color:#B36B00;cursor:pointer;text-decoration:underline')}>AU-1450</button> tiene 82% de probabilidad de falla de suspensión en los próximos 2,000 km.</span></div>
+      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · mantenimiento predictivo y combustible</span><span style={sx('font-size:14px;color:#3E4A59')}>AU-1876 y AU-1688 rinden 35% menos que la flotilla y sus km de GPS no cuadran con las cargas: posible fuga o uso no autorizado. <button type="button" onClick={() => { setSelU('AU-1450'); verUnidades('Todos'); setQ('AU-1450') }} style={sx('background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline')}>AU-1450</button> tiene 82% de probabilidad de falla de suspensión en los próximos 2,000 km.</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Rendimiento en km por litro: AU-3321 10.3, AU-1876 6.8, AU-2214 10.2, AU-2087 10.2, AU-1688 6.9, AU-1450 9.9" style={sx('display:block')}><g><rect x="4" y="11.8" width="28" height="48.2" rx="2" fill="#2B7FA8"></rect><rect x="40" y="28.2" width="28" height="31.8" rx="2" fill="#D9534F"></rect><rect x="76" y="12.3" width="28" height="47.7" rx="2" fill="#2B7FA8"></rect><rect x="112" y="12.3" width="28" height="47.7" rx="2" fill="#2B7FA8"></rect><rect x="148" y="27.7" width="28" height="32.3" rx="2" fill="#D9534F"></rect><rect x="184" y="13.7" width="28" height="46.3" rx="2" fill="#2B7FA8"></rect></g></svg>
+          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Rendimiento en km por litro: AU-3321 10.3, AU-1876 6.8, AU-2214 10.2, AU-2087 10.2, AU-1688 6.9, AU-1450 9.9" style={sx('display:block')}><g><rect x="4" y="11.8" width="28" height="48.2" rx="2" fill="#475CC7"></rect><rect x="40" y="28.2" width="28" height="31.8" rx="2" fill="#D9534F"></rect><rect x="76" y="12.3" width="28" height="47.7" rx="2" fill="#475CC7"></rect><rect x="112" y="12.3" width="28" height="47.7" rx="2" fill="#475CC7"></rect><rect x="148" y="27.7" width="28" height="32.3" rx="2" fill="#D9534F"></rect><rect x="184" y="13.7" width="28" height="46.3" rx="2" fill="#475CC7"></rect></g></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>km/l por unidad · rojo: consumo anómalo</figcaption>
         </figure>
         <Link className="btn" to={ROUTES.AsistenteIA}>Preguntarle a la IA</Link>
@@ -192,7 +192,7 @@ export default function Flotilla() {
       <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between')}>
         <div role="tablist" aria-label="Sección" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
           {TABS.map(([k, label]) => (
-            <button key={k} type="button" role="tab" aria-selected={k === tab} className="btn" style={sx(k === tab ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '')} onClick={() => cambiarTab(k)}>{label} <span className="mono" style={sx('font-size:12px;opacity:.8')}>{k === 'u' ? unidades.length : k === 't' ? ordenes.length : cargas.length}</span></button>
+            <button key={k} type="button" role="tab" aria-selected={k === tab} className="btn" style={sx(k === tab ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => cambiarTab(k)}>{label} <span className="mono" style={sx('font-size:12px;opacity:.8')}>{k === 'u' ? unidades.length : k === 't' ? ordenes.length : cargas.length}</span></button>
           ))}
         </div>
         <div style={sx('display:flex;gap:10px;flex-wrap:wrap;align-items:center')}>
@@ -256,7 +256,7 @@ export default function Flotilla() {
 
       <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px')}>
         <div className="card" style={sx('display:flex;flex-direction:column;gap:10px')}>
-          <h2 style={sx("margin:0 0 6px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Vencimientos próximos</h2>
+          <h2 style={sx("margin:0 0 6px;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Vencimientos próximos</h2>
           <button type="button" className="venc" onClick={() => verUnidades('Todos', 'poliza')}><span>Pólizas de seguro · 30 días</span><span className="pill p-warn">{venc.poliza} unidades</span></button>
           <button type="button" className="venc" onClick={() => verUnidades('Todos', 'verif')}><span>Verificación vehicular · 2° semestre</span><span className="pill p-bad">{venc.verif} unidades</span></button>
           <button type="button" className="venc" onClick={() => verUnidades('Todos', 'km')}><span>Servicio por kilometraje · &lt; 1,000 km</span><span className="pill p-warn">{venc.km} unidades</span></button>
@@ -264,7 +264,7 @@ export default function Flotilla() {
         </div>
         <div id="costo-unidad" className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
           <div style={sx('display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 6px')}>
-            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Costo total · {sel.id} · trimestre</h2>
+            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Costo total · {sel.id} · trimestre</h2>
             <select aria-label="Unidad" value={sel.id} onChange={e => setSelU(e.target.value)} style={sx(selectSt)}>{unidades.map(u => <option key={u.id} value={u.id}>{u.id} · {u.vehiculo}</option>)}</select>
           </div>
           {([['Combustible', costo.comb], ['Mantenimiento', costo.mant], ['Seguro', costo.seg]] as [string, number][]).map(([k, v]) => (

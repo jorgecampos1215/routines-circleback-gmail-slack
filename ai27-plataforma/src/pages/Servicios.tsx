@@ -9,24 +9,24 @@ import { CLIENTES, custodios, unidades, type TipoServicio } from '../data/seed'
 import { MONITORISTAS, filasServicios, type FilaServicio } from '../data/servicios'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
-.kpi{font-family:'Archivo',sans-serif;font-size:28px;font-weight:600}
+.kpi{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:600}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap;cursor:pointer;user-select:none}
-.tbl th:hover{color:#121821}
+.tbl th:hover{color:#0D1D41}
 .tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .track{height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden}
 .srv-row{cursor:pointer}
 .srv-row:hover td{background:#FAFBFC}
-.mon{background:#F3F5F8;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px;border:1px solid transparent;cursor:pointer;font-family:inherit;color:#121821;text-align:left}
-.mon:hover,.mon[aria-pressed=true]{border-color:#F2A93B}
+.mon{background:#F3F5F8;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px;border:1px solid transparent;cursor:pointer;font-family:inherit;color:#0D1D41;text-align:left}
+.mon:hover,.mon[aria-pressed=true]{border-color:#475CC7}
 `
 
 type Tab = 'all' | TipoServicio
@@ -46,7 +46,7 @@ const hhmm = (iso: string, plusMin: number) => { const d = new Date(iso); d.setM
 const LOG_24817: LogItem[] = [
   { t: '08:12', text: 'Check-in en CEDIS Cuautitlán, sellos verificados', src: 'Custodio R. Medina · foto adjunta', dot: dot('#4CC38A') },
   { t: '10:47', text: 'Parada autorizada · caseta Palmillas', src: 'Samsara · geocerca', dot: dot('#3FA7C9') },
-  { t: '13:05', text: 'Frenado brusco · km 118', src: 'Samsara · evento de conductor', dot: dot('#F2A93B') },
+  { t: '13:05', text: 'Frenado brusco · km 118', src: 'Samsara · evento de conductor', dot: dot('#475CC7') },
   { t: '14:30', text: 'Desvío de ruta 1.6 km fuera de geocerca', src: 'Samsara · alerta automática', dot: dot('#F0605D') },
   { t: '14:31', text: 'Llamada a custodio sin respuesta; se marca incidente', src: 'Monitorista L. Herrera', dot: dot('#F0605D') },
 ]
@@ -67,7 +67,7 @@ function detalle(r: FilaServicio) {
   const t = (m: number) => hhmm(r.inicio, m)
   if (r.nuevo) {
     log.push({ t: 'hoy', text: 'Servicio creado y confirmado', src: 'Servicios · alta manual', dot: dot('#3FA7C9') })
-    log.push({ t: '—', text: r.custNombres === 'por asignar' ? 'Pendiente de asignar custodios y unidad' : `Custodios asignados: ${r.custNombres} · unidad ${r.unidad}`, src: r.custNombres === 'por asignar' ? 'Asignación IA' : 'Coordinación de operaciones', dot: dot(r.custNombres === 'por asignar' ? '#F2A93B' : '#4CC38A') })
+    log.push({ t: '—', text: r.custNombres === 'por asignar' ? 'Pendiente de asignar custodios y unidad' : `Custodios asignados: ${r.custNombres} · unidad ${r.unidad}`, src: r.custNombres === 'por asignar' ? 'Asignación IA' : 'Coordinación de operaciones', dot: dot(r.custNombres === 'por asignar' ? '#475CC7' : '#4CC38A') })
   } else if (r.status === 'Cotizado') {
     log.push({ t: '09:20', text: 'Cotización enviada al cliente', src: 'Comercial', dot: dot('#AEB8C4') })
   } else if (r.status === 'Activo') {
@@ -76,7 +76,7 @@ function detalle(r: FilaServicio) {
   } else {
     log.push({ t: t(-25), text: 'Check-in en origen, sellos verificados', src: `Custodio ${r.custNombres.split(', ')[0]} · foto adjunta`, dot: dot('#4CC38A') })
     if (r.status !== 'Confirmado') log.push({ t: t(0), text: 'Salida a ruta · ' + r.route, src: `${r.fuente} · geocerca`, dot: dot('#3FA7C9') })
-    if (r.id === 'SRV-24822') log.push({ t: '13:50', text: 'Retraso de 40 min por tráfico en Querétaro', src: 'IA · riesgo de retraso', dot: dot('#F2A93B') })
+    if (r.id === 'SRV-24822') log.push({ t: '13:50', text: 'Retraso de 40 min por tráfico en Querétaro', src: 'IA · riesgo de retraso', dot: dot('#475CC7') })
     if (r.status === 'En tránsito') log.push({ t: t(140), text: `Parada autorizada · caseta ${r.zona}`, src: `${r.fuente} · geocerca`, dot: dot('#3FA7C9') })
     if (r.status === 'Con incidente') { log.push({ t: t(190), text: 'Desvío de ruta fuera de geocerca', src: `${r.fuente} · alerta automática`, dot: dot('#F0605D') }); log.push({ t: t(192), text: 'Se marca incidente y se escala a Reacción', src: 'Monitorista ' + r.mon, dot: dot('#F0605D') }) }
     if (r.status === 'Entregado' || r.status === 'Cerrado') log.push({ t: t(380), text: 'Entrega confirmada en destino', src: 'Custodio · firma de recibido', dot: dot('#4CC38A') })
@@ -188,7 +188,7 @@ export default function Servicios() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Operación</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Servicios</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Servicios</h1>
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
           <Link className="btn" to={ROUTES.Cotizador}>Desde cotización</Link>
@@ -196,11 +196,11 @@ export default function Servicios() {
         </div>
       </header>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · servicios en riesgo de retraso</span><span style={sx('font-size:14px;color:#3E4A59')}><button type="button" onClick={() => { cambiarVista('Activos'); setSel('SRV-24822') }} style={sx('background:none;border:0;padding:0;font:inherit;color:#B36B00;cursor:pointer;text-decoration:underline')}>SRV-24822</button> (Farmacéutica Orión) va 40 min atrás de su ETA por tráfico en Querétaro. Avisar al cliente ahora mantiene el SLA de puntualidad, que va en 96.4%.</span></div>
+      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · servicios en riesgo de retraso</span><span style={sx('font-size:14px;color:#3E4A59')}><button type="button" onClick={() => { cambiarVista('Activos'); setSel('SRV-24822') }} style={sx('background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline')}>SRV-24822</button> (Farmacéutica Orión) va 40 min atrás de su ETA por tráfico en Querétaro. Avisar al cliente ahora mantiene el SLA de puntualidad, que va en 96.4%.</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Puntualidad mensual de abril a septiembre: 94.1, 94.8, 95.2, 95.0, 95.9 y 96.4 por ciento" style={sx('display:block')}><path d="M10 60H210" stroke="#E4E8ED"></path><polyline points="10,47.8 50,38.2 90,32.7 130,35.4 170,23.1 210,16.2" fill="none" stroke="#D08A1C" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"></polyline><circle cx="210" cy="16.2" r="4" fill="#D08A1C"></circle><text x="168" y="10" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#8A5300">96.4%</text></svg>
+          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Puntualidad mensual de abril a septiembre: 94.1, 94.8, 95.2, 95.0, 95.9 y 96.4 por ciento" style={sx('display:block')}><path d="M10 60H210" stroke="#E4E8ED"></path><polyline points="10,47.8 50,38.2 90,32.7 130,35.4 170,23.1 210,16.2" fill="none" stroke="#3448A8" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"></polyline><circle cx="210" cy="16.2" r="4" fill="#3448A8"></circle><text x="168" y="10" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#0D1D41">96.4%</text></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Puntualidad de entregas · abr a sep</figcaption>
         </figure>
         <button type="button" className="btn" onClick={avisar} disabled={avisado} style={sx(avisado ? 'background:#E3F6EC;border-color:#9ED9BC;color:#17784A;cursor:default' : '')}>{avisado ? 'Cliente avisado' : 'Avisar al cliente'}</button>
@@ -209,7 +209,7 @@ export default function Servicios() {
       <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between')}>
         <div role="tablist" aria-label="Tipo de servicio" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
           {TABS.map(([k, label]) => (
-            <button key={k} type="button" role="tab" aria-selected={k === tab} className="btn" style={sx(k === tab ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '')} onClick={() => cambiarTab(k)}>{label} <span className="mono" style={sx('font-size:12px;opacity:.8')}>{count(k)}</span></button>
+            <button key={k} type="button" role="tab" aria-selected={k === tab} className="btn" style={sx(k === tab ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => cambiarTab(k)}>{label} <span className="mono" style={sx('font-size:12px;opacity:.8')}>{count(k)}</span></button>
           ))}
         </div>
         <div style={sx('display:flex;gap:10px;flex-wrap:wrap;align-items:center')}>
@@ -228,7 +228,7 @@ export default function Servicios() {
               {rows.slice(pg.from, pg.to).map(x => (
                 <tr key={x.id} className="srv-row" aria-selected={x.id === r.id} tabIndex={0}
                   onClick={() => seleccionar(x.id)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionar(x.id) } }}
-                  style={sx(x.id === r.id ? (x.status === 'Con incidente' ? 'background:#FFF5F5' : 'background:#FFF8EC') : x.status === 'Con incidente' ? 'background:#FFF5F5' : '')}>
+                  style={sx(x.id === r.id ? (x.status === 'Con incidente' ? 'background:#FFF5F5' : 'background:#F0F3FD') : x.status === 'Con incidente' ? 'background:#FFF5F5' : '')}>
                   <td className="mono">{x.id}</td><td>{x.client}{x.nuevo && <span className="pill p-warn" style={sx('margin-left:8px')}>Nuevo</span>}</td><td><span className="pill p-mute">{x.type}</span></td><td>{x.route}</td><td>{x.cust}</td><td>{x.mon}</td><td className="mono">{x.fee}</td><td><span className={ST[x.status]}>{x.status}</span></td>
                 </tr>
               ))}
@@ -244,7 +244,7 @@ export default function Servicios() {
           <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start')}>
             <div style={sx('display:flex;flex-direction:column;gap:4px')}>
               <span className="lbl">{r.id} · {r.type}</span>
-              <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:22px;font-weight:600")}>{r.client} · {r.route}</h2>
+              <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:22px;font-weight:600")}>{r.client} · {r.route}</h2>
             </div>
             <span className={ST[r.status]}>{r.status}</span>
           </div>
@@ -267,7 +267,7 @@ export default function Servicios() {
         </div>
 
         <div className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Bitácora del servicio</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Bitácora del servicio</h2>
           <ol style={sx('list-style:none;margin:0;padding:0;display:flex;flex-direction:column')}>
             {log.map((l, i) => (
               <li key={i} style={sx('display:grid;grid-template-columns:56px 14px minmax(0,1fr);gap:12px;padding:8px 0')}>
@@ -280,14 +280,14 @@ export default function Servicios() {
           <label style={sx('display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A')}>Comentario del monitorista
             <textarea rows={2} placeholder="Agregar nota a la bitácora (Enter para guardar)" value={nota} onChange={e => setNota(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); agregarNota() } }}
-              style={sx("background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:10px 12px;font:400 14px 'IBM Plex Sans',sans-serif;resize:vertical")}></textarea>
+              style={sx("background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:10px 12px;font:400 14px 'Montserrat',sans-serif;resize:vertical")}></textarea>
           </label>
         </div>
       </section>
 
       <section className="card" style={sx('display:flex;flex-direction:column;gap:16px')}>
         <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Consola de monitoristas</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Consola de monitoristas</h2>
           <span style={sx('font-size:13px;color:#5F6B7A')}>Turno vespertino · {MONITORISTAS.length} monitoristas · {activos.length} servicios activos</span>
         </div>
         <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:12px')}>

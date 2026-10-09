@@ -6,22 +6,22 @@ import { usuarios as USUARIOS_SEED, type Usuario } from '../data/usuarios'
 import { descargar, toCSV } from '../data/rh'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-mute{background:#EBEEF2;color:#4A5868}.p-info{background:#E3F2F8;color:#0B6A8A}.p-bad{background:#FDE8E8;color:#B42318}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-mute{background:#EBEEF2;color:#4A5868}.p-info{background:#E3F2F8;color:#0B6A8A}.p-bad{background:#FDE8E8;color:#B42318}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
 .tbl td{padding:8px 12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .btn-sm{min-height:32px;padding:0 10px;font-size:13px}
 `
 
 const SR = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)'
-const SEL = "min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif"
+const SEL = "min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif"
 
 const MODS = ['Dashboard', 'Servicios', 'Asignación IA', 'Monitoreo', 'Reacción', 'Custodios (datos sensibles)', 'Flotilla y taller', 'Cotizador', 'CRM', 'RH', 'Finanzas', 'Usuarios y roles']
 const ACTS = ['Ver', 'Crear', 'Editar', 'Aprobar']
@@ -165,7 +165,7 @@ export default function Usuarios() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Administración</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Usuarios y roles</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Usuarios y roles</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>{activos} usuarios · {roles.length} roles · permisos por módulo, acción, zona y cliente</span>
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap;align-items:center')}>
@@ -180,7 +180,7 @@ export default function Usuarios() {
         <nav aria-label="Roles" className="card" style={sx('flex:1 1 240px;padding:10px;display:flex;flex-direction:column;gap:4px')}>
           {roles.map(name => (
             <button key={name} type="button" aria-current={name === role ? 'true' : undefined} onClick={() => setRole(name)}
-              style={sx("display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;border:0;cursor:pointer;font:500 14px 'IBM Plex Sans',sans-serif;text-align:left;" + (name === role ? 'background:#FFF1DB;color:#8A5300' : 'background:transparent;color:#2A3442'))}>
+              style={sx("display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;border:0;cursor:pointer;font:500 14px 'Montserrat',sans-serif;text-align:left;" + (name === role ? 'background:#E9EDFB;color:#0D1D41' : 'background:transparent;color:#2A3442'))}>
               <span>{name}</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{counts[name]}</span>
             </button>
           ))}
@@ -189,8 +189,8 @@ export default function Usuarios() {
         <section className="card" style={sx('flex:999 1 560px;display:flex;flex-direction:column;gap:16px')}>
           <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end')}>
             <div style={sx('display:flex;flex-direction:column;gap:4px')}>
-              <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:20px;font-weight:600")}>{role}</h2>
-              <span style={sx('font-size:13px;color:#5F6B7A')}>{desc[role]} <button type="button" onClick={() => { setUQ(''); setModal('usuarios') }} style={sx('background:none;border:0;padding:0;cursor:pointer;color:#B36B00;font:inherit;text-decoration:underline')}>Ver {counts[role]} {counts[role] === 1 ? 'usuario' : 'usuarios'}</button></span>
+              <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:20px;font-weight:600")}>{role}</h2>
+              <span style={sx('font-size:13px;color:#5F6B7A')}>{desc[role]} <button type="button" onClick={() => { setUQ(''); setModal('usuarios') }} style={sx('background:none;border:0;padding:0;cursor:pointer;color:#3448A8;font:inherit;text-decoration:underline')}>Ver {counts[role]} {counts[role] === 1 ? 'usuario' : 'usuarios'}</button></span>
             </div>
             <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
               <label style={sx('display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A')}>Alcance por zona<select style={sx(SEL)} value={cur.zone} onChange={e => setRoleScope('zone', e.target.value)}>{ZONAS.map(z => <option key={z}>{z}</option>)}</select></label>
@@ -204,7 +204,7 @@ export default function Usuarios() {
                 {MODS.map((mod, i) => (
                   <tr key={mod}><td style={sx('cursor:pointer')} title="Marcar/desmarcar toda la fila" onClick={() => { const all = perms[role][i].every(Boolean); const p = { ...perms, [role]: perms[role].map((r, k) => (k === i ? r.map(() => !all) : r)) }; setPerms(p) }}>{mod}</td>
                     {ACTS.map((a, j) => (
-                      <td key={a} style={sx('text-align:center')}><label style={sx('display:inline-flex;min-width:44px;min-height:36px;align-items:center;justify-content:center;cursor:pointer')}><span style={sx(SR)}>{a + ' ' + mod}</span><input type="checkbox" checked={perms[role][i][j]} onChange={() => toggle(i, j)} style={sx('width:18px;height:18px;accent-color:#F2A93B')} /></label></td>
+                      <td key={a} style={sx('text-align:center')}><label style={sx('display:inline-flex;min-width:44px;min-height:36px;align-items:center;justify-content:center;cursor:pointer')}><span style={sx(SR)}>{a + ' ' + mod}</span><input type="checkbox" checked={perms[role][i][j]} onChange={() => toggle(i, j)} style={sx('width:18px;height:18px;accent-color:#475CC7')} /></label></td>
                     ))}
                   </tr>
                 ))}
@@ -216,7 +216,7 @@ export default function Usuarios() {
 
       <section className="card" style={sx('display:flex;flex-direction:column;gap:10px')}>
         <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Bitácora de auditoría</h2>
+          <h2 style={sx("margin:0 0 4px;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Bitácora de auditoría</h2>
           <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
             <label style={sx('display:flex')}><span style={sx(SR)}>Buscar en bitácora</span><input type="search" placeholder="Buscar en la bitácora" value={fQ} onChange={e => setFQ(e.target.value)} style={sx(SEL + ';min-width:220px')} /></label>
             <label style={sx('display:flex')}><span style={sx(SR)}>Filtrar por actor</span><select style={sx(SEL)} value={fActor} onChange={e => setFActor(e.target.value)}>{actores.map(a => <option key={a}>{a}</option>)}</select></label>

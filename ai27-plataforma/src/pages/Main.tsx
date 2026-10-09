@@ -9,24 +9,24 @@ import { FILTROS_DEFAULT, PERIODOS, TIPOS, kpis, custodiosPorZona, alertas, segu
 import { usePins, togglePin } from '../data/asistente'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
-.kpi{font-family:'Archivo',sans-serif;font-size:32px;font-weight:600;letter-spacing:-.01em}
+.kpi{font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600;letter-spacing:-.01em}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
 .tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
-.field select,.field input{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+.field select,.field input{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
 .track{height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden}
-.kpi-link{color:inherit;text-decoration:none;cursor:pointer}.kpi-link:hover{border-color:#F2A93B;color:inherit}
+.kpi-link{color:inherit;text-decoration:none;cursor:pointer}.kpi-link:hover{border-color:#475CC7;color:inherit}
 .alert-row{cursor:pointer;background:transparent;border:0;border-top:1px solid #EEF1F4;text-align:left;font:inherit;color:inherit;width:100%}.alert-row:hover{background:#FAFBFC}
-.lnk{background:none;border:0;padding:0;font:inherit;color:#B36B00;cursor:pointer;text-decoration:underline}.lnk:hover{color:#8A5300}
+.lnk{background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline}.lnk:hover{color:#0D1D41}
 `
 
 const Q = [
@@ -86,7 +86,7 @@ export default function Main() {
   const com = useMemo(() => comercial(f), [f])
   const zones = zonas.filas.map(z => ({ ...z, bar: 'height:100%;width:' + Math.round(z.avail / z.total * 100 * 3) + '%;max-width:100%;background:' + (z.avail / z.total < 0.08 ? '#F0605D' : '#3FA7C9') }))
   const maxMes = Math.max(...k.meses.map(m => m.total), 0.1)
-  const months = k.meses.map(m => ({ name: m.name, enPeriodo: m.enPeriodo, total: fmtM(m.total), evt: 'height:' + px(m.evt, maxMes) + 'px;background:#F2A93B', ded: 'height:' + px(m.ded, maxMes) + 'px;background:#3FA7C9', mon: 'height:' + px(m.mon, maxMes) + 'px;background:#1F5A73' }))
+  const months = k.meses.map(m => ({ name: m.name, enPeriodo: m.enPeriodo, total: fmtM(m.total), evt: 'height:' + px(m.evt, maxMes) + 'px;background:#475CC7', ded: 'height:' + px(m.ded, maxMes) + 'px;background:#3FA7C9', mon: 'height:' + px(m.mon, maxMes) + 'px;background:#0D1D41' }))
   const alertasVisibles = masAlertas ? al : al.slice(0, 5)
   const hueco = zones.find(z => z.name === 'Bajío')
   const filtrado = f.periodo !== 'Octubre 2026' || f.zona !== 'Todas' || f.cliente !== 'Todos' || f.tipo !== 'Todos'
@@ -101,7 +101,7 @@ export default function Main() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Dirección</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Operación hoy</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Operación hoy</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>Miércoles 7 oct 2026 · 14:32 · telemetría Samsara + Ruptela normalizada</span>
         </div>
         <form style={sx('display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end')} onSubmit={e => e.preventDefault()}>
@@ -122,7 +122,7 @@ export default function Main() {
         </Kpi>
         <Kpi to={ROUTES.Custodios} label="Utilización custodios">
           <span className="kpi">{k.utilizacion}%</span>
-          <div className="track"><div style={sx(`width:${k.utilizacion}%;height:100%;background:#F2A93B`)}></div></div>
+          <div className="track"><div style={sx(`width:${k.utilizacion}%;height:100%;background:#475CC7`)}></div></div>
           <span style={sx('font-size:13px;color:#5F6B7A')}>{k.enServicio} de {k.plantilla} en servicio</span>
         </Kpi>
         <Kpi to={ROUTES.Reportes} label="Entregas sin incidente">
@@ -146,7 +146,7 @@ export default function Main() {
       <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:16px')}>
         <div className="card" style={sx('display:flex;flex-direction:column;gap:16px')}>
           <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap')}>
-            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Alertas priorizadas</h2>
+            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Alertas priorizadas</h2>
             <Link to={ROUTES.Monitoreo} style={sx('font-size:14px')}>Abrir monitoreo</Link>
           </div>
           {alertasVisibles.length === 0 && <span style={sx('font-size:14px;color:#5F6B7A;padding:12px 0;border-top:1px solid #EEF1F4')}>Sin alertas para estos filtros.</span>}
@@ -167,7 +167,7 @@ export default function Main() {
 
         <div className="card" style={sx('display:flex;flex-direction:column;gap:16px')}>
           <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap')}>
-            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Custodios disponibles por zona</h2>
+            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Custodios disponibles por zona</h2>
             {hueco && <Link to={ROUTES.AsignacionIA} className="pill p-warn" style={sx('text-decoration:none')} title="Ver detección de huecos">Hueco: Bajío mañana −6</Link>}
           </div>
           {zones.map(z => (
@@ -183,7 +183,7 @@ export default function Main() {
 
       <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:16px')}>
         <div className="card" style={sx('display:flex;flex-direction:column;gap:16px')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Ingresos por tipo de servicio</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Ingresos por tipo de servicio</h2>
           <div style={sx('display:flex;gap:20px;align-items:flex-end;height:180px;padding-top:8px')}>
             {months.map(m => (
               <Link to={ROUTES.Finanzas} key={m.name} title={`Ver finanzas de ${m.name}`} style={sx('flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:inherit' + (m.enPeriodo || f.periodo === 'Octubre 2026' ? '' : ';opacity:.45'))}>
@@ -198,14 +198,14 @@ export default function Main() {
             ))}
           </div>
           <div style={sx('display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#3E4A59')}>
-            {([['Por evento', '#F2A93B'], ['Dedicado', '#3FA7C9'], ['Monitoreo', '#1F5A73']] as const).map(([t, c]) => (
+            {([['Por evento', '#475CC7'], ['Dedicado', '#3FA7C9'], ['Monitoreo', '#0D1D41']] as const).map(([t, c]) => (
               <button key={t} type="button" title={`Filtrar por ${t}`} onClick={() => setF(prev => ({ ...prev, tipo: prev.tipo === t ? 'Todos' : t }))} style={sx('display:flex;gap:6px;align-items:center;background:none;border:0;padding:0;font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;' + (f.tipo === t ? 'font-weight:600' : f.tipo !== 'Todos' ? 'opacity:.5' : 'font-weight:400'))}><span style={sx(`width:10px;height:10px;border-radius:2px;background:${c}`)}></span>{t}</button>
             ))}
           </div>
         </div>
 
         <div className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Seguridad y reacción</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Seguridad y reacción</h2>
           <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px')}>
             <Link to={ROUTES.Reaccion} className="kpi-link" style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">Tiempo de reacción</span><span className="kpi" style={sx('font-size:24px')}>{seg.reaccion} min</span></Link>
             <Link to={ROUTES.Reaccion} className="kpi-link" style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">% recuperación</span><span className="kpi" style={sx('font-size:24px')}>{seg.recuperacion}%</span></Link>
@@ -220,7 +220,7 @@ export default function Main() {
         </div>
 
         <div className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Comercial y RH</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Comercial y RH</h2>
           <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px')}>
             <Link to={ROUTES.Cotizador} className="kpi-link" style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">Cierre cotizaciones</span><span className="kpi" style={sx('font-size:24px')}>{com.cierre}%</span></Link>
             <Link to={ROUTES.CRM} className="kpi-link" style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">Clientes activos</span><span className="kpi" style={sx('font-size:24px')}>{com.clientesActivos}</span></Link>
@@ -236,7 +236,7 @@ export default function Main() {
       {pins.length > 0 && (
         <section className="card" aria-label="Insights del asistente" style={sx('display:flex;flex-direction:column;gap:12px')}>
           <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap')}>
-            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Fijado desde el asistente</h2>
+            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Fijado desde el asistente</h2>
             <Link to={ROUTES.AsistenteIA} style={sx('font-size:14px')}>Abrir asistente</Link>
           </div>
           <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px')}>
@@ -254,19 +254,19 @@ export default function Main() {
         </section>
       )}
 
-      <section className="card" aria-label="Asistente de IA" style={sx('display:flex;flex-direction:column;gap:16px;border-color:#F3D9A8')}>
+      <section className="card" aria-label="Asistente de IA" style={sx('display:flex;flex-direction:column;gap:16px;border-color:#C7D0F2')}>
         <div style={sx('display:flex;gap:10px;align-items:center')}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F2A93B" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600;flex:1")}>Pregúntale a la operación</h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475CC7" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600;flex:1")}>Pregúntale a la operación</h2>
           <Link to={ROUTES.AsistenteIA} style={sx('font-size:14px')}>Abrir asistente completo con gráficas</Link>
         </div>
         <div style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
           {Q.map((qq, i) => (
-            <button key={i} type="button" className="btn" style={sx(i === q && free === null ? 'border-color:#F2A93B;color:#8A5300' : '')} onClick={() => { setQ(i); setFree(null) }}>{qq.text}</button>
+            <button key={i} type="button" className="btn" style={sx(i === q && free === null ? 'border-color:#475CC7;color:#0D1D41' : '')} onClick={() => { setQ(i); setFree(null) }}>{qq.text}</button>
           ))}
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
-          <label style={sx('flex:1 1 320px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Pregunta</span><input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') ask() }} placeholder="Escribe una pregunta sobre clientes, rutas, custodios o finanzas" style={sx("flex:1;min-height:44px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 14px;font:400 14px 'IBM Plex Sans',sans-serif")} /></label>
+          <label style={sx('flex:1 1 320px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Pregunta</span><input type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') ask() }} placeholder="Escribe una pregunta sobre clientes, rutas, custodios o finanzas" style={sx("flex:1;min-height:44px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 14px;font:400 14px 'Montserrat',sans-serif")} /></label>
           <button type="button" className="btn btn-pri" style={sx('min-height:44px')} onClick={ask}>Preguntar</button>
         </div>
         <div style={sx('background:#F3F5F8;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px')}>

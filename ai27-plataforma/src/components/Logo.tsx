@@ -1,12 +1,15 @@
-/** Logotipo oficial de AI27 (public/logo.jpg) como ícono cuadrado con esquinas redondeadas. */
-export function Logo({ size = 30 }: { size?: number }) {
+/**
+ * Logotipo oficial de AI27 (wordmark, public/logo.png, fondo transparente).
+ * `height` controla el tamaño; el ancho se ajusta solo (proporción 3.12:1).
+ * `variant="light"` lo pinta en blanco para fondos oscuros (cotización, cierre, etc.).
+ */
+export function Logo({ height = 26, variant = 'color' }: { height?: number; variant?: 'color' | 'light' }) {
   return (
     <img
-      src={`${import.meta.env.BASE_URL}logo.jpg`}
+      src={`${import.meta.env.BASE_URL}logo.png`}
       alt="AI27"
-      width={size}
-      height={size}
-      style={{ width: size, height: size, borderRadius: Math.round(size * 0.22), objectFit: 'cover', flexShrink: 0, display: 'block' }}
+      height={height}
+      style={{ height, width: 'auto', display: 'block', flexShrink: 0, filter: variant === 'light' ? 'brightness(0) invert(1)' : undefined }}
     />
   )
 }

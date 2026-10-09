@@ -8,24 +8,24 @@ import { sx, fmtMXN } from '../lib/sx'
 import { AUTOPARTES, clientesCRM, fmtM, incidentesDe, serviciosDe, todosLosClientes, type ClienteCRM } from '../data/crm'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .btn-sm{min-height:32px;padding:0 10px;font-size:13px}
-.k{font-family:'Archivo',sans-serif;font-size:24px;font-weight:600}
+.k{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600}
 .crm-row{cursor:pointer}.crm-row:hover td{background:#FAFBFC}
-.crm-row.sel td{background:#FFF8EC}
-button.pill{border:0;cursor:pointer;font-family:'IBM Plex Sans',sans-serif}
+.crm-row.sel td{background:#F0F3FD}
+button.pill{border:0;cursor:pointer;font-family:'Montserrat',sans-serif}
 .crm-deal{cursor:pointer}.crm-deal:hover{outline:1px solid #D5DBE3}
-.crm-th{cursor:pointer;user-select:none}.crm-th:hover{color:#121821}
+.crm-th{cursor:pointer;user-select:none}.crm-th:hover{color:#0D1D41}
 .mv{width:24px;height:24px;border-radius:6px;border:1px solid #D5DBE3;background:#FFFFFF;color:#3E4A59;font-size:13px;cursor:pointer;padding:0;line-height:1}
 .mv:disabled{opacity:.35;cursor:default}
-.field select,.field input,.field textarea{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif;width:100%;box-sizing:border-box}
+.field select,.field input,.field textarea{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif;width:100%;box-sizing:border-box}
 `
 
 /** Clientes de la lista lateral del diseño (en ese orden). */
@@ -53,7 +53,7 @@ type SortKey = 'nombre' | 'modelo' | 'activos' | 'trimestre' | 'margen' | 'diasC
 
 const TH = 'text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED'
 const TH_R = TH + ';text-align:right'
-const PILL_ON = 'background:#FFF1DB;color:#8A5300'
+const PILL_ON = 'background:#E9EDFB;color:#0D1D41'
 const td = 'padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap'
 const hoy = () => new Date().toISOString().slice(0, 10)
 
@@ -173,17 +173,17 @@ export default function CRM() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Comercial</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Clientes y pipeline</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Clientes y pipeline</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>{tabla.length} clientes activos · {leadsAbiertos} leads abiertos · cierre de cotizaciones 42%</span>
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}><button type="button" className="btn" onClick={() => setLeadOpen(true)}>Nuevo lead</button><Link className="btn btn-pri" to={ROUTES.Cotizador + '?cliente=' + encodeURIComponent(sel.nombre)}>Nueva cotización</Link></div>
       </header>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
         <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · siguiente mejor acción</span><span style={sx('font-size:14px;color:#3E4A59')}>Agroexport Sinaloa tiene la cotización vencida hace 2 días y abrió el PDF 4 veces. Si se le llama hoy, la probabilidad de cierre estimada es 64%. Farmacéutica Orión es el deal con más probabilidad del pipeline (85%).</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Probabilidad de cierre por deal: Orión 85, Peninsular 71, Agroexport 64, Marsh 52, Cementos 38" style={sx('display:block')}><g fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#3E4A59"><rect x="4" y="9.2" width="30" height="51" rx="2" fill="#2B9A66"></rect><rect x="48" y="17.4" width="30" height="42.6" rx="2" fill="#2B7FA8"></rect><rect x="92" y="21.6" width="30" height="38.4" rx="2" fill="#D08A1C"></rect><rect x="136" y="28.8" width="30" height="31.2" rx="2" fill="#2B7FA8"></rect><rect x="180" y="37.2" width="30" height="22.8" rx="2" fill="#AEB8C4"></rect><text x="8" y="6">85%</text><text x="96" y="18">64%</text></g></svg>
+          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Probabilidad de cierre por deal: Orión 85, Peninsular 71, Agroexport 64, Marsh 52, Cementos 38" style={sx('display:block')}><g fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#3E4A59"><rect x="4" y="9.2" width="30" height="51" rx="2" fill="#2B9A66"></rect><rect x="48" y="17.4" width="30" height="42.6" rx="2" fill="#475CC7"></rect><rect x="92" y="21.6" width="30" height="38.4" rx="2" fill="#3448A8"></rect><rect x="136" y="28.8" width="30" height="31.2" rx="2" fill="#475CC7"></rect><rect x="180" y="37.2" width="30" height="22.8" rx="2" fill="#AEB8C4"></rect><text x="8" y="6">85%</text><text x="96" y="18">64%</text></g></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Probabilidad de cierre por deal</figcaption>
         </figure>
         <Link className="btn" to={ROUTES.AsistenteIA}>Preguntarle a la IA</Link>
@@ -192,7 +192,7 @@ export default function CRM() {
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
         <nav aria-label="Clientes" className="card" style={sx('flex:1 1 260px;padding:10px;display:flex;flex-direction:column;gap:4px')}>
           {lateral.map(c => (
-            <button key={c.nombre} type="button" aria-pressed={c.nombre === sel.nombre} onClick={() => { setSelName(c.nombre); setDesdeTabla(false) }} style={sx("display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:52px;padding:6px 12px;border-radius:8px;border:0;cursor:pointer;font:400 14px 'IBM Plex Sans',sans-serif;text-align:left;" + (c.nombre === sel.nombre ? 'background:#FFF1DB;color:#8A5300' : 'background:transparent;color:#121821'))}>
+            <button key={c.nombre} type="button" aria-pressed={c.nombre === sel.nombre} onClick={() => { setSelName(c.nombre); setDesdeTabla(false) }} style={sx("display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:52px;padding:6px 12px;border-radius:8px;border:0;cursor:pointer;font:400 14px 'Montserrat',sans-serif;text-align:left;" + (c.nombre === sel.nombre ? 'background:#E9EDFB;color:#0D1D41' : 'background:transparent;color:#0D1D41'))}>
               <span style={sx('display:flex;flex-direction:column;align-items:flex-start;gap:2px')}><span style={sx('font-weight:500')}>{c.nombre}</span><span style={sx('font-size:12px;color:#5F6B7A')}>{c.modelo}{c.nuevo ? ' · nuevo' : ''}</span></span>
               <span className="mono" style={sx('font-size:13px;color:#3E4A59')}>{c.nuevo ? '—' : fmtM(c.ingresosMes)}</span>
             </button>
@@ -202,7 +202,7 @@ export default function CRM() {
         <section style={sx('flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px')}>
           <div ref={vista} className="card" style={sx('display:flex;flex-direction:column;gap:16px')}>
             <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start')}>
-              <div style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">Vista 360</span><h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>{sel.nombre}</h2><span style={sx('font-size:14px;color:#5F6B7A')}>{sel.modelo} · {sel.sector} · cliente desde {sel.desde}</span></div>
+              <div style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">Vista 360</span><h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>{sel.nombre}</h2><span style={sx('font-size:14px;color:#5F6B7A')}>{sel.modelo} · {sel.sector} · cliente desde {sel.desde}</span></div>
               <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
                 <span className={sel.nuevo ? 'pill p-info' : sel.cobranza === 'Al corriente' ? 'pill p-ok' : 'pill p-warn'}>{sel.nuevo ? 'Alta reciente' : sel.cobranza === 'Al corriente' ? 'Contrato vigente' : `Cobranza ${sel.cobranza}`}</span>
                 <button type="button" className="btn btn-sm" onClick={() => setActOpen(true)}>Registrar actividad</button>
@@ -226,14 +226,14 @@ export default function CRM() {
                 <span className="lbl">Servicios recientes · {svSel.length} en el trimestre</span>
                 {svSel.length === 0 && <span style={sx('color:#5F6B7A')}>Sin servicios registrados</span>}
                 {svSel.slice(0, 5).map(s => (
-                  <Link key={s.id} to={ROUTES.Servicios} style={sx('display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:#121821')}><span><span className="mono" style={sx('color:#3E4A59')}>{s.id}</span> · {s.ruta}</span><span className={'pill ' + (s.estatus === 'En tránsito' ? 'p-info' : s.estatus === 'Con incidente' ? 'p-bad' : s.estatus === 'Confirmado' ? 'p-warn' : 'p-mute')}>{s.estatus}</span></Link>
+                  <Link key={s.id} to={ROUTES.Servicios} style={sx('display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:#0D1D41')}><span><span className="mono" style={sx('color:#3E4A59')}>{s.id}</span> · {s.ruta}</span><span className={'pill ' + (s.estatus === 'En tránsito' ? 'p-info' : s.estatus === 'Con incidente' ? 'p-bad' : s.estatus === 'Confirmado' ? 'p-warn' : 'p-mute')}>{s.estatus}</span></Link>
                 ))}
               </div>
               <div style={sx('display:flex;flex-direction:column;gap:6px')}>
                 <span className="lbl">Incidentes · {incSel.length}</span>
                 {incSel.length === 0 && <span style={sx('color:#5F6B7A')}>Sin incidentes en el trimestre</span>}
                 {incSel.slice(0, 4).map(i => (
-                  <Link key={i.id} to={ROUTES.Reaccion} style={sx('display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:#121821')}><span><span className="mono" style={sx('color:#3E4A59')}>{i.id}</span> · {i.tipo} · {i.carretera}</span><span className={'pill ' + (i.resultado === 'Pérdida' ? 'p-bad' : i.resultado === 'Recuperación parcial' ? 'p-warn' : 'p-ok')}>{i.resultado}</span></Link>
+                  <Link key={i.id} to={ROUTES.Reaccion} style={sx('display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:#0D1D41')}><span><span className="mono" style={sx('color:#3E4A59')}>{i.id}</span> · {i.tipo} · {i.carretera}</span><span className={'pill ' + (i.resultado === 'Pérdida' ? 'p-bad' : i.resultado === 'Recuperación parcial' ? 'p-warn' : 'p-ok')}>{i.resultado}</span></Link>
                 ))}
               </div>
               <div style={sx('display:flex;flex-direction:column;gap:6px')}>
@@ -250,7 +250,7 @@ export default function CRM() {
 
       <section className="card" style={sx('display:flex;flex-direction:column;gap:14px;padding:20px 8px 12px')}>
         <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:0 12px')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Todos los clientes</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Todos los clientes</h2>
           <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
             <input type="search" value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar cliente…" aria-label="Buscar cliente" style={sx(inputStyle + ';width:180px;min-height:36px')} />
             <button type="button" aria-pressed={filtro === 'todos'} className="pill p-mute" style={sx(filtro === 'todos' ? PILL_ON : '')} onClick={() => setFiltro('todos')}>{tabla.length} activos</button>
@@ -273,7 +273,7 @@ export default function CRM() {
             <tbody>
               {rows.slice(pg.from, pg.to).map(c => {
                 const cls = c.cobranza === 'Al corriente' ? 'pill p-ok' : (parseInt(c.cobranza) > 60 ? 'pill p-bad' : 'pill p-warn')
-                const bar = 'height:100%;width:' + Math.min(100, Math.round(c.margen / 45 * 100)) + '%;background:' + (c.margen < 28 ? '#D08A1C' : '#2B9A66')
+                const bar = 'height:100%;width:' + Math.min(100, Math.round(c.margen / 45 * 100)) + '%;background:' + (c.margen < 28 ? '#3448A8' : '#2B9A66')
                 return (
                   <tr key={c.nombre} className={'crm-row' + (desdeTabla && c.nombre === sel.nombre ? ' sel' : '')} onClick={() => { pick(c.nombre); setDesdeTabla(true) }} title="Ver vista 360">
                     <td style={sx(td + ';font-weight:500')}>{c.nombre}{c.nuevo ? <span className="pill p-info" style={sx('margin-left:8px')}>nuevo</span> : null}</td>
@@ -295,7 +295,7 @@ export default function CRM() {
 
       <section style={sx('display:flex;flex-direction:column;gap:12px')}>
         <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Pipeline comercial</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Pipeline comercial</h2>
           <span style={sx('font-size:13px;color:#5F6B7A')}>Valor mensual estimado · MXN · usa ‹ › para mover de etapa</span>
         </div>
         <div style={sx('overflow-x:auto')}>

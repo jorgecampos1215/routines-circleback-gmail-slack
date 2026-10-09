@@ -9,7 +9,7 @@ import { Nav, type NavId } from './Nav'
  */
 export function Shell({ active, css, children, mainStyle }: { active: NavId; css?: string; children: ReactNode; mainStyle?: string }) {
   return (
-    <div style={sx("font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap")}>
+    <div style={sx("font-family:'Montserrat',system-ui,sans-serif;color:#0D1D41;background:#F6F7F9;min-height:100vh;display:flex;flex-wrap:wrap")}>
       {css && <style>{css}</style>}
       <div style={sx('flex:1 1 240px;background:#FFFFFF;border-right:1px solid #EEF1F4')}>
         <Nav active={active} />

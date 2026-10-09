@@ -10,22 +10,22 @@ import { CIUDADES, etiqueta, factorRiesgo, ruta as rutaDe, tiempoTexto, zonaDe }
 import type { CotizacionPayload } from './CotizacionPDF'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-bad{background:#FDE8E8;color:#B42318}.p-warn{background:#FFF1DB;color:#8A5300}.p-ok{background:#E3F6EC;color:#17784A}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.p-bad{background:#FDE8E8;color:#B42318}.p-warn{background:#FFF3DC;color:#9A5B00}.p-ok{background:#E3F6EC;color:#17784A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
-.field select,.field input,.field textarea{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+.field select,.field input,.field textarea{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
 .field textarea{padding:10px 12px;resize:vertical}
-.step{width:40px;height:40px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:600 18px 'IBM Plex Sans',sans-serif;cursor:pointer}
+.step{width:40px;height:40px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:600 18px 'Montserrat',sans-serif;cursor:pointer}
 `
 
 type Tab = 'evt' | 'ded' | 'mon'
-const ON = 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300'
+const ON = 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41'
 const TABS: [Tab, string][] = [['evt', 'Por evento'], ['ded', 'Custodio dedicado'], ['mon', 'Monitoreo como servicio']]
 type Rates = [string, string[]][]
 const RATES_INIT: Rates = [
@@ -226,7 +226,7 @@ export default function Cotizador() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Comercial · {FOLIO} · {cli.nombre}</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Cotizador</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Cotizador</h1>
         </div>
         <label className="field" style={sx('min-width:260px')}>Cliente
           <select value={cliente} onChange={e => setCliente(e.target.value)}>
@@ -235,11 +235,11 @@ export default function Cotizador() {
         </label>
       </header>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
         <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · precio sugerido</span><span style={sx('font-size:14px;color:#3E4A59')}>{ia.txt}</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label={`Precios aceptados por ${cli.nombre}; precio actual ${fmt(price)}`} style={sx('display:block')}><g fill="#E2C48F"><rect x="4" y="40" width="16" height="20" rx="2"></rect><rect x="28" y="28" width="16" height="32" rx="2"></rect><rect x="52" y="14" width="16" height="46" rx="2"></rect><rect x="76" y="6" width="16" height="54" rx="2"></rect><rect x="100" y="20" width="16" height="40" rx="2"></rect><rect x="124" y="36" width="16" height="24" rx="2"></rect><rect x="148" y="48" width="16" height="12" rx="2"></rect></g><path d="M92 2V62" stroke="#B36B00" strokeWidth="2" strokeDasharray="4 3"></path><text x="98" y="10" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#8A5300">${(price / 1000).toFixed(1)}K</text></svg>
+          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label={`Precios aceptados por ${cli.nombre}; precio actual ${fmt(price)}`} style={sx('display:block')}><g fill="#B9C4EE"><rect x="4" y="40" width="16" height="20" rx="2"></rect><rect x="28" y="28" width="16" height="32" rx="2"></rect><rect x="52" y="14" width="16" height="46" rx="2"></rect><rect x="76" y="6" width="16" height="54" rx="2"></rect><rect x="100" y="20" width="16" height="40" rx="2"></rect><rect x="124" y="36" width="16" height="24" rx="2"></rect><rect x="148" y="48" width="16" height="12" rx="2"></rect></g><path d="M92 2V62" stroke="#3448A8" strokeWidth="2" strokeDasharray="4 3"></path><text x="98" y="10" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#0D1D41">${(price / 1000).toFixed(1)}K</text></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Cotizaciones aceptadas por rango de precio</figcaption>
         </figure>
         <Link className="btn" to={ROUTES.AsistenteIA}>Preguntarle a la IA</Link>
@@ -298,7 +298,7 @@ export default function Cotizador() {
           )}
         </section>
 
-        <aside className="card" aria-label="Resultado" style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:12px;border-color:#F3D9A8')}>
+        <aside className="card" aria-label="Resultado" style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:12px;border-color:#C7D0F2')}>
           <span className="lbl">Desglose de costo</span>
           {lines.map(([k, v]) => (
             <div key={k} style={sx('display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:6px 0;border-top:1px solid #EEF1F4')}><span>{k}</span><span className="mono">{fmt(v)}</span></div>
@@ -307,7 +307,7 @@ export default function Cotizador() {
           <div style={sx('display:flex;justify-content:space-between;gap:12px;font-size:14px;color:#3E4A59')}><span>Margen objetivo</span><span className="mono">35%</span></div>
           <div style={sx('display:flex;flex-direction:column;gap:4px;padding-top:12px;border-top:1px solid #E4E8ED')}>
             <span className="lbl">{priceLbl}</span>
-            <span style={sx("font-family:'Archivo',sans-serif;font-size:36px;font-weight:600;color:#8A5300")}>{fmt(price)}</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;font-size:36px;font-weight:600;color:#0D1D41")}>{fmt(price)}</span>
             <span style={sx('font-size:13px;color:#5F6B7A')}>MXN antes de IVA · margen {fmt(price - cost)}</span>
           </div>
           <div style={sx('display:flex;flex-direction:column;gap:8px')}>
@@ -321,7 +321,7 @@ export default function Cotizador() {
 
       <section className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
         <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Tarifas base por zona</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Tarifas base por zona</h2>
           <div style={sx('display:flex;gap:12px;align-items:center;flex-wrap:wrap')}>
             <span style={sx('font-size:13px;color:#5F6B7A')}>Editables · un cliente puede tener tarifa pactada distinta</span>
             <button type="button" className="btn" style={sx('min-height:34px')} onClick={restaurarTarifas}>Restaurar</button>
@@ -332,9 +332,9 @@ export default function Cotizador() {
           <div style={sx('display:grid;grid-template-columns:140px repeat(4,minmax(120px,1fr));gap:8px;min-width:640px;align-items:center;font-size:14px')}>
             <span className="lbl">Zona</span><span className="lbl">Custodio / jornada</span><span className="lbl">Unidad / km</span><span className="lbl">Dedicado / mes</span><span className="lbl">Monitoreo / unidad</span>
             {rates.map(([z, vs], i) => [
-              <span key={z} style={sx(i === zi ? 'font-weight:600;color:#8A5300' : '')}>{z}{i === zi ? ' ●' : ''}</span>,
+              <span key={z} style={sx(i === zi ? 'font-weight:600;color:#0D1D41' : '')}>{z}{i === zi ? ' ●' : ''}</span>,
               ...vs.map((v, vi) => (
-                <label key={z + vi} style={sx('display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Tarifa {z}</span><input type="text" value={v} onChange={e => setRate(i, vi, e.target.value)} className="mono" style={sx('width:100%;min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 10px;font-size:14px;box-sizing:border-box')} /></label>
+                <label key={z + vi} style={sx('display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Tarifa {z}</span><input type="text" value={v} onChange={e => setRate(i, vi, e.target.value)} className="mono" style={sx('width:100%;min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 10px;font-size:14px;box-sizing:border-box')} /></label>
               )),
             ])}
           </div>

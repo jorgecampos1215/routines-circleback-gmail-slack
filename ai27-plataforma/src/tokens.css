@@ -2,8 +2,8 @@
 
 :root {
   /* Tipografía */
-  --font-display: 'Archivo', system-ui, sans-serif;   /* títulos y KPIs */
-  --font-body: 'IBM Plex Sans', system-ui, sans-serif; /* texto e interfaz */
+  --font-display: 'Montserrat', system-ui, sans-serif;   /* títulos y KPIs */
+  --font-body: 'Montserrat', system-ui, sans-serif; /* texto e interfaz */
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace; /* IDs, montos, horas */
 
   /* Superficies */
@@ -17,29 +17,29 @@
   --track: #EBEEF2;       /* fondo de barras de progreso */
 
   /* Texto */
-  --text: #121821;
+  --text: #0D1D41;
   --text-2: #3E4A59;
   --text-muted: #5F6B7A;
 
   /* Acento (marca) */
-  --accent: #F2A93B;        /* botón primario, selección */
-  --accent-strong: #D08A1C; /* líneas de gráficas, iconos */
-  --accent-ink: #8A5300;    /* texto sobre fondo ámbar claro */
-  --accent-link: #B36B00;   /* enlaces */
-  --accent-soft: #FFF1DB;   /* fondo de estado activo */
-  --ai-bg: #FFF8EC;         /* tarjetas de sugerencia IA */
-  --ai-border: #F3D9A8;
+  --accent: #475CC7;        /* botón primario, selección */
+  --accent-strong: #3448A8; /* líneas de gráficas, iconos */
+  --accent-ink: #0D1D41;    /* texto sobre fondo ámbar claro */
+  --accent-link: #3448A8;   /* enlaces */
+  --accent-soft: #E9EDFB;   /* fondo de estado activo */
+  --ai-bg: #F0F3FD;         /* tarjetas de sugerencia IA */
+  --ai-border: #C7D0F2;
 
   /* Datos */
-  --data-1: #2B7FA8;  /* azul principal */
-  --data-2: #D08A1C;  /* ámbar */
+  --data-1: #475CC7;  /* azul principal */
+  --data-2: #3448A8;  /* ámbar */
   --data-3: #2B9A66;  /* verde */
-  --data-4: #1F5A73;  /* azul oscuro */
+  --data-4: #0D1D41;  /* azul oscuro */
   --data-neutral: #AEB8C4;
 
   /* Estados (pills) */
   --ok-bg: #E3F6EC;   --ok-fg: #17784A;
-  --warn-bg: #FFF1DB; --warn-fg: #8A5300;
+  --warn-bg: #E9EDFB; --warn-fg: #0D1D41;
   --bad-bg: #FDE8E8;  --bad-fg: #B42318;  --bad-solid: #D9534F;
   --info-bg: #E3F2F8; --info-fg: #0B6A8A;
   --mute-bg: #EEF1F4; --mute-fg: #4A5868;

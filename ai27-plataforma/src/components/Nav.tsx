@@ -8,28 +8,28 @@ type Item = { id: NavId; label: string; to: string; d: string }
 
 export const NAV_GROUPS: { name: string; items: Item[] }[] = [
   { name: 'Operación', items: [
-    { id: 'dashboard', label: 'Dashboard', to: '/', d: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z' },
-    { id: 'asistente', label: 'Asistente IA', to: '/asistente', d: 'M4 5h16v11H9l-5 4zM12 7.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z' },
+    { id: 'dashboard', label: 'Inicio', to: '/', d: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z' },
+    { id: 'asistente', label: 'Asistente', to: '/asistente', d: 'M4 5h16v11H9l-5 4zM12 7.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z' },
     { id: 'servicios', label: 'Servicios', to: '/servicios', d: 'M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM8 17h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7' },
-    { id: 'ia', label: 'Asignación IA', to: '/asignacion', d: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z' },
-    { id: 'monitoreo', label: 'Monitoreo en vivo', to: '/monitoreo', d: 'M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z' },
-    { id: 'reaccion', label: 'Reacción', to: '/reaccion', d: 'M12 3l9 16H3zM12 10v4M12 17.5v.01' },
+    { id: 'ia', label: 'Asignar custodios', to: '/asignacion', d: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z' },
+    { id: 'monitoreo', label: 'Mapa en vivo', to: '/monitoreo', d: 'M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z' },
+    { id: 'reaccion', label: 'Incidentes', to: '/reaccion', d: 'M12 3l9 16H3zM12 10v4M12 17.5v.01' },
   ]},
   { name: 'Recursos', items: [
     { id: 'custodios', label: 'Custodios', to: '/custodios', d: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8 16.5c1-1.5 2.4-2.2 4-2.2s3 .7 4 2.2' },
-    { id: 'flotilla', label: 'Flotilla y taller', to: '/flotilla', d: 'M5 16v2M19 16v2M4 12l2-5h12l2 5v4H4zM7.5 13.5h.01M16.5 13.5h.01' },
-    { id: 'rh', label: 'Personas (RH)', to: '/personas', d: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.8-3.4 3.4-5 6.5-5s5.7 1.6 6.5 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18.5 15c1.6.6 2.7 2.2 3 5' },
+    { id: 'flotilla', label: 'Flotilla', to: '/flotilla', d: 'M5 16v2M19 16v2M4 12l2-5h12l2 5v4H4zM7.5 13.5h.01M16.5 13.5h.01' },
+    { id: 'rh', label: 'Equipo', to: '/personas', d: 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c.8-3.4 3.4-5 6.5-5s5.7 1.6 6.5 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18.5 15c1.6.6 2.7 2.2 3 5' },
   ]},
   { name: 'Comercial', items: [
-    { id: 'cotizador', label: 'Cotizador', to: '/cotizador', d: 'M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01M9 17h.01M12 17h3' },
-    { id: 'crm', label: 'Clientes y CRM', to: '/clientes', d: 'M3 8h18v12H3zM8 8V5h8v3M3 13h18' },
+    { id: 'cotizador', label: 'Cotizaciones', to: '/cotizador', d: 'M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01M9 17h.01M12 17h3' },
+    { id: 'crm', label: 'Clientes', to: '/clientes', d: 'M3 8h18v12H3zM8 8V5h8v3M3 13h18' },
     { id: 'finanzas', label: 'Finanzas', to: '/finanzas', d: 'M3 3v18h18M7 15l4-4 3 3 5-6' },
   ]},
   { name: 'Administración', items: [
     { id: 'reportes', label: 'Reportes', to: '/reportes', d: 'M6 3h9l3 3v15H6zM9 17v-3M12 17v-6M15 17v-4' },
     { id: 'portal', label: 'Mi portal', to: '/mi-portal', d: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1.5-4 4.5-6 8-6s6.5 2 8 6' },
-    { id: 'usuarios', label: 'Usuarios y roles', to: '/usuarios', d: 'M6 11h12v10H6zM8.5 11V7.5a3.5 3.5 0 0 1 7 0V11M12 15v2' },
-    { id: 'movil', label: 'Vista custodio', to: '/custodio', d: 'M8 2.5h8a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 20V4A1.5 1.5 0 0 1 8 2.5zM11 18h2' },
+    { id: 'usuarios', label: 'Usuarios', to: '/usuarios', d: 'M6 11h12v10H6zM8.5 11V7.5a3.5 3.5 0 0 1 7 0V11M12 15v2' },
+    { id: 'movil', label: 'App del custodio', to: '/custodio', d: 'M8 2.5h8a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 20V4A1.5 1.5 0 0 1 8 2.5zM11 18h2' },
   ]},
 ]
 
@@ -37,19 +37,15 @@ const base = 'display:flex;align-items:center;gap:10px;min-height:40px;padding:0
 
 export function Nav({ active }: { active: NavId }) {
   return (
-    <nav aria-label="Principal" style={sx("font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;background:#FFFFFF;box-sizing:border-box;padding:22px 14px 28px;display:flex;flex-direction:column;gap:22px")}>
-      <NavLink to="/" style={sx('display:flex;align-items:center;gap:10px;text-decoration:none;color:#121821;padding:0 8px')}>
-        <Logo size={30} />
-        <span style={sx('display:flex;flex-direction:column;line-height:1.1')}>
-          <span style={sx("font-family:'Archivo',sans-serif;font-weight:700;font-size:20px;letter-spacing:.02em")}>AI27</span>
-          <span style={sx('font-size:11px;color:#5F6B7A;letter-spacing:.08em;text-transform:uppercase')}>Centro de operación</span>
-        </span>
+    <nav aria-label="Principal" style={sx("font-family:'Montserrat',system-ui,sans-serif;color:#0D1D41;background:#FFFFFF;box-sizing:border-box;padding:22px 14px 28px;display:flex;flex-direction:column;gap:22px")}>
+      <NavLink to="/" style={sx('display:flex;align-items:center;text-decoration:none;color:#0D1D41;padding:4px 10px 2px')} aria-label="Inicio">
+        <Logo height={30} />
       </NavLink>
       {NAV_GROUPS.map(g => (
         <div key={g.name} style={sx('display:flex;flex-direction:column;gap:2px')}>
           <span style={sx('font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6B7684;padding:0 12px 6px')}>{g.name}</span>
           {g.items.map(it => (
-            <NavLink key={it.id} to={it.to} style={sx(base + (it.id === active ? 'background:#FFF1DB;color:#8A5300;font-weight:600' : 'color:#3E4A59'))}>
+            <NavLink key={it.id} to={it.to} style={sx(base + (it.id === active ? 'background:#E9EDFB;color:#0D1D41;font-weight:600' : 'color:#3E4A59'))}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={it.d} /></svg>
               <span>{it.label}</span>
             </NavLink>
@@ -62,8 +58,8 @@ export function Nav({ active }: { active: NavId }) {
         <span style={sx('display:flex;align-items:center;gap:8px')}><span style={sx('width:8px;height:8px;border-radius:50%;background:#3FA7C9')} />Ruptela · secundaria</span>
       </div>
       <div style={sx('display:flex;align-items:center;gap:10px;padding:0 8px')}>
-        <span style={sx('width:36px;height:36px;border-radius:50%;background:#FFF1DB;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#8A5300')}>DR</span>
-        <span style={sx('display:flex;flex-direction:column;font-size:13px;line-height:1.3')}><span>Dirección</span><span style={sx('color:#5F6B7A;font-size:12px')}>Rol: Dirección general</span></span>
+        <span style={sx('width:36px;height:36px;border-radius:50%;background:#E9EDFB;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#0D1D41')}>DR</span>
+        <span style={sx('display:flex;flex-direction:column;font-size:13px;line-height:1.3')}><span>Dirección general</span><span style={sx('color:#5F6B7A;font-size:12px')}>Vista de dirección</span></span>
       </div>
     </nav>
   )

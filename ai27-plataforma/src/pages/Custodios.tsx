@@ -7,19 +7,19 @@ import { sx } from '../lib/sx'
 import { ESTATUS_CUSTODIO, ZONAS, conteoCustodios, custodios as SEED, servicios, type Custodio, type EstatusCustodio, type Zona } from '../data/seed'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
 .tbl th.sort{cursor:pointer;user-select:none}
-.tbl th.sort:hover{color:#121821}
+.tbl th.sort:hover{color:#0D1D41}
 .tbl td{padding:10px 12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .cus-row{cursor:pointer}
 .cus-row:hover td{background:#FAFBFC}
 `
@@ -119,20 +119,20 @@ export default function Custodios() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Recursos</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Custodios</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Custodios</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>{lista.length} custodios en {ZONAS.length} zonas · utilización {utilizacion}% · {horasProm} h promedio por semana</span>
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
-          <label style={sx('display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Buscar custodio</span><input type="search" placeholder="Buscar por nombre, ID o zona" value={q} onChange={e => { setQ(e.target.value); pg.setPage(0) }} style={sx("min-height:40px;min-width:260px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif")} /></label>
+          <label style={sx('display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Buscar custodio</span><input type="search" placeholder="Buscar por nombre, ID o zona" value={q} onChange={e => { setQ(e.target.value); pg.setPage(0) }} style={sx("min-height:40px;min-width:260px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif")} /></label>
           <button type="button" className="btn btn-pri" onClick={() => setAlta(true)}>Alta de custodio</button>
         </div>
       </header>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · fatiga y cobertura</span><span style={sx('font-size:14px;color:#3E4A59')}>J. Ordaz lleva 52 h esta semana y 3 custodios de Bajío acumulan semanas sin descanso completo. <button type="button" onClick={() => { setSelId('C-0931'); setF('Todos'); setZona('Todas'); setQ('Rafael Uc'); pg.setPage(0) }} style={sx('background:none;border:0;padding:0;font:inherit;color:#B36B00;cursor:pointer;text-decoration:underline')}>Rafael Uc</button> lleva 9 días sin asignar: sugiero asignarlo al hueco de Bajío de mañana.</span></div>
+      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · fatiga y cobertura</span><span style={sx('font-size:14px;color:#3E4A59')}>J. Ordaz lleva 52 h esta semana y 3 custodios de Bajío acumulan semanas sin descanso completo. <button type="button" onClick={() => { setSelId('C-0931'); setF('Todos'); setZona('Todas'); setQ('Rafael Uc'); pg.setPage(0) }} style={sx('background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline')}>Rafael Uc</button> lleva 9 días sin asignar: sugiero asignarlo al hueco de Bajío de mañana.</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Utilización semanal de custodios en las últimas 6 semanas: 72, 74, 76, 79, 77 y 78 por ciento" style={sx('display:block')}><path d="M10 60H210" stroke="#E4E8ED"></path><path d="M10 12.8H210" stroke="#F3D9A8" strokeDasharray="4 3"></path><polyline points="10,46.4 50,36.8 90,27.2 130,12.8 170,22.4 210,17.6" fill="none" stroke="#2B7FA8" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"></polyline><circle cx="210" cy="17.6" r="4" fill="#2B7FA8"></circle><text x="176" y="34" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#1E6488">78%</text></svg>
+          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Utilización semanal de custodios en las últimas 6 semanas: 72, 74, 76, 79, 77 y 78 por ciento" style={sx('display:block')}><path d="M10 60H210" stroke="#E4E8ED"></path><path d="M10 12.8H210" stroke="#C7D0F2" strokeDasharray="4 3"></path><polyline points="10,46.4 50,36.8 90,27.2 130,12.8 170,22.4 210,17.6" fill="none" stroke="#475CC7" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"></polyline><circle cx="210" cy="17.6" r="4" fill="#475CC7"></circle><text x="176" y="34" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#1E6488">78%</text></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Utilización semanal · línea punteada: tope sano</figcaption>
         </figure>
         <Link className="btn" to={ROUTES.AsignacionIA}>Abrir asignación</Link>
@@ -140,9 +140,9 @@ export default function Custodios() {
 
       <div role="group" aria-label="Filtrar por estatus" style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr));gap:10px')}>
         {FILTROS.map(label => (
-          <button key={label} type="button" aria-pressed={label === f} onClick={() => cambiarFiltro(label)} style={sx('display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;border-radius:10px;cursor:pointer;font-family:inherit;color:#121821;text-align:left;background:#FFFFFF;border:1px solid ' + (label === f ? '#F2A93B' : '#E4E8ED'))}>
+          <button key={label} type="button" aria-pressed={label === f} onClick={() => cambiarFiltro(label)} style={sx('display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;border-radius:10px;cursor:pointer;font-family:inherit;color:#0D1D41;text-align:left;background:#FFFFFF;border:1px solid ' + (label === f ? '#475CC7' : '#E4E8ED'))}>
             <span style={sx('font-size:12px;color:#5F6B7A')}>{label}</span>
-            <span style={sx("font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>{counts[label]}</span>
+            <span style={sx("font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>{counts[label]}</span>
           </button>
         ))}
       </div>
@@ -183,7 +183,7 @@ export default function Custodios() {
 
         <aside id="expediente" className="card" aria-label="Expediente" style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:16px')}>
           <div style={sx('display:flex;gap:14px;align-items:center')}>
-            <div style={sx('width:64px;height:64px;border-radius:10px;background:#FFF1DB;border:1px dashed #D5DBE3;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F6B7A')}>Foto</div>
+            <div style={sx('width:64px;height:64px;border-radius:10px;background:#E9EDFB;border:1px dashed #D5DBE3;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F6B7A')}>Foto</div>
             <div style={sx('display:flex;flex-direction:column;gap:4px')}>
               <span style={sx('font-weight:600;font-size:18px')}>{sel.nombre}</span>
               <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{sel.id} · {sel.zona}</span>
@@ -219,7 +219,7 @@ export default function Custodios() {
 
       <section className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
         <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Turnos · {tituloTurnos} · semana 41</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Turnos · {tituloTurnos} · semana 41</h2>
           <div style={sx('display:flex;gap:14px;font-size:12px;color:#3E4A59;flex-wrap:wrap')}>
             <span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#3FA7C9')}></span>En servicio</span>
             <span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#CBD3DD')}></span>Descanso</span>

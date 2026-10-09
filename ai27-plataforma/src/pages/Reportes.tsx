@@ -5,7 +5,7 @@ import { sx } from '../lib/sx'
 import { CLIENTES_FILTRO, ZONAS_FILTRO, desdeSeed } from '../data/reportes'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
@@ -14,11 +14,11 @@ a{color:#B36B00}a:hover{color:#8A5300}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
 .tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .btn:disabled{opacity:.6;cursor:progress}
 .field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
-.field select{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+.field select{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
 .pill-btn{border:0;cursor:pointer;font-family:inherit}
 @keyframes rep-pulse{0%,100%{opacity:.35}50%{opacity:1}}
 @media print{
@@ -208,15 +208,15 @@ export default function Reportes() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Administración</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Reportes</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Reportes</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>{R.length + 6 + generated.length} reportes listos · {activos} envíos programados · exporta a PDF o Excel</span>
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}><button type="button" className="btn" onClick={abrirProgramar}>Programar envío</button><button type="button" className="btn btn-pri" onClick={() => inputRef.current?.focus()}>Nuevo reporte</button></div>
       </header>
 
-      <section aria-label="Reporte con IA" style={sx('display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <label style={sx('flex:1 1 360px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Pídele un reporte a la IA</span><input ref={inputRef} type="text" value={prompt} onChange={e => setPrompt(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') generar() }} placeholder="Pídele un reporte a la IA: ej. incidentes de septiembre para Marsh con mapa de calor" style={sx("flex:1;min-height:44px;background:#FFFFFF;border:1px solid #E2C48F;border-radius:8px;color:#121821;padding:0 14px;font:400 14px 'IBM Plex Sans',sans-serif")} /></label>
+      <section aria-label="Reporte con IA" style={sx('display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+        <label style={sx('flex:1 1 360px;display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Pídele un reporte a la IA</span><input ref={inputRef} type="text" value={prompt} onChange={e => setPrompt(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') generar() }} placeholder="Pídele un reporte a la IA: ej. incidentes de septiembre para Marsh con mapa de calor" style={sx("flex:1;min-height:44px;background:#FFFFFF;border:1px solid #B9C4EE;border-radius:8px;color:#0D1D41;padding:0 14px;font:400 14px 'Montserrat',sans-serif")} /></label>
         <button type="button" className="btn btn-pri" style={sx('min-height:44px')} onClick={generar} disabled={loading}>{loading ? 'Generando…' : 'Generar con IA'}</button>
       </section>
 
@@ -233,7 +233,7 @@ export default function Reportes() {
             <div key={c.name} style={sx('display:flex;flex-direction:column;gap:2px')}>
               <span className="lbl" style={sx('padding:4px 10px')}>{c.name}</span>
               {c.items.map(x => (
-                <button key={x.id} type="button" aria-current={x.id === r} onClick={() => setR(x.id)} style={sx("text-align:left;min-height:40px;padding:0 10px;border-radius:8px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:normal;" + (x.id === r ? 'background:#FFF1DB;border:1px solid #F3D9A8;color:#121821;font-weight:500' : 'background:transparent;border:1px solid transparent;color:#3E4A59;font-weight:400'))}>{x.name}</button>
+                <button key={x.id} type="button" aria-current={x.id === r} onClick={() => setR(x.id)} style={sx("text-align:left;min-height:40px;padding:0 10px;border-radius:8px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:14px;line-height:normal;" + (x.id === r ? 'background:#E9EDFB;border:1px solid #C7D0F2;color:#0D1D41;font-weight:500' : 'background:transparent;border:1px solid transparent;color:#3E4A59;font-weight:400'))}>{x.name}</button>
               ))}
             </div>
           ))}
@@ -241,20 +241,20 @@ export default function Reportes() {
 
         <section id="rep-preview" className="card" style={sx('flex:999 1 560px;display:flex;flex-direction:column;gap:18px;padding:24px;position:relative')}>
           {loading && (
-            <div aria-live="polite" style={sx('position:absolute;inset:0;background:rgba(255,255,255,.82);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;color:#8A5300;z-index:1')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('animation:rep-pulse 1s ease-in-out infinite')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+            <div aria-live="polite" style={sx('position:absolute;inset:0;background:rgba(255,255,255,.82);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;color:#0D1D41;z-index:1')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('animation:rep-pulse 1s ease-in-out infinite')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
               La IA está armando el reporte…
             </div>
           )}
           <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start')}>
-            <div style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">{cur0.cat} · {PERIODO_CORTO[periodo]}</span><h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>{cur0.name}</h2><span style={sx('font-size:14px;color:#3E4A59')}>{cur0.desc}</span>
+            <div style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">{cur0.cat} · {PERIODO_CORTO[periodo]}</span><h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>{cur0.name}</h2><span style={sx('font-size:14px;color:#3E4A59')}>{cur0.desc}</span>
               {filtros.length > 0 && <span style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:4px')}>{filtros.map(f => <span key={f} className="pill p-info">{f}</span>)}</span>}
             </div>
             <div className="no-print" style={sx('display:flex;gap:8px;flex-wrap:wrap')}><button type="button" className="btn" onClick={() => { window.print(); flash('PDF listo: ' + cur0.name) }}>Descargar PDF</button><button type="button" className="btn" onClick={exportExcel}>Excel</button><button type="button" className="btn" onClick={abrirEnviar}>Enviar</button></div>
           </div>
           <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px')}>
             {cur0.kpis.map(([k, v]) => (
-              <div key={k} style={sx('background:#F7F9FB;border:1px solid #E4E8ED;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:4px')}><span className="lbl">{k}</span><span style={sx("font-family:'Archivo',sans-serif;font-size:24px;font-weight:600")}>{v}</span></div>
+              <div key={k} style={sx('background:#F7F9FB;border:1px solid #E4E8ED;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:4px')}><span className="lbl">{k}</span><span style={sx("font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>{v}</span></div>
             ))}
           </div>
           <figure style={sx('margin:0;display:flex;flex-direction:column;gap:12px')}>
@@ -263,26 +263,26 @@ export default function Reportes() {
             {cur0.data.map(([k, v], i) => (
               <div key={k} style={sx('display:grid;grid-template-columns:180px minmax(0,1fr) 90px;gap:12px;align-items:center;font-size:14px')}>
                 <span>{k}</span>
-                <div style={sx('height:16px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.max(1, Math.round(v / max * 100)) + '%;background:' + (i === 0 ? '#D08A1C' : '#2B7FA8'))}></div></div>
+                <div style={sx('height:16px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.max(1, Math.round(v / max * 100)) + '%;background:' + (i === 0 ? '#3448A8' : '#475CC7'))}></div></div>
                 <span className="mono" style={sx('text-align:right')}>{fv(v)}</span>
               </div>
             ))}
           </figure>
           <div style={sx('display:flex;gap:10px;align-items:flex-start;background:#F7F9FB;border-radius:8px;padding:14px;font-size:14px;color:#3E4A59')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none;margin-top:2px')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-            <span><b style={sx('color:#121821')}>Lectura de la IA:</b> {cur0.ai}</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none;margin-top:2px')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+            <span><b style={sx('color:#0D1D41')}>Lectura de la IA:</b> {cur0.ai}</span>
           </div>
         </section>
       </div>
 
       <section className="card" style={sx('padding:20px 8px 0;display:flex;flex-direction:column;gap:12px')}>
-        <h2 style={sx("margin:0;padding:0 12px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Envíos programados</h2>
+        <h2 style={sx("margin:0;padding:0 12px;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Envíos programados</h2>
         <div style={sx('overflow-x:auto')}>
           <table className="tbl">
             <thead><tr><th>Reporte</th><th>Destinatarios</th><th>Frecuencia</th><th>Próximo envío</th><th>Formato</th><th>Estatus</th><th></th></tr></thead>
             <tbody>
               {sched.map((s, i) => (
-                <tr key={s.r}><td><button type="button" onClick={() => abrirReporte(s.r)} style={sx("background:none;border:0;padding:0;cursor:pointer;color:#121821;font:400 14px 'IBM Plex Sans',sans-serif;text-align:left")} title="Abrir reporte">{s.r}</button></td><td>{s.to}</td><td>{s.f}</td><td className="mono">{s.n}</td><td>{s.fmt}</td><td><button type="button" title={s.st === 'Activo' ? 'Pausar envío' : 'Reactivar envío'} onClick={() => toggle(i)} className={'pill pill-btn ' + (s.st === 'Activo' ? 'p-ok' : 'p-mute')}>{s.st}</button></td>
+                <tr key={s.r}><td><button type="button" onClick={() => abrirReporte(s.r)} style={sx("background:none;border:0;padding:0;cursor:pointer;color:#0D1D41;font:400 14px 'Montserrat',sans-serif;text-align:left")} title="Abrir reporte">{s.r}</button></td><td>{s.to}</td><td>{s.f}</td><td className="mono">{s.n}</td><td>{s.fmt}</td><td><button type="button" title={s.st === 'Activo' ? 'Pausar envío' : 'Reactivar envío'} onClick={() => toggle(i)} className={'pill pill-btn ' + (s.st === 'Activo' ? 'p-ok' : 'p-mute')}>{s.st}</button></td>
                   <td><div style={sx('display:flex;gap:6px')}><button type="button" className="btn" style={sx('min-height:30px;padding:0 10px;font-size:13px')} onClick={() => enviarAhora(s)}>Enviar ahora</button><button type="button" className="btn" style={sx('min-height:30px;padding:0 10px;font-size:13px')} aria-label="Eliminar envío" onClick={() => quitar(i)}>×</button></div></td></tr>
               ))}
             </tbody>

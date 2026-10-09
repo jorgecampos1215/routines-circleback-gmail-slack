@@ -12,7 +12,7 @@ export const useToast = () => useContext(ToastCtx)
 
 const KIND_STYLE: Record<ToastKind, string> = {
   ok: 'background:#E3F6EC;color:#17784A;border-color:#BFE8D0',
-  warn: 'background:#FFF1DB;color:#8A5300;border-color:#F3D9A8',
+  warn: 'background:#E9EDFB;color:#0D1D41;border-color:#C7D0F2',
   bad: 'background:#FDE8E8;color:#B42318;border-color:#F5C2C0',
   info: 'background:#E3F2F8;color:#0B6A8A;border-color:#BFDDE9',
 }
@@ -29,7 +29,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div aria-live="polite" style={sx('position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:1000;max-width:min(360px,calc(100vw - 40px))')}>
         {items.map(t => (
-          <div key={t.id} role="status" style={sx(`border:1px solid;border-radius:10px;padding:12px 14px;font:500 14px 'IBM Plex Sans',sans-serif;box-shadow:0 6px 24px rgba(18,24,33,.12);${KIND_STYLE[t.kind]}`)}>{t.msg}</div>
+          <div key={t.id} role="status" style={sx(`border:1px solid;border-radius:10px;padding:12px 14px;font:500 14px 'Montserrat',sans-serif;box-shadow:0 6px 24px rgba(18,24,33,.12);${KIND_STYLE[t.kind]}`)}>{t.msg}</div>
         ))}
       </div>
     </ToastCtx.Provider>
@@ -51,9 +51,9 @@ export function Modal({ open, onClose, title, children, footer, width = 560 }: {
   if (!open) return null
   return (
     <div onClick={onClose} style={sx('position:fixed;inset:0;background:rgba(18,24,33,.38);display:flex;align-items:center;justify-content:center;padding:16px;z-index:900')}>
-      <div role="dialog" aria-modal="true" aria-label={title} onClick={e => e.stopPropagation()} style={sx(`background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;width:min(${width}px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#121821;box-shadow:0 20px 60px rgba(18,24,33,.18)`)}>
+      <div role="dialog" aria-modal="true" aria-label={title} onClick={e => e.stopPropagation()} style={sx(`background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;width:min(${width}px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;font-family:'Montserrat',system-ui,sans-serif;color:#0D1D41;box-shadow:0 20px 60px rgba(18,24,33,.18)`)}>
         <div style={sx('display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid #EEF1F4')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>{title}</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>{title}</h2>
           <button type="button" onClick={onClose} aria-label="Cerrar" style={sx('width:32px;height:32px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#3E4A59;font-size:16px;cursor:pointer')}>×</button>
         </div>
         <div style={sx('padding:20px 22px;overflow:auto;display:flex;flex-direction:column;gap:14px')}>{children}</div>
@@ -72,9 +72,9 @@ export function Field({ label, children }: { label: string; children: ReactNode 
     </label>
   )
 }
-export const inputStyle = "min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif;width:100%;box-sizing:border-box"
-export const btnStyle = "display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none"
-export const btnPriStyle = btnStyle + ';background:#F2A93B;border-color:#F2A93B;color:#17110A'
+export const inputStyle = "min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif;width:100%;box-sizing:border-box"
+export const btnStyle = "display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none"
+export const btnPriStyle = btnStyle + ';background:#475CC7;border-color:#475CC7;color:#FFFFFF'
 
 /* ───────────────────────── Paginación ─────────────────────────
  * Para tablas con cientos de filas: muestra "1–25 de 400" y botones anterior/siguiente.

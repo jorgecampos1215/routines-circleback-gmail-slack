@@ -1,1 +1,15 @@
 html, body { margin: 0; background: #F6F7F9; }
+
+/* Clases base compartidas (antes cada pantalla las traía en su propio <style>). Las pantallas pueden seguir
+   definiéndolas; estas son el respaldo para los componentes compartidos (PageHeader, Section, Modal). */
+.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;padding:20px;box-sizing:border-box;min-width:0}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:600}
+.mono{font-family:'IBM Plex Mono',monospace}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:600 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn:hover{background:#F3F5F8}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
+.btn-pri:hover{background:#3448A8}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E9EDFB;color:#3448A8}.p-mute{background:#EEF1F4;color:#4A5868}
+a{color:#3448A8}
+button,input,select,textarea{font-family:'Montserrat',system-ui,sans-serif}

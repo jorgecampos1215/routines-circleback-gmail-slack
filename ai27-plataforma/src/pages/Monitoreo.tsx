@@ -8,23 +8,23 @@ import { simularEventos, type EventoTelemetria, type TipoEvento } from '../lib/t
 import { unidadesMapa, HERO, conteosMapa, enZonaRiesgo, custodiosDeUnidad, type UnidadMapa } from '../data/monitoreo'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
-.city{font:500 13px 'IBM Plex Sans',sans-serif;fill:#5F6B7A}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
+.city{font:500 13px 'Montserrat',sans-serif;fill:#5F6B7A}
 @keyframes ping{0%{r:8;opacity:.9}100%{r:26;opacity:0}}
 .ping{animation:ping 1.6s ease-out infinite}
-@keyframes feedIn{from{background:#FFF8EC}to{background:transparent}}
+@keyframes feedIn{from{background:#F0F3FD}to{background:transparent}}
 .feed-new{animation:feedIn 2.4s ease-out}
-.marker{cursor:pointer}.marker:hover circle,.marker:hover rect{stroke:#121821;stroke-width:2}
+.marker{cursor:pointer}.marker:hover circle,.marker:hover rect{stroke:#0D1D41;stroke-width:2}
 .feed-row{cursor:pointer;background:transparent;border:0;border-top:1px solid #EEF1F4;text-align:left;font:inherit;color:inherit;width:100%}.feed-row:hover{background:#FAFBFC}
-.kpi-btn{cursor:pointer;text-align:left;font:inherit;color:inherit}.kpi-btn:hover{border-color:#F2A93B}
-.lnk{background:none;border:0;padding:0;font:inherit;color:#B36B00;cursor:pointer;text-decoration:underline}.lnk:hover{color:#8A5300}
+.kpi-btn{cursor:pointer;text-align:left;font:inherit;color:inherit}.kpi-btn:hover{border-color:#475CC7}
+.lnk{background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline}.lnk:hover{color:#0D1D41}
 `
 
 type Src = 'all' | 'samsara' | 'ruptela'
@@ -141,8 +141,8 @@ export default function Monitoreo() {
     setModal(null)
   }
   const kpiBtn = (k: Cat, label: string, n: number, sub: string) => (
-    <button type="button" className="card kpi-btn" aria-pressed={cat === k} onClick={() => setCat(c => (c === k ? 'all' : k))} title={cat === k ? 'Quitar filtro' : 'Filtrar el feed'} style={sx('display:flex;flex-direction:column;gap:6px' + (cat === k ? ';border-color:#F2A93B;background:#FFF8EC' : ''))}>
-      <span className="lbl">{label}</span><span style={sx("font-family:'Archivo';font-size:28px;font-weight:600")}>{n}</span><span style={sx('font-size:13px;color:#5F6B7A')}>{sub}</span>
+    <button type="button" className="card kpi-btn" aria-pressed={cat === k} onClick={() => setCat(c => (c === k ? 'all' : k))} title={cat === k ? 'Quitar filtro' : 'Filtrar el feed'} style={sx('display:flex;flex-direction:column;gap:6px' + (cat === k ? ';border-color:#475CC7;background:#F0F3FD' : ''))}>
+      <span className="lbl">{label}</span><span style={sx("font-family:'Montserrat';font-size:28px;font-weight:600")}>{n}</span><span style={sx('font-size:13px;color:#5F6B7A')}>{sub}</span>
     </button>
   )
 
@@ -151,18 +151,18 @@ export default function Monitoreo() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Monitoreo</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Mapa en vivo</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Mapa en vivo</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>{conteos.custodios} custodios · {conteos.autos} autos de custodia · {conteos.trailers} tráileres reportando{src !== 'all' ? ` · solo ${src === 'samsara' ? 'Samsara' : 'Ruptela'}` : ''}</span>
         </div>
         <div role="group" aria-label="Fuente de telemetría" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
           {SOURCES.map(([k, label]) => (
-            <button key={k} type="button" className="btn" aria-pressed={k === src} style={sx(k === src ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '')} onClick={() => setSrc(k)}>{label}</button>
+            <button key={k} type="button" className="btn" aria-pressed={k === src} style={sx(k === src ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => setSrc(k)}>{label}</button>
           ))}
         </div>
       </header>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
         <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · patrón de robo detectado</span><span style={sx('font-size:14px;color:#3E4A59')}>El desvío de <button type="button" className="lnk" onClick={() => seleccionar(HERO)}>SRV-24817</button> coincide 87% con 5 robos previos en Méx–Qro: salida a terracería, velocidad baja y separación del custodio. Recomiendo escalar a Reacción ahora y pre-alertar a la unidad R-03.</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
           <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Incidentes por franja horaria: el pico está entre 21 y 24 horas, seguido de 00 a 03" style={sx('display:block')}><g fill="#AEB8C4"><rect x="4" y="12" width="20" height="48" rx="2"></rect><rect x="31" y="42" width="20" height="18" rx="2"></rect><rect x="58" y="54" width="20" height="6" rx="2"></rect><rect x="85" y="48" width="20" height="12" rx="2"></rect><rect x="139" y="30" width="20" height="30" rx="2"></rect><rect x="166" y="36" width="20" height="24" rx="2"></rect><rect x="193" y="6" width="20" height="54" rx="2"></rect></g><rect x="112" y="24" width="20" height="36" rx="2" fill="#D9534F"></rect></svg>
@@ -194,21 +194,21 @@ export default function Monitoreo() {
                 <g key={u.id} className="marker" role="button" tabIndex={0} aria-label={`${u.id} · ${u.cliente} · ${u.estado}`} onClick={() => seleccionar(u)} onKeyDown={e => { if (e.key === 'Enter') seleccionar(u) }} opacity={u.estado === 'Sin señal' ? 0.55 : 1}>
                   <title>{`${u.id} · ${u.cliente} · ${u.ruta} · ${u.estado}`}</title>
                   {esHero && <circle cx="438" cy="344" r="8" fill="none" stroke="#F0605D" strokeWidth="2" className="ping"></circle>}
-                  {esSel && <circle cx={u.x + 6} cy={u.y + 6} r="16" fill="none" stroke="#121821" strokeWidth="1.5" strokeDasharray="3 3"></circle>}
+                  {esSel && <circle cx={u.x + 6} cy={u.y + 6} r="16" fill="none" stroke="#0D1D41" strokeWidth="1.5" strokeDasharray="3 3"></circle>}
                   <rect x={u.x - 6} y={u.y - 6} width="12" height="12" rx="2" fill={u.estado === 'Desvío' ? '#B42318' : '#0B6A8A'}></rect>
-                  <circle cx={cx} cy={cy} r="7" fill="#F2A93B"></circle>
+                  <circle cx={cx} cy={cy} r="7" fill="#475CC7"></circle>
                   {esHero && <path d="M438 344L452 352" stroke="#F0605D" strokeWidth="2" strokeDasharray="3 3"></path>}
                 </g>
               )
             })}
             {/* Posición del replay de SRV-24817 */}
             <g aria-label={'Replay ' + replayLabel}>
-              <circle cx={rx} cy={ry} r="6" fill="#FFFFFF" stroke="#121821" strokeWidth="2"></circle>
-              <circle cx={rx} cy={ry} r="2" fill="#121821"></circle>
+              <circle cx={rx} cy={ry} r="6" fill="#FFFFFF" stroke="#0D1D41" strokeWidth="2"></circle>
+              <circle cx={rx} cy={ry} r="2" fill="#0D1D41"></circle>
             </g>
             <rect x="140" y="470" width="340" height="70" rx="8" fill="#FFFFFF" stroke="#E4E8ED"></rect>
             <rect x="158" y="488" width="12" height="12" rx="2" fill="#0B6A8A"></rect><text x="178" y="499" className="city" style={sx('fill:#3E4A59')}>Tráiler del cliente</text>
-            <circle cx="164" cy="520" r="6" fill="#F2A93B"></circle><text x="178" y="525" className="city" style={sx('fill:#3E4A59')}>Custodio / auto de custodia</text>
+            <circle cx="164" cy="520" r="6" fill="#475CC7"></circle><text x="178" y="525" className="city" style={sx('fill:#3E4A59')}>Custodio / auto de custodia</text>
             <path d="M320 494H348" stroke="#F0605D" strokeWidth="3" strokeDasharray="6 5"></path><text x="356" y="499" className="city" style={sx('fill:#3E4A59')}>Desvío</text>
             <text x="356" y="525" className="city" style={sx('fill:#3E4A59')}>{unidades.length} unidades en mapa</text>
           </svg>
@@ -216,7 +216,7 @@ export default function Monitoreo() {
             <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
               <span className="lbl" style={sx('display:inline-flex;align-items:center;gap:10px')}>
                 <button type="button" onClick={() => { if (!playing && replay >= 100) setReplay(0); setPlaying(p => !p) }} aria-label={playing ? 'Pausar replay' : 'Reproducir replay'}
-                  style={sx('display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid #D5DBE3;background:#F3F5F8;cursor:pointer;padding:0;color:#121821')}>
+                  style={sx('display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid #D5DBE3;background:#F3F5F8;cursor:pointer;padding:0;color:#0D1D41')}>
                   <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">{playing ? <path d="M3 2h2v8H3zM7 2h2v8H7z" fill="currentColor" /> : <path d="M3 1.5l7 4.5-7 4.5z" fill="currentColor" />}</svg>
                 </button>
                 Replay de ruta · SRV-24817
@@ -225,7 +225,7 @@ export default function Monitoreo() {
             </div>
             <label style={sx('display:flex;gap:12px;align-items:center')}>
               <span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Posición del replay</span>
-              <input type="range" min="0" max="100" value={replay} onChange={e => { setPlaying(false); setReplay(Number(e.target.value)) }} style={sx('flex:1;accent-color:#F2A93B;min-height:44px')} />
+              <input type="range" min="0" max="100" value={replay} onChange={e => { setPlaying(false); setReplay(Number(e.target.value)) }} style={sx('flex:1;accent-color:#475CC7;min-height:44px')} />
             </label>
             <div style={sx('display:flex;justify-content:space-between;font-size:12px;color:#5F6B7A')}>
               {([['08:12 salida', 0], ['10:47 parada', 41], ['13:05 frenado', 77], ['14:30 desvío', 100]] as const).map(([l, p]) => (
@@ -236,7 +236,7 @@ export default function Monitoreo() {
         </section>
 
         <aside style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:16px;min-width:0')}>
-          <div className="card" style={sx('display:flex;flex-direction:column;gap:12px;border-color:' + (sel.estado === 'Desvío' ? '#F5C2C2' : sel.estado === 'Sin señal' ? '#F3D9A8' : '#E4E8ED'))}>
+          <div className="card" style={sx('display:flex;flex-direction:column;gap:12px;border-color:' + (sel.estado === 'Desvío' ? '#F5C2C2' : sel.estado === 'Sin señal' ? '#C7D0F2' : '#E4E8ED'))}>
             <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:8px')}><span className={ESTADO_CLS[sel.estado]}>{sel.estado === 'Desvío' ? 'Crítica · Desvío de ruta' : `${sel.tipo} · ${sel.estado}`}</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{sel.id === HERO.id ? '14:30:12' : sel.fuente}</span></div>
             <span style={sx('font-weight:600;font-size:16px')}>{sel.id} · {sel.cliente} · {sel.trailer}</span>
             <span style={sx('font-size:14px;color:#3E4A59')}>{sel.detalle}</span>
@@ -251,7 +251,7 @@ export default function Monitoreo() {
           </div>
           <div className="card" style={sx('display:flex;flex-direction:column;gap:4px')}>
             <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px')}>
-              <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:16px;font-weight:600")}>{cat === 'riesgo' ? 'Unidades en zona de riesgo' : cat === 'separacion' ? 'Separaciones' : cat === 'senal' ? 'Sin señal' : 'Eventos entrantes'}</h2>
+              <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:600")}>{cat === 'riesgo' ? 'Unidades en zona de riesgo' : cat === 'separacion' ? 'Separaciones' : cat === 'senal' ? 'Sin señal' : 'Eventos entrantes'}</h2>
               {cat !== 'all' && <button type="button" className="lnk" style={sx('font-size:12px')} onClick={() => setCat('all')}>Ver todos los eventos</button>}
             </div>
             {cat === 'riesgo' ? (

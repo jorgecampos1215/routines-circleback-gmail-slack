@@ -8,27 +8,27 @@ import { Field, Modal, Pager, btnPriStyle, btnStyle, inputStyle, usePagination, 
 import { AREAS_DISENO, HOY, JEFE_POR_AREA, altas as altasDe, antiguedad, bajas as BAJAS_SEED, descargar, diasPorLey, esVoluntaria, fechaCorta, fmtPesos, mesAnio, personas as PERSONAS, porArea, porMes, sedes as SEDES, toCSV, type Movimiento, type Persona } from '../data/rh'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EEF1F4;color:#4A5868}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EEF1F4;color:#4A5868}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
 .tbl th.sortable{cursor:pointer;user-select:none}
 .tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .btn-sm{min-height:30px;padding:0 10px;font-size:12px}
-.k{font-family:'Archivo',sans-serif;font-size:26px;font-weight:600}
-.sel{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
+.k{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:600}
+.sel{min-height:40px;background:#FFFFFF;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
 .pillbtn{border:0;cursor:pointer;font-family:inherit}
 `
 
 const SR = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)'
 
-const areaColor: Record<string, string> = { 'Custodia': '#2B7FA8', 'Monitoreo': '#6A5ACD', 'Reacción': '#C0492F', 'Operaciones': '#B36B00', 'Flotilla y taller': '#4A5868', 'Comercial': '#2B9A66', 'Finanzas': '#8A4FA0', 'RH': '#D08A1C', 'Dirección': '#121821' }
+const areaColor: Record<string, string> = { 'Custodia': '#475CC7', 'Monitoreo': '#6A5ACD', 'Reacción': '#C0492F', 'Operaciones': '#3448A8', 'Flotilla y taller': '#4A5868', 'Comercial': '#2B9A66', 'Finanzas': '#8A4FA0', 'RH': '#3448A8', 'Dirección': '#0D1D41' }
 const st: Record<string, string> = { 'Activo': 'pill p-ok', 'Vacaciones': 'pill p-info', 'Incapacidad': 'pill p-warn', 'Onboarding': 'pill p-warn', 'Baja en proceso': 'pill p-bad' }
 
 const ini = (n: string) => n.split(' ').map(x => x[0]).slice(0, 2).join('')
@@ -240,7 +240,7 @@ export default function RH() {
 
   const onbCur = onb[Math.min(onbSel, onb.length - 1)]
   const done = onbCur.ck.filter(Boolean).length
-  const onbRows = onb.map(o => { const p = o.ck.filter(Boolean).length / 7; return { ...o, p: Math.round(p * 100) + '%', bar: 'height:100%;width:' + Math.round(p * 100) + '%;background:' + (p >= 1 ? '#2B9A66' : '#D08A1C') } })
+  const onbRows = onb.map(o => { const p = o.ck.filter(Boolean).length / 7; return { ...o, p: Math.round(p * 100) + '%', bar: 'height:100%;width:' + Math.round(p * 100) + '%;background:' + (p >= 1 ? '#2B9A66' : '#3448A8') } })
   const maxBar = Math.max(1, ...meses.flatMap(([, a, b]) => [a, b]))
   const barH = (v: number) => Math.max(v ? 4 : 0, Math.round((v / maxBar) * 96))
 
@@ -249,7 +249,7 @@ export default function RH() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">Recursos humanos · toda la empresa</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Personas</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Personas</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>{headcount} colaboradores en {areas.filter(([, n]) => n > 0).length} áreas y {sedesAll.length} sedes</span>
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
@@ -270,7 +270,7 @@ export default function RH() {
 
       <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:16px')}>
         <figure className="card" style={sx('margin:0;display:flex;flex-direction:column;gap:12px')}>
-          <figcaption style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap')}><span style={sx("font-family:'Archivo',sans-serif;font-size:16px;font-weight:600")}>Altas y bajas por mes</span>
+          <figcaption style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap')}><span style={sx("font-family:'Montserrat',sans-serif;font-size:16px;font-weight:600")}>Altas y bajas por mes</span>
             <span style={sx('display:flex;gap:14px;font-size:12px;color:#3E4A59')}><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#2B9A66')}></span>Altas</span><span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#D9534F')}></span>Bajas</span></span>
           </figcaption>
           <div style={sx('display:flex;gap:18px;align-items:flex-end;height:130px')}>
@@ -283,7 +283,7 @@ export default function RH() {
           </div>
         </figure>
         <figure className="card" style={sx('margin:0;display:flex;flex-direction:column;gap:10px')}>
-          <figcaption style={sx("font-family:'Archivo',sans-serif;font-size:16px;font-weight:600")}>Colaboradores por área</figcaption>
+          <figcaption style={sx("font-family:'Montserrat',sans-serif;font-size:16px;font-weight:600")}>Colaboradores por área</figcaption>
           {areas.map(([n, v]) => (
             <button key={n} type="button" onClick={() => { setTab('dir'); setFArea(fArea === n ? 'Todas las áreas' : n); pg.setPage(0) }} aria-pressed={fArea === n} style={sx('display:grid;grid-template-columns:150px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:13px;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;color:inherit;text-align:left' + (fArea === n ? ';font-weight:600' : ''))}>
               <span>{n}</span><div style={sx('height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.max(2, Math.round(Math.sqrt(v / 400) * 100)) + '%;background:' + areaColor[n])}></div></div><span className="mono" style={sx('text-align:right')}>{v}</span>
@@ -292,15 +292,15 @@ export default function RH() {
         </figure>
       </section>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
         <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · riesgo de rotación</span><span style={sx('font-size:14px;color:#3E4A59')}>7 colaboradores muestran el patrón previo a una baja: exceso de horas 3 semanas seguidas, vacaciones sin tomar y sin ajuste de sueldo en más de 18 meses. 5 son custodios de Bajío y 2 monitoristas.</span></div>
         <Link className="btn" to={ROUTES.AsistenteIA}>Ver a quiénes</Link>
       </section>
 
       <div role="tablist" aria-label="Sección de personas" style={sx('display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #E4E8ED;padding-bottom:12px')}>
         {TABS.map(([k, label]) => (
-          <button key={k} type="button" role="tab" aria-selected={k === tab} className="btn" style={sx(k === tab ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '')} onClick={() => setTab(k)}>{label}</button>
+          <button key={k} type="button" role="tab" aria-selected={k === tab} className="btn" style={sx(k === tab ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => setTab(k)}>{label}</button>
         ))}
       </div>
 
@@ -315,7 +315,7 @@ export default function RH() {
             </div>
             <div style={sx('display:grid;grid-template-columns:repeat(auto-fill,minmax(min(210px,100%),1fr));gap:12px')}>
               {pageRows.map(p => (
-                <button key={p.id} type="button" onClick={() => setSelId(p.id)} aria-pressed={p.id === p0.id} style={sx('display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:10px;cursor:pointer;font-family:inherit;color:#121821;background:#FFFFFF;border:1px solid ' + (p.id === p0.id ? '#F2A93B;box-shadow:0 0 0 2px #FFF1DB' : '#E4E8ED'))}>
+                <button key={p.id} type="button" onClick={() => setSelId(p.id)} aria-pressed={p.id === p0.id} style={sx('display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:10px;cursor:pointer;font-family:inherit;color:#0D1D41;background:#FFFFFF;border:1px solid ' + (p.id === p0.id ? '#475CC7;box-shadow:0 0 0 2px #E9EDFB' : '#E4E8ED'))}>
                   <span style={sx(av(p.area, 48))}>{ini(p.name)}</span>
                   <span style={sx('display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left')}>
                     <span style={sx('font-weight:600;font-size:14px')}>{p.name}</span>
@@ -335,7 +335,7 @@ export default function RH() {
             <div style={sx('display:flex;gap:16px;align-items:center')}>
               <span style={sx(av(p0.area, 80))}>{ini(p0.name)}</span>
               <div style={sx('display:flex;flex-direction:column;gap:3px;min-width:0')}>
-                <span style={sx("font-family:'Archivo',sans-serif;font-size:20px;font-weight:600")}>{p0.name}</span>
+                <span style={sx("font-family:'Montserrat',sans-serif;font-size:20px;font-weight:600")}>{p0.name}</span>
                 <span style={sx('font-size:14px;color:#3E4A59')}>{p0.role}</span>
                 <span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{p0.id} · {p0.area} · {p0.site}</span>
               </div>
@@ -361,14 +361,14 @@ export default function RH() {
             </section>
             <section style={sx('display:flex;flex-direction:column;gap:10px;border-top:1px solid #EEF1F4;padding-top:14px')}>
               <span className="lbl">Vacaciones 2026</span>
-              <div style={sx('height:10px;border-radius:5px;background:#EBEEF2;overflow:hidden;display:flex')}><div style={sx('height:100%;background:#2B7FA8;width:' + Math.round(p0.vac[0] / Math.max(1, p0.vac[1]) * 100) + '%')}></div></div>
+              <div style={sx('height:10px;border-radius:5px;background:#EBEEF2;overflow:hidden;display:flex')}><div style={sx('height:100%;background:#475CC7;width:' + Math.round(p0.vac[0] / Math.max(1, p0.vac[1]) * 100) + '%')}></div></div>
               <div style={sx('display:flex;justify-content:space-between;font-size:13px;color:#3E4A59')}><span>{p0.vac[0]} tomados</span><span>{p0.vac[1] - p0.vac[0]} disponibles de {p0.vac[1]}</span></div>
             </section>
             <section style={sx('display:flex;flex-direction:column;gap:8px;border-top:1px solid #EEF1F4;padding-top:14px')}>
               <span className="lbl">Historial</span>
               <ol style={sx('list-style:none;margin:0;padding:0;display:flex;flex-direction:column')}>
                 {p0.hist.map(([d, t]) => (
-                  <li key={d + t} style={sx('display:grid;grid-template-columns:80px 12px minmax(0,1fr);gap:10px;padding:6px 0;font-size:13px')}><span className="mono" style={sx('color:#5F6B7A')}>{d}</span><span style={sx('width:8px;height:8px;border-radius:50%;background:#D08A1C;margin-top:5px')}></span><span>{t}</span></li>
+                  <li key={d + t} style={sx('display:grid;grid-template-columns:80px 12px minmax(0,1fr);gap:10px;padding:6px 0;font-size:13px')}><span className="mono" style={sx('color:#5F6B7A')}>{d}</span><span style={sx('width:8px;height:8px;border-radius:50%;background:#3448A8;margin-top:5px')}></span><span>{t}</span></li>
                 ))}
               </ol>
             </section>
@@ -389,7 +389,7 @@ export default function RH() {
           <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:8px 12px 4px')}>
             <div role="group" aria-label="Tipo de movimiento" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
               {(['Todos', 'Alta', 'Baja'] as const).map(k => (
-                <button key={k} type="button" className="btn btn-sm" aria-pressed={movFiltro === k} style={sx(movFiltro === k ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '')} onClick={() => { setMovFiltro(k); pgMov.setPage(0) }}>{k === 'Todos' ? 'Todos' : k + 's'} · {k === 'Todos' ? altasList.length + bajasAll.length : k === 'Alta' ? altasList.length : bajasAll.length}</button>
+                <button key={k} type="button" className="btn btn-sm" aria-pressed={movFiltro === k} style={sx(movFiltro === k ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => { setMovFiltro(k); pgMov.setPage(0) }}>{k === 'Todos' ? 'Todos' : k + 's'} · {k === 'Todos' ? altasList.length + bajasAll.length : k === 'Alta' ? altasList.length : bajasAll.length}</button>
               ))}
             </div>
             <div style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
@@ -416,9 +416,9 @@ export default function RH() {
       {tab === 'on' && (
         <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:16px')}>
           <section className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
-            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Ingresos en curso</h2>
+            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Ingresos en curso</h2>
             {onbRows.map((o, i) => (
-              <button key={o.n + i} type="button" onClick={() => setOnbSel(i)} aria-pressed={i === onbSel} style={sx('display:grid;grid-template-columns:minmax(0,1fr) 120px 44px;gap:12px;align-items:center;border:0;border-top:1px solid #EEF1F4;font-size:14px;cursor:pointer;font-family:inherit;color:inherit;text-align:left;' + (i === onbSel ? 'padding:8px 8px;background:#FFF8EC;margin:0 -8px;border-radius:6px' : 'padding:8px 0;background:none'))}>
+              <button key={o.n + i} type="button" onClick={() => setOnbSel(i)} aria-pressed={i === onbSel} style={sx('display:grid;grid-template-columns:minmax(0,1fr) 120px 44px;gap:12px;align-items:center;border:0;border-top:1px solid #EEF1F4;font-size:14px;cursor:pointer;font-family:inherit;color:inherit;text-align:left;' + (i === onbSel ? 'padding:8px 8px;background:#F0F3FD;margin:0 -8px;border-radius:6px' : 'padding:8px 0;background:none'))}>
                 <span style={sx('display:flex;flex-direction:column')}><span style={sx('font-weight:500')}>{o.n}</span><span style={sx('font-size:12px;color:#5F6B7A')}>{o.r} · ingresa {o.d}</span></span>
                 <div style={sx('height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx(o.bar)}></div></div>
                 <span className="mono" style={sx('font-size:13px;text-align:right')}>{o.p}</span>
@@ -426,11 +426,11 @@ export default function RH() {
             ))}
           </section>
           <section className="card" style={sx('display:flex;flex-direction:column;gap:8px')}>
-            <h2 style={sx("margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Checklist · {onbCur.n}</h2>
+            <h2 style={sx("margin:0 0 4px;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Checklist · {onbCur.n}</h2>
             <span style={sx('font-size:13px;color:#5F6B7A')}>{onbCur.r} · {done} de 7 completos</span>
             {LABELS.map((label, i) => (
               <label key={label} style={sx('display:flex;gap:12px;align-items:center;min-height:40px;font-size:14px;border-top:1px solid #EEF1F4;cursor:pointer')}>
-                <input type="checkbox" checked={onbCur.ck[i]} onChange={() => toggleCk(i)} style={sx('width:18px;height:18px;accent-color:#D08A1C')} />
+                <input type="checkbox" checked={onbCur.ck[i]} onChange={() => toggleCk(i)} style={sx('width:18px;height:18px;accent-color:#3448A8')} />
                 <span style={sx(onbCur.ck[i] ? 'color:#5F6B7A;text-decoration:line-through' : '')}>{label}</span>
               </label>
             ))}
@@ -459,7 +459,7 @@ export default function RH() {
 
       {tab === 'vac' && (
         <section className="card" style={sx('display:flex;flex-direction:column;gap:6px')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Solicitudes de vacaciones y permisos</h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Solicitudes de vacaciones y permisos</h2>
           <span style={sx('font-size:13px;color:#5F6B7A;margin-bottom:8px')}>Llegan desde el <Link to={ROUTES.PortalColaborador}>portal del colaborador</Link>, ya aprobadas por el jefe directo.</span>
           {solicitudes.map((v: SolicitudVacaciones) => (
             <VacRow key={v.id} n={v.colaborador} r={v.area + ' · ' + v.id} d={rango(v.desde, v.hasta) + ' · ' + v.dias + (v.dias === 1 ? ' día' : ' días')}
@@ -470,7 +470,7 @@ export default function RH() {
             <VacRow key={'d' + i} n={n} r={r} d={d} cover={cover} state={vac[i] || (done0 ? 'Aprobada' : null)}
               ok={() => { setVac({ ...vac, [i]: 'Aprobada' }); toast(`Vacaciones de ${n} aprobadas`) }} no={() => { setVac({ ...vac, [i]: 'Rechazada' }); toast(`Vacaciones de ${n} rechazadas`, 'warn') }} />
           ))}
-          <h2 style={sx("margin:18px 0 0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Trámites solicitados a RH</h2>
+          <h2 style={sx("margin:18px 0 0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Trámites solicitados a RH</h2>
           <span style={sx('font-size:13px;color:#5F6B7A;margin-bottom:8px')}>Constancias, cartas y cambios de datos pedidos desde Mi portal.</span>
           {tramites.length === 0 && <span style={sx('font-size:14px;color:#5F6B7A;padding:8px 0;border-top:1px solid #EEF1F4')}>Sin trámites pendientes.</span>}
           {tramites.map((t: TramiteRH) => (

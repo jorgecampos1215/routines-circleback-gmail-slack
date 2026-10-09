@@ -9,23 +9,23 @@ import { clientes } from '../data/seed'
 import { ETIQUETA, FACTOR, GASTOS, PERIODOS, antiguedad, diasCobroPromedio, facturasIniciales, rentaPorCliente, rentaPorServicio, rentaPorUnidad, type Factura, type Periodo, type Renta } from '../data/finanzas'
 
 const CSS = `
-a{color:#B36B00}a:hover{color:#8A5300}
+a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF1DB;color:#8A5300}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
+.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap;cursor:pointer;user-select:none}
-.tbl th:hover{color:#121821}
+.tbl th:hover{color:#0D1D41}
 .tbl td{padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#121821;font:500 14px 'IBM Plex Sans',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#F2A93B;border-color:#F2A93B;color:#17110A}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .btn-sm{min-height:32px;padding:0 10px;font-size:13px}
-.k{font-family:'Archivo',sans-serif;font-size:26px;font-weight:600}
+.k{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:600}
 .field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
-.field select{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#121821;padding:0 12px;font:400 14px 'IBM Plex Sans',sans-serif}
-.inv{cursor:pointer;border-radius:6px}.inv:hover{background:#FAFBFC}.inv.sel{background:#FFF8EC}
+.field select{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
+.inv{cursor:pointer;border-radius:6px}.inv:hover{background:#FAFBFC}.inv.sel{background:#F0F3FD}
 `
 
 type By = 'cli' | 'srv' | 'uni'
@@ -143,7 +143,7 @@ export default function Finanzas() {
       <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
         <div style={sx('display:flex;flex-direction:column;gap:6px')}>
           <span className="lbl">ERP ligero · {ETIQUETA[periodo]}</span>
-          <h1 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:32px;font-weight:600")}>Finanzas</h1>
+          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Finanzas</h1>
           <span style={sx('color:#5F6B7A;font-size:14px')}>Registro de facturación sin timbrado CFDI en el demo</span>
         </div>
         <div style={sx('display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end')}>
@@ -152,8 +152,8 @@ export default function Finanzas() {
         </div>
       </header>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#FFF8EC;border:1px solid #F3D9A8;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B36B00" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
         <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · proyección de cobranza</span><span style={sx('font-size:14px;color:#3E4A59')}>Con el historial de pago de cada cliente, se esperan cobrar $7.9M en octubre. Bebidas del Golfo y Grupo Textil Arrayán concentran {b.mas60 ? Math.round((facturas.filter(x => ['Bebidas del Golfo', 'Grupo Textil Arrayán'].includes(x.cliente) && x.estatus !== 'Cobrada' && x.dias > 60).reduce((a, x) => a + x.monto, 0) / b.mas60) * 100) : 0}% del riesgo a más de 60 días: sugiero condicionar nuevos servicios a pago.</span></div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
           <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Cobranza acumulada proyectada por semana de octubre: 1.8, 3.9, 5.6 y 7.9 millones" style={sx('display:block')}><g><rect x="8" y="49" width="40" height="11" rx="2" fill="#2B9A66"></rect><rect x="60" y="36.3" width="40" height="23.7" rx="2" fill="#2B9A66"></rect><rect x="112" y="26" width="40" height="34" rx="2" fill="#9FD6BB"></rect><rect x="164" y="12" width="40" height="48" rx="2" fill="#9FD6BB"></rect></g><text x="166" y="9" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#17784A">$7.9M</text></svg>
@@ -172,10 +172,10 @@ export default function Finanzas() {
 
       <section className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
         <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Rentabilidad <span style={sx('font-size:13px;color:#5F6B7A;font-weight:400;font-family:IBM Plex Sans,sans-serif')}>· {rows.length} {by === 'cli' ? 'clientes' : by === 'srv' ? 'modelos' : 'unidades'} · {ETIQUETA[periodo]}</span></h2>
+          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Rentabilidad <span style={sx('font-size:13px;color:#5F6B7A;font-weight:400;font-family:IBM Plex Sans,sans-serif')}>· {rows.length} {by === 'cli' ? 'clientes' : by === 'srv' ? 'modelos' : 'unidades'} · {ETIQUETA[periodo]}</span></h2>
           <div role="tablist" aria-label="Agrupar por" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
             {TABS.map(([k, label]) => (
-              <button key={k} type="button" role="tab" aria-selected={k === by} className="btn" style={sx(k === by ? 'background:#FFF1DB;border-color:#F2A93B;color:#8A5300' : '')} onClick={() => { setBy(k); pg.setPage(0) }}>{label}</button>
+              <button key={k} type="button" role="tab" aria-selected={k === by} className="btn" style={sx(k === by ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => { setBy(k); pg.setPage(0) }}>{label}</button>
             ))}
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function Finanzas() {
             <tbody>
               {rows.slice(pg.from, pg.to).map(r => (
                 <tr key={r.n} title={r.detalle}><td>{r.n}{r.detalle && <span style={sx('display:block;font-size:12px;color:#5F6B7A;white-space:normal')}>{r.detalle}</span>}</td><td className="mono">{fmt(r.rev)}</td><td className="mono">{fmt(r.cost)}</td><td className="mono">{fmt(r.m)}</td>
-                  <td><div style={sx('display:flex;align-items:center;gap:10px')}><div style={sx('flex:1;height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.max(2, Math.round(r.pct * 100 / 0.45)) + '%;max-width:100%;background:' + (r.pct < 0 ? '#F0605D' : r.pct < 0.3 ? '#F2A93B' : '#4CC38A'))}></div></div><span className="mono" style={sx('font-size:13px;min-width:40px;text-align:right')}>{Math.round(r.pct * 100)}%</span></div></td>
+                  <td><div style={sx('display:flex;align-items:center;gap:10px')}><div style={sx('flex:1;height:8px;border-radius:4px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.max(2, Math.round(r.pct * 100 / 0.45)) + '%;max-width:100%;background:' + (r.pct < 0 ? '#F0605D' : r.pct < 0.3 ? '#475CC7' : '#4CC38A'))}></div></div><span className="mono" style={sx('font-size:13px;min-width:40px;text-align:right')}>{Math.round(r.pct * 100)}%</span></div></td>
                 </tr>
               ))}
             </tbody>
@@ -196,7 +196,7 @@ export default function Finanzas() {
 
       <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px')}>
         <div className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
-          <h2 style={sx("margin:0 0 4px;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Gastos por categoría <span style={sx('font-size:13px;color:#5F6B7A;font-weight:400;font-family:IBM Plex Sans,sans-serif')}>· {ETIQUETA[periodo]}</span></h2>
+          <h2 style={sx("margin:0 0 4px;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Gastos por categoría <span style={sx('font-size:13px;color:#5F6B7A;font-weight:400;font-family:IBM Plex Sans,sans-serif')}>· {ETIQUETA[periodo]}</span></h2>
           {GASTOS.map(([k, v]) => (
             <div key={k} style={sx('display:grid;grid-template-columns:150px minmax(0,1fr) 80px;gap:12px;align-items:center;font-size:14px')}>
               <span>{k}</span><div style={sx('height:10px;border-radius:5px;background:#EBEEF2;overflow:hidden')}><div style={sx('height:100%;width:' + Math.round(v * f / gmax * 100) + '%;background:#3FA7C9')}></div></div><span className="mono" style={sx('text-align:right')}>{fmtM1(v * f)}</span>
@@ -206,7 +206,7 @@ export default function Finanzas() {
         </div>
         <div className="card" style={sx('display:flex;flex-direction:column;gap:12px')}>
           <div style={sx('display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center')}>
-            <h2 style={sx("margin:0;font-family:'Archivo',sans-serif;font-size:18px;font-weight:600")}>Cuentas por cobrar</h2>
+            <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Cuentas por cobrar</h2>
             <div style={sx('display:flex;gap:6px;flex-wrap:wrap')}>
               <button type="button" className="btn btn-sm" onClick={abrirPago}>Registrar pago</button>
               <button type="button" className="btn btn-sm" onClick={abrirRec}>Enviar recordatorio</button>

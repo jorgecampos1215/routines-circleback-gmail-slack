@@ -2,6 +2,7 @@ import { Logo } from '../components/Logo'
 import { useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Nav } from '../components/Nav'
+import { PageHeader, Section, Nota } from '../components/Page'
 import { ROUTES } from '../lib/routes'
 import { sx } from '../lib/sx'
 import { useToast } from '../components/ui'
@@ -11,8 +12,9 @@ const CSS = `
 a{color:#3448A8}a:hover{color:#0D1D41}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:600 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn:hover{background:#F3F5F8}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}.btn-pri:hover{background:#3448A8}
 @media print{
   @page{size:letter;margin:12mm}
   html,body{background:#FFFFFF !important}
@@ -47,7 +49,6 @@ export default function ReporteIncidente() {
   const evidRef = useRef<HTMLInputElement>(null)
   const evidIdx = useRef(0)
   const enviado = !!sent[caso.id]
-  const sendLabel = enviado ? `Enviado al portal y correo de ${caso.cliente}` : 'Enviar al cliente'
   const volverTo = caso.esPrincipal ? ROUTES.Reaccion : `${ROUTES.Reaccion}?inc=${caso.id}`
   // Línea de tiempo: la del diseño para el caso principal; para los demás, la bitácora completa del caso (hasta 7 hitos)
   const TL = caso.esPrincipal ? TL0 : [...caso.log, ...(caso.log.length < 7 ? [caso.stepLog[4]] : [])].filter(Boolean).slice(0, 8).map(l => ({ t: l.t, x: l.text }))
@@ -62,17 +63,17 @@ export default function ReporteIncidente() {
         <Nav active="reaccion" />
       </div>
       <main className="ri-main" style={sx('flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px')}>
-        <header className="ri-noprint" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
-          <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-            <span className="lbl">Reacción · paso final</span>
-            <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Reporte post-incidente</h1>
-          </div>
-          <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
-            <Link className="btn" to={volverTo}>Volver al incidente</Link>
-            <button type="button" className="btn" onClick={descargar}>Descargar PDF</button>
-            <button type="button" className="btn btn-pri" onClick={enviar} disabled={enviado} style={enviado ? sx('cursor:default') : undefined}>{sendLabel}</button>
-          </div>
-        </header>
+        <div className="ri-noprint">
+          <PageHeader seccion="Operación · Incidentes · paso final" titulo="Reporte para el cliente"
+            descripcion={`Documento listo para ${caso.cliente}: qué pasó, cómo se atendió y qué recomendamos. Revísalo, descárgalo o envíalo.`}
+            accion={{ label: enviado ? 'Reenviar al cliente' : 'Enviar al cliente', onClick: enviar }}
+            secundarias={<>
+              <Link className="btn" to={volverTo}>‹ Volver al incidente</Link>
+              <button type="button" className="btn" onClick={descargar}>Descargar PDF</button>
+            </>}>
+            {enviado && <span className="pill" style={sx('display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#E3F6EC;color:#17784A;align-self:flex-start')}>Enviado al portal y correo de {caso.cliente}</span>}
+          </PageHeader>
+        </div>
 
         <article className="ri-doc" style={sx('background:#FFFFFF;border:1px solid #E4E8ED;border-radius:12px;max-width:880px;width:100%;box-sizing:border-box;padding:56px 64px;display:flex;flex-direction:column;gap:28px;align-self:center')}>
           <div style={sx('display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;border-bottom:2px solid #0D1D41;padding-bottom:20px')}>
@@ -85,6 +86,7 @@ export default function ReporteIncidente() {
             </div>
           </div>
           <div style={sx('display:flex;flex-direction:column;gap:6px')}>
+            <span className="lbl">Reporte post-incidente</span>
             <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:26px;font-weight:600;text-wrap:balance")}>{caso.tituloReporte}</h2>
             <span style={sx('font-size:15px;color:#3E4A59')}>Para: {caso.cliente} · Gerencia de logística y seguridad corporativa</span>
           </div>
@@ -118,6 +120,7 @@ export default function ReporteIncidente() {
                 <button key={i} type="button" title="Adjuntar o reemplazar evidencia" onClick={() => { evidIdx.current = i; evidRef.current?.click() }} style={sx(EVID + ';cursor:pointer;font-family:inherit;padding:8px;overflow:hidden;word-break:break-word;text-align:center' + (EVID0.includes(e) ? '' : ';background:#E3F6EC;border-style:solid'))}>{e}</button>
               ))}
             </div>
+            <span className="ri-noprint" style={sx('font-size:12px;color:#5F6B7A')}>Haz clic en una casilla para adjuntar o reemplazar la evidencia antes de enviar.</span>
           </section>
           <section style={sx('display:flex;flex-direction:column;gap:10px')}>
             <h3 style={sx(H3)}>Recomendaciones</h3>
@@ -131,12 +134,17 @@ export default function ReporteIncidente() {
           </div>
         </article>
 
-        <nav className="ri-noprint" aria-label="Siguiente en el demo" style={sx('display:flex;gap:12px;flex-wrap:wrap;justify-content:center')}>
-          <Link className="btn" to={ROUTES.Flotilla}>Vista rápida: Flotilla</Link>
-          <Link className="btn" to={ROUTES.RH}>Vista rápida: RH</Link>
-          <Link className="btn" to={ROUTES.Finanzas}>Vista rápida: Rentabilidad</Link>
-          <Link className="btn" to={ROUTES.Flujo}>Ver flujo completo</Link>
-        </nav>
+        <div className="ri-noprint" style={sx('max-width:880px;width:100%;align-self:center')}>
+          <Section titulo="Qué más puedes ver" ayuda="Atajos a las demás áreas de la plataforma una vez cerrado el incidente." plegable abierto={false}>
+            <nav aria-label="Siguiente en el demo" style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
+              <Link className="btn" to={ROUTES.Flotilla}>Flotilla</Link>
+              <Link className="btn" to={ROUTES.RH}>Equipo</Link>
+              <Link className="btn" to={ROUTES.Finanzas}>Rentabilidad</Link>
+              <Link className="btn" to={ROUTES.Flujo}>Ver flujo completo</Link>
+            </nav>
+            <Nota>El reporte queda guardado en el expediente del servicio {caso.servicio} y en el portal del cliente.</Nota>
+          </Section>
+        </div>
       </main>
     </div>
   )

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/Shell'
+import { PageHeader, Pasos, Section, Nota } from '../components/Page'
 import { sx } from '../lib/sx'
 import { ROUTES } from '../lib/routes'
 import { Modal, useToast, btnStyle, btnPriStyle } from '../components/ui'
@@ -14,8 +15,9 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 .mono{font-family:'IBM Plex Mono',monospace}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
 .p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:600 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn:hover{background:#F3F5F8}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}.btn-pri:hover{background:#3448A8}
 .city{font:500 13px 'Montserrat',sans-serif;fill:#5F6B7A}
 @keyframes ping{0%{r:8;opacity:.9}100%{r:26;opacity:0}}
 .ping{animation:ping 1.6s ease-out infinite}
@@ -25,13 +27,16 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 .feed-row{cursor:pointer;background:transparent;border:0;border-top:1px solid #EEF1F4;text-align:left;font:inherit;color:inherit;width:100%}.feed-row:hover{background:#FAFBFC}
 .kpi-btn{cursor:pointer;text-align:left;font:inherit;color:inherit}.kpi-btn:hover{border-color:#475CC7}
 .lnk{background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline}.lnk:hover{color:#0D1D41}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 14px;border-radius:999px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:600 13px 'Montserrat',sans-serif;cursor:pointer}
+.chip:hover{background:#F3F5F8}
+.chip[aria-pressed="true"]{background:#E9EDFB;border-color:#475CC7}
 `
 
 type Src = 'all' | 'samsara' | 'ruptela'
 type Cat = 'all' | 'separacion' | 'senal' | 'riesgo'
 type Ev = { k: string; t: string; text: string; src: 'Samsara' | 'Ruptela'; cls: string; nuevo?: boolean; unidad: string; tipo: string; velocidad?: number }
 
-const SOURCES: [Src, string][] = [['all', 'Todas las fuentes'], ['samsara', 'Samsara'], ['ruptela', 'Ruptela']]
+const SOURCES: [Src, string][] = [['all', 'Todas'], ['samsara', 'Samsara'], ['ruptela', 'Ruptela']]
 
 const BASE: Ev[] = [
   { k: 'b1', t: '14:30:12', text: 'Desvío de ruta · TR-88213', src: 'Samsara', cls: 'pill p-bad', unidad: 'SRV-24817', tipo: 'Desvío de ruta' },
@@ -81,12 +86,14 @@ function posReplay(r: number) {
 
 const ESTADO_CLS: Record<UnidadMapa['estado'], string> = { Desvío: 'pill p-bad', 'En ruta': 'pill p-ok', Detenido: 'pill p-mute', 'Sin señal': 'pill p-warn' }
 const tel = (t: string) => 'tel:+52' + t.replace(/\D/g, '')
+const FEED_TITULO: Record<Cat, string> = { all: 'Eventos de telemetría', separacion: 'Separaciones custodio–tráiler', senal: 'Unidades sin señal', riesgo: 'Unidades en zona de riesgo' }
 
 export default function Monitoreo() {
   const navigate = useNavigate()
   const toast = useToast()
   const [src, setSrc] = useState<Src>('all')
   const [cat, setCat] = useState<Cat>('all')
+  const [feedKey, setFeedKey] = useState(0) // > 0 cuando un contador pidió abrir el feed
   const [selId, setSelId] = useState(HERO.id)
   const [verTodos, setVerTodos] = useState(false)
   const [modal, setModal] = useState<{ tipo: 'llamar'; u: UnidadMapa } | { tipo: 'evento'; e: Ev } | null>(null)
@@ -140,39 +147,62 @@ export default function Monitoreo() {
     if (u) { seleccionar(u); toast(`${u.id} seleccionado en el mapa`, 'info') } else toast(`${e.unidad} no tiene posición en el mapa de rutas activas`, 'warn')
     setModal(null)
   }
+  /** Los contadores filtran el feed y lo abren. */
+  const filtrarFeed = (k: Cat) => {
+    setCat(c => (c === k ? 'all' : k))
+    setVerTodos(false)
+    setFeedKey(n => n + 1)
+    window.setTimeout(() => document.getElementById('feed-eventos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+  }
   const kpiBtn = (k: Cat, label: string, n: number, sub: string) => (
-    <button type="button" className="card kpi-btn" aria-pressed={cat === k} onClick={() => setCat(c => (c === k ? 'all' : k))} title={cat === k ? 'Quitar filtro' : 'Filtrar el feed'} style={sx('display:flex;flex-direction:column;gap:6px' + (cat === k ? ';border-color:#475CC7;background:#F0F3FD' : ''))}>
-      <span className="lbl">{label}</span><span style={sx("font-family:'Montserrat';font-size:28px;font-weight:600")}>{n}</span><span style={sx('font-size:13px;color:#5F6B7A')}>{sub}</span>
+    <button type="button" className="card kpi-btn" aria-pressed={cat === k} onClick={() => filtrarFeed(k)} title={cat === k ? 'Quitar filtro' : 'Ver estos eventos'} style={sx('display:flex;flex-direction:column;gap:4px;padding:14px 18px' + (cat === k ? ';border-color:#475CC7;background:#F0F3FD' : ''))}>
+      <span className="lbl">{label}</span><span style={sx("font-family:'Montserrat';font-size:26px;font-weight:600")}>{n}</span><span style={sx('font-size:13px;color:#5F6B7A')}>{sub}</span>
     </button>
   )
 
   return (
     <Shell active="monitoreo" css={CSS} mainStyle="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
-      <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
-        <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-          <span className="lbl">Monitoreo</span>
-          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Mapa en vivo</h1>
-          <span style={sx('color:#5F6B7A;font-size:14px')}>{conteos.custodios} custodios · {conteos.autos} autos de custodia · {conteos.trailers} tráileres reportando{src !== 'all' ? ` · solo ${src === 'samsara' ? 'Samsara' : 'Ruptela'}` : ''}</span>
-        </div>
-        <div role="group" aria-label="Fuente de telemetría" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
-          {SOURCES.map(([k, label]) => (
-            <button key={k} type="button" className="btn" aria-pressed={k === src} style={sx(k === src ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => setSrc(k)}>{label}</button>
-          ))}
-        </div>
-      </header>
+      <PageHeader seccion="Operación" titulo="Mapa en vivo"
+        descripcion="Dónde están ahora los tráileres y custodios de cada servicio, y qué alertas necesitan atención. Para el monitorista de turno."
+        accion={{ label: 'Atender incidente', to: ROUTES.Reaccion }}>
+        <span style={sx('color:#5F6B7A;font-size:13px')}>{conteos.custodios} custodios · {conteos.autos} autos de custodia · {conteos.trailers} tráileres reportando{src !== 'all' ? ` · solo ${src === 'samsara' ? 'Samsara' : 'Ruptela'}` : ''}</span>
+      </PageHeader>
+      <Pasos actual={3} />
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+      <section aria-label="Sugerencia de la IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:14px 18px')}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · patrón de robo detectado</span><span style={sx('font-size:14px;color:#3E4A59')}>El desvío de <button type="button" className="lnk" onClick={() => seleccionar(HERO)}>SRV-24817</button> coincide 87% con 5 robos previos en Méx–Qro: salida a terracería, velocidad baja y separación del custodio. Recomiendo escalar a Reacción ahora y pre-alertar a la unidad R-03.</span></div>
+        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}>
+          <span style={sx('font-weight:600')}>Sugerencia de la IA: escalar <button type="button" className="lnk" onClick={() => seleccionar(HERO)}>SRV-24817</button> a incidente ahora</span>
+          <span style={sx('font-size:14px;color:#3E4A59')}>Su desvío coincide 87% con 5 robos previos en Méx–Qro: salida a terracería, velocidad baja y separación del custodio. Conviene pre-alertar a la unidad de reacción R-03.</span>
+        </div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Incidentes por franja horaria: el pico está entre 21 y 24 horas, seguido de 00 a 03" style={sx('display:block')}><g fill="#AEB8C4"><rect x="4" y="12" width="20" height="48" rx="2"></rect><rect x="31" y="42" width="20" height="18" rx="2"></rect><rect x="58" y="54" width="20" height="6" rx="2"></rect><rect x="85" y="48" width="20" height="12" rx="2"></rect><rect x="139" y="30" width="20" height="30" rx="2"></rect><rect x="166" y="36" width="20" height="24" rx="2"></rect><rect x="193" y="6" width="20" height="54" rx="2"></rect></g><rect x="112" y="24" width="20" height="36" rx="2" fill="#D9534F"></rect></svg>
+          <svg width="220" height="56" viewBox="0 0 220 64" role="img" aria-label="Incidentes por franja horaria: el pico está entre 21 y 24 horas, seguido de 00 a 03" style={sx('display:block')}><g fill="#AEB8C4"><rect x="4" y="12" width="20" height="48" rx="2"></rect><rect x="31" y="42" width="20" height="18" rx="2"></rect><rect x="58" y="54" width="20" height="6" rx="2"></rect><rect x="85" y="48" width="20" height="12" rx="2"></rect><rect x="139" y="30" width="20" height="30" rx="2"></rect><rect x="166" y="36" width="20" height="24" rx="2"></rect><rect x="193" y="6" width="20" height="54" rx="2"></rect></g><rect x="112" y="24" width="20" height="36" rx="2" fill="#D9534F"></rect></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Incidentes por franja de 3 h · rojo: ahora</figcaption>
         </figure>
-        <Link className="btn" to={ROUTES.Reaccion} onClick={() => toast('Escalado a Reacción · unidad R-03 pre-alertada', 'warn')}>Escalar a Reacción</Link>
+        <Link className="btn" to={ROUTES.Reaccion} onClick={() => toast('Escalado a Incidentes · unidad R-03 pre-alertada', 'warn')}>Escalar a Incidentes</Link>
+      </section>
+
+      <section aria-label="Contadores de alertas" style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:12px')}>
+        {kpiBtn('all', 'Alertas abiertas', alertasAbiertas.length, `${sev.crit} crítica${sev.crit === 1 ? '' : 's'} · ${sev.alta} alta${sev.alta === 1 ? '' : 's'} · ${sev.media} media${sev.media === 1 ? '' : 's'}`)}
+        {kpiBtn('separacion', 'Separación custodio–tráiler', separacion.length, 'Custodio a más de 1 km por más de 3 min')}
+        {kpiBtn('senal', 'Sin señal', sinSenal.length, `${sinSenal.filter(e => e.src === 'Ruptela').length} Ruptela · ${sinSenal.filter(e => e.src === 'Samsara').length} Samsara`)}
+        {kpiBtn('riesgo', 'En zona de riesgo', riesgo.length, 'Tramos con más robos: Arco Norte, Méx–Qro, Puebla–Orizaba')}
       </section>
 
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:stretch')}>
-        <section className="card" style={sx('flex:999 1 560px;padding:0;overflow:hidden;position:relative;display:flex;flex-direction:column')}>
+        <section className="card" aria-label="Mapa de rutas activas" style={sx('flex:999 1 620px;padding:0;overflow:hidden;position:relative;display:flex;flex-direction:column')}>
+          <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:14px 20px;border-bottom:1px solid #E4E8ED')}>
+            <div style={sx('display:flex;flex-direction:column;gap:2px')}>
+              <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:17px;font-weight:600;color:#0D1D41")}>{unidades.length} rutas activas</h2>
+              <span style={sx('font-size:13px;color:#5F6B7A')}>Haz clic en una unidad para ver su detalle a la derecha.</span>
+            </div>
+            <div role="group" aria-label="Fuente de telemetría" style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
+              <span className="lbl">Fuente</span>
+              {SOURCES.map(([k, label]) => (
+                <button key={k} type="button" className="chip" aria-pressed={k === src} onClick={() => setSrc(k)}>{label}</button>
+              ))}
+            </div>
+          </div>
           <svg viewBox="0 0 900 560" role="img" aria-label={`Mapa de ${unidades.length} rutas activas`} style={sx('width:100%;height:auto;display:block;background:#F7F9FB')}>
             <defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#F3F5F8" strokeWidth="1"></path></pattern></defs>
             <rect width="900" height="560" fill="url(#g)"></rect>
@@ -206,88 +236,89 @@ export default function Monitoreo() {
               <circle cx={rx} cy={ry} r="6" fill="#FFFFFF" stroke="#0D1D41" strokeWidth="2"></circle>
               <circle cx={rx} cy={ry} r="2" fill="#0D1D41"></circle>
             </g>
-            <rect x="140" y="470" width="340" height="70" rx="8" fill="#FFFFFF" stroke="#E4E8ED"></rect>
+            <rect x="140" y="470" width="380" height="70" rx="8" fill="#FFFFFF" stroke="#E4E8ED"></rect>
             <rect x="158" y="488" width="12" height="12" rx="2" fill="#0B6A8A"></rect><text x="178" y="499" className="city" style={sx('fill:#3E4A59')}>Tráiler del cliente</text>
             <circle cx="164" cy="520" r="6" fill="#475CC7"></circle><text x="178" y="525" className="city" style={sx('fill:#3E4A59')}>Custodio / auto de custodia</text>
-            <path d="M320 494H348" stroke="#F0605D" strokeWidth="3" strokeDasharray="6 5"></path><text x="356" y="499" className="city" style={sx('fill:#3E4A59')}>Desvío</text>
-            <text x="356" y="525" className="city" style={sx('fill:#3E4A59')}>{unidades.length} unidades en mapa</text>
+            <path d="M372 494H400" stroke="#F0605D" strokeWidth="3" strokeDasharray="6 5"></path><text x="408" y="499" className="city" style={sx('fill:#3E4A59')}>Desvío</text>
+            <text x="372" y="525" className="city" style={sx("fill:#3E4A59")}>{unidades.length} unidades en mapa</text>
           </svg>
-          <div style={sx('padding:16px 20px;display:flex;flex-direction:column;gap:10px;border-top:1px solid #E4E8ED')}>
-            <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-              <span className="lbl" style={sx('display:inline-flex;align-items:center;gap:10px')}>
-                <button type="button" onClick={() => { if (!playing && replay >= 100) setReplay(0); setPlaying(p => !p) }} aria-label={playing ? 'Pausar replay' : 'Reproducir replay'}
-                  style={sx('display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid #D5DBE3;background:#F3F5F8;cursor:pointer;padding:0;color:#0D1D41')}>
-                  <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">{playing ? <path d="M3 2h2v8H3zM7 2h2v8H7z" fill="currentColor" /> : <path d="M3 1.5l7 4.5-7 4.5z" fill="currentColor" />}</svg>
-                </button>
-                Replay de ruta · SRV-24817
-              </span>
-              <span className="mono" style={sx('font-size:13px;color:#3E4A59')}>{replayLabel}</span>
-            </div>
-            <label style={sx('display:flex;gap:12px;align-items:center')}>
-              <span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Posición del replay</span>
-              <input type="range" min="0" max="100" value={replay} onChange={e => { setPlaying(false); setReplay(Number(e.target.value)) }} style={sx('flex:1;accent-color:#475CC7;min-height:44px')} />
-            </label>
-            <div style={sx('display:flex;justify-content:space-between;font-size:12px;color:#5F6B7A')}>
-              {([['08:12 salida', 0], ['10:47 parada', 41], ['13:05 frenado', 77], ['14:30 desvío', 100]] as const).map(([l, p]) => (
-                <span key={l} role="button" tabIndex={0} style={sx('cursor:pointer')} onClick={() => { setPlaying(false); setReplay(p) }} onKeyDown={e => { if (e.key === 'Enter') { setPlaying(false); setReplay(p) } }}>{l}</span>
-              ))}
-            </div>
-          </div>
         </section>
 
         <aside style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:16px;min-width:0')}>
-          <div className="card" style={sx('display:flex;flex-direction:column;gap:12px;border-color:' + (sel.estado === 'Desvío' ? '#F5C2C2' : sel.estado === 'Sin señal' ? '#C7D0F2' : '#E4E8ED'))}>
-            <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:8px')}><span className={ESTADO_CLS[sel.estado]}>{sel.estado === 'Desvío' ? 'Crítica · Desvío de ruta' : `${sel.tipo} · ${sel.estado}`}</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{sel.id === HERO.id ? '14:30:12' : sel.fuente}</span></div>
+          <Section titulo={sel.estado === 'Desvío' ? 'Alerta crítica' : sel.estado === 'Sin señal' ? 'Alerta · sin señal' : 'Unidad seleccionada'}
+            ayuda={sel.id === HERO.id ? 'Requiere atención inmediata del monitorista.' : 'Detalle de la unidad elegida en el mapa.'}
+            style={'flex:1;border-color:' + (sel.estado === 'Desvío' ? '#F5C2C2' : sel.estado === 'Sin señal' ? '#C7D0F2' : '#E4E8ED')}>
+            <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap')}><span className={ESTADO_CLS[sel.estado]}>{sel.estado === 'Desvío' ? 'Crítica · Desvío de ruta' : `${sel.tipo} · ${sel.estado}`}</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{sel.id === HERO.id ? '14:30:12' : sel.fuente}</span></div>
             <span style={sx('font-weight:600;font-size:16px')}>{sel.id} · {sel.cliente} · {sel.trailer}</span>
             <span style={sx('font-size:14px;color:#3E4A59')}>{sel.detalle}</span>
-            {sel.id !== HERO.id && <span style={sx('font-size:13px;color:#5F6B7A')}>Custodios: {sel.custodios} · Auto {sel.auto} · Monitorista {sel.monitorista} · {sel.fuente}</span>}
-            <div style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
-              {sel.estado === 'Desvío' || sel.estado === 'Sin señal'
-                ? <Link className="btn btn-pri" to={ROUTES.Reaccion}>Abrir incidente</Link>
-                : <Link className="btn btn-pri" to={ROUTES.Servicios}>Ver servicio</Link>}
+            <dl style={sx('margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;font-size:13px')}>
+              <div><dt className="lbl">Custodios</dt><dd style={sx('margin:3px 0 0')}>{sel.custodios}</dd></div>
+              <div><dt className="lbl">Auto de custodia</dt><dd className="mono" style={sx('margin:3px 0 0')}>{sel.auto}</dd></div>
+              <div><dt className="lbl">Monitorista</dt><dd style={sx('margin:3px 0 0')}>{sel.monitorista}</dd></div>
+              <div><dt className="lbl">Fuente</dt><dd style={sx('margin:3px 0 0')}>{sel.fuente}</dd></div>
+            </dl>
+            <div style={sx('display:flex;gap:8px;flex-wrap:wrap;margin-top:auto')}>
               <button type="button" className="btn" onClick={() => setModal({ tipo: 'llamar', u: sel })}>Llamar custodio</button>
+              {sel.id !== HERO.id && (sel.estado === 'Desvío' || sel.estado === 'Sin señal'
+                ? <Link className="btn" to={ROUTES.Reaccion}>Abrir incidente</Link>
+                : <Link className="btn" to={ROUTES.Servicios}>Ver servicio</Link>)}
               {sel.id !== HERO.id && <button type="button" className="btn" onClick={() => seleccionar(HERO)} title="Volver a la alerta crítica">Volver a SRV-24817</button>}
             </div>
-          </div>
-          <div className="card" style={sx('display:flex;flex-direction:column;gap:4px')}>
-            <div style={sx('display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px')}>
-              <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:600")}>{cat === 'riesgo' ? 'Unidades en zona de riesgo' : cat === 'separacion' ? 'Separaciones' : cat === 'senal' ? 'Sin señal' : 'Eventos entrantes'}</h2>
-              {cat !== 'all' && <button type="button" className="lnk" style={sx('font-size:12px')} onClick={() => setCat('all')}>Ver todos los eventos</button>}
-            </div>
-            {cat === 'riesgo' ? (
-              <>
-                {riesgo.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A;padding:8px 0')}>Ninguna unidad en zona de riesgo con esta fuente.</span>}
-                {(verTodos ? riesgo : riesgo.slice(0, 7)).map(u => (
-                  <button key={u.id} type="button" className="feed-row" onClick={() => seleccionar(u)} style={sx('display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;font-size:13px')}>
-                    <span style={sx('min-width:0')}><strong>{u.id}</strong> · {u.cliente} · {u.ruta}</span>
-                    <span className={ESTADO_CLS[u.estado]}>{u.estado}</span>
-                  </button>
-                ))}
-                {riesgo.length > 7 && <button type="button" className="lnk" style={sx('align-self:flex-start;font-size:13px;margin-top:6px')} onClick={() => setVerTodos(v => !v)}>{verTodos ? 'Ver menos' : `Ver las ${riesgo.length}`}</button>}
-              </>
-            ) : (
-              <>
-                {events.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A;padding:8px 0')}>Sin eventos para este filtro.</span>}
-                {events.map(e => (
-                  <button key={e.k} type="button" className={'feed-row' + (e.nuevo ? ' feed-new' : '')} onClick={() => setModal({ tipo: 'evento', e })} title="Ver detalle del evento" style={sx('display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;font-size:13px')}>
-                    <span className="mono" style={sx('color:#5F6B7A')}>{e.t}</span>
-                    <span style={sx('min-width:0')}>{e.text}</span>
-                    <span className={e.cls}>{e.src}</span>
-                  </button>
-                ))}
-                {feedCat.length > 7 && <button type="button" className="lnk" style={sx('align-self:flex-start;font-size:13px;margin-top:6px')} onClick={() => setVerTodos(v => !v)}>{verTodos ? 'Ver menos' : `Ver los ${feedCat.length} eventos`}</button>}
-              </>
-            )}
-          </div>
+            {sel.id === HERO.id && <Nota>Para abrir el caso y avisar a autoridades usa <strong>Atender incidente</strong>, arriba a la derecha.</Nota>}
+          </Section>
         </aside>
       </div>
 
-      <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:16px')}>
-        {kpiBtn('all', 'Alertas abiertas', alertasAbiertas.length, `${sev.crit} crítica${sev.crit === 1 ? '' : 's'} · ${sev.alta} alta${sev.alta === 1 ? '' : 's'} · ${sev.media} media${sev.media === 1 ? '' : 's'}`)}
-        {kpiBtn('separacion', 'Separación custodio–tráiler', separacion.length, 'Umbral 1 km por más de 3 min')}
-        {kpiBtn('senal', 'Sin señal', sinSenal.length, `${sinSenal.filter(e => e.src === 'Ruptela').length} Ruptela · ${sinSenal.filter(e => e.src === 'Samsara').length} Samsara`)}
-        {kpiBtn('riesgo', 'En zona de riesgo', riesgo.length, 'Arco Norte, Méx–Qro y Puebla–Orizaba')}
-      </section>
+      <Section titulo="Replay de ruta · SRV-24817" ayuda="Recorre el día de la unidad en desvío, desde la salida hasta la alerta. El punto blanco se mueve en el mapa."
+        acciones={<span className="mono" style={sx('font-size:13px;color:#3E4A59')}>{replayLabel}</span>}>
+        <div style={sx('display:flex;gap:12px;align-items:center')}>
+          <button type="button" className="btn" onClick={() => { if (!playing && replay >= 100) setReplay(0); setPlaying(p => !p) }} aria-label={playing ? 'Pausar replay' : 'Reproducir replay'} style={sx('min-height:36px;padding:0 12px')}>
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">{playing ? <path d="M3 2h2v8H3zM7 2h2v8H7z" fill="currentColor" /> : <path d="M3 1.5l7 4.5-7 4.5z" fill="currentColor" />}</svg>
+            {playing ? 'Pausar' : 'Reproducir'}
+          </button>
+          <label style={sx('display:flex;gap:12px;align-items:center;flex:1')}>
+            <span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Posición del replay</span>
+            <input type="range" min="0" max="100" value={replay} onChange={e => { setPlaying(false); setReplay(Number(e.target.value)) }} style={sx('flex:1;accent-color:#475CC7;min-height:36px')} />
+          </label>
+        </div>
+        <div style={sx('display:flex;justify-content:space-between;font-size:12px;color:#5F6B7A;flex-wrap:wrap;gap:8px')}>
+          {([['08:12 salida', 0], ['10:47 parada', 41], ['13:05 frenado', 77], ['14:30 desvío', 100]] as const).map(([l, p]) => (
+            <span key={l} role="button" tabIndex={0} style={sx('cursor:pointer;text-decoration:underline')} onClick={() => { setPlaying(false); setReplay(p) }} onKeyDown={e => { if (e.key === 'Enter') { setPlaying(false); setReplay(p) } }}>{l}</span>
+          ))}
+        </div>
+      </Section>
+
+      <div id="feed-eventos">
+        <Section key={feedKey} titulo={FEED_TITULO[cat]} plegable abierto={feedKey > 0}
+          ayuda="Todo lo que reportan Samsara y Ruptela, ya normalizado. Haz clic en un evento para verlo en el mapa, marcarlo atendido o escalarlo."
+          acciones={cat !== 'all' ? <button type="button" className="btn" style={sx('min-height:34px;padding:0 12px;font-size:13px')} onClick={() => { setCat('all'); setVerTodos(false) }}>Ver todos los eventos</button> : undefined}>
+          {cat === 'riesgo' ? (
+            <div style={sx('display:flex;flex-direction:column')}>
+              <Nota>Zona de riesgo: tramos donde el historial de robos del trimestre es más alto. Las unidades que los cruzan se vigilan con más frecuencia.</Nota>
+              {riesgo.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A;padding:8px 0')}>Ninguna unidad en zona de riesgo con esta fuente. Prueba con «Todas».</span>}
+              {(verTodos ? riesgo : riesgo.slice(0, 7)).map(u => (
+                <button key={u.id} type="button" className="feed-row" onClick={() => seleccionar(u)} style={sx('display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;font-size:13px')}>
+                  <span style={sx('min-width:0')}><strong>{u.id}</strong> · {u.cliente} · {u.ruta}</span>
+                  <span className={ESTADO_CLS[u.estado]}>{u.estado}</span>
+                </button>
+              ))}
+              {riesgo.length > 7 && <button type="button" className="lnk" style={sx('align-self:flex-start;font-size:13px;margin-top:6px')} onClick={() => setVerTodos(v => !v)}>{verTodos ? 'Ver menos' : `Ver las ${riesgo.length}`}</button>}
+            </div>
+          ) : (
+            <div style={sx('display:flex;flex-direction:column')}>
+              {events.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A;padding:8px 0')}>Sin eventos para este filtro. Prueba con otra fuente.</span>}
+              {events.map(e => (
+                <button key={e.k} type="button" className={'feed-row' + (e.nuevo ? ' feed-new' : '')} onClick={() => setModal({ tipo: 'evento', e })} title="Ver detalle del evento" style={sx('display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;font-size:13px')}>
+                  <span className="mono" style={sx('color:#5F6B7A')}>{e.t}</span>
+                  <span style={sx('min-width:0')}>{e.text}</span>
+                  <span className={e.cls}>{e.src}</span>
+                </button>
+              ))}
+              {feedCat.length > 7 && <button type="button" className="lnk" style={sx('align-self:flex-start;font-size:13px;margin-top:6px')} onClick={() => setVerTodos(v => !v)}>{verTodos ? 'Ver menos' : `Ver los ${feedCat.length} eventos`}</button>}
+            </div>
+          )}
+        </Section>
+      </div>
 
       <Modal open={modal?.tipo === 'llamar'} onClose={() => setModal(null)} title={`Llamar custodio · ${modal?.tipo === 'llamar' ? modal.u.id : ''}`} width={480}
         footer={<button type="button" style={sx(btnStyle)} onClick={() => setModal(null)}>Cerrar</button>}>
@@ -310,7 +341,7 @@ export default function Monitoreo() {
           <>
             <button type="button" style={sx(btnStyle)} onClick={() => verEnMapa(modal.e)}>Ver en mapa</button>
             <button type="button" style={sx(btnStyle)} onClick={() => { toast(`Evento ${modal.e.t} marcado como atendido`); setModal(null) }}>Marcar atendido</button>
-            <button type="button" style={sx(btnPriStyle)} onClick={() => { toast('Evento escalado a Reacción', 'warn'); navigate(ROUTES.Reaccion) }}>Escalar a Reacción</button>
+            <button type="button" style={sx(btnPriStyle)} onClick={() => { toast('Evento escalado a Incidentes', 'warn'); navigate(ROUTES.Reaccion) }}>Escalar a Incidentes</button>
           </>
         ) : undefined}>
         {modal?.tipo === 'evento' && (

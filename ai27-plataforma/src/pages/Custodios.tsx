@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/Shell'
+import { PageHeader, Section, Nota } from '../components/Page'
 import { Field, Modal, Pager, btnPriStyle, btnStyle, inputStyle, usePagination, useToast } from '../components/ui'
 import { ROUTES } from '../lib/routes'
 import { sx } from '../lib/sx'
@@ -17,11 +18,17 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 .tbl th{text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED;white-space:nowrap}
 .tbl th.sort{cursor:pointer;user-select:none}
 .tbl th.sort:hover{color:#0D1D41}
-.tbl td{padding:10px 12px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
+.tbl td{padding:10px 10px;border-bottom:1px solid #EEF1F4;white-space:nowrap}
+.tbl td.wrap{white-space:normal;min-width:150px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:600 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
+.btn:hover{background:#F3F5F8}
+.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}.btn-pri:hover{background:#3448A8}
 .cus-row{cursor:pointer}
 .cus-row:hover td{background:#FAFBFC}
+.chip{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid #D5DBE3;background:#FFFFFF;color:#0D1D41;font:600 14px 'Montserrat',sans-serif;cursor:pointer}
+.chip:hover{background:#F3F5F8}
+.chip[aria-pressed="true"]{background:#0D1D41;border-color:#0D1D41;color:#FFFFFF}
+.chip .n{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700}
 `
 
 const CLS: Record<string, string> = { 'Disponible': 'pill p-ok', 'Asignado': 'pill p-info', 'En servicio': 'pill p-info', 'Descanso': 'pill p-mute', 'Vacaciones': 'pill p-mute', 'Incapacidad': 'pill p-warn', 'Baja': 'pill p-bad' }
@@ -35,8 +42,8 @@ const inicial = (n: string) => { const p = n.trim().split(/\s+/); return p.lengt
 const FILTROS: string[] = ['Todos', ...ESTATUS_CUSTODIO]
 const DIAS = ['Lun 5', 'Mar 6', 'Mié 7', 'Jue 8', 'Vie 9', 'Sáb 10', 'Dom 11']
 
-type SortKey = 'nombre' | 'zona' | 'estatus' | 'asignacion' | 'horasSemana' | 'calificacion' | 'docs'
-const COLS: [SortKey, string][] = [['nombre', 'Custodio'], ['zona', 'Zona'], ['estatus', 'Estatus'], ['asignacion', 'Asignación actual'], ['horasSemana', 'Horas sem.'], ['calificacion', 'Desempeño'], ['docs', 'Docs']]
+type SortKey = 'nombre' | 'zona' | 'estatus' | 'asignacion' | 'calificacion' | 'docs'
+const COLS: [SortKey, string][] = [['nombre', 'Custodio'], ['zona', 'Zona'], ['estatus', 'Estatus'], ['asignacion', 'Servicio actual'], ['calificacion', 'Desempeño'], ['docs', 'Documentos']]
 
 /** Historial del custodio: SRV-24817 y compañía para el héroe del diseño; para el resto, servicios de seed donde participa. */
 function historial(c: Custodio): string[] {
@@ -85,6 +92,8 @@ export default function Custodios() {
 
   const cambiarFiltro = (label: string) => { setF(label); pg.setPage(0) }
   const ordenar = (k: SortKey) => setSort(s => (s && s.k === k ? (s.dir === 1 ? { k, dir: -1 } : null) : { k, dir: 1 }))
+  const verExpediente = (id: string) => { setSelId(id); document.getElementById('expediente')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }
+  const verRafael = () => { setSelId('C-0931'); setF('Todos'); setZona('Todas'); setQ('Rafael Uc'); pg.setPage(0); toast('Mostrando a Rafael Uc', 'info') }
 
   const guardarAlta = () => {
     if (!form.nombre.trim()) { toast('Escribe el nombre del custodio', 'warn'); return }
@@ -114,128 +123,126 @@ export default function Custodios() {
     toast(`Exportados ${rows.length} custodios a CSV`)
   }
 
+  const vacio = `Sin custodios ${f === 'Todos' ? '' : 'con estatus “' + f + '” '}${zona !== 'Todas' ? 'en ' + zona + ' ' : ''}${nq ? 'que coincidan con “' + q.trim() + '” ' : ''}en esta vista. Prueba con otra zona o estatus.`
+
   return (
     <Shell active="custodios" css={CSS}>
-      <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
-        <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-          <span className="lbl">Recursos</span>
-          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Custodios</h1>
-          <span style={sx('color:#5F6B7A;font-size:14px')}>{lista.length} custodios en {ZONAS.length} zonas · utilización {utilizacion}% · {horasProm} h promedio por semana</span>
-        </div>
-        <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
-          <label style={sx('display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Buscar custodio</span><input type="search" placeholder="Buscar por nombre, ID o zona" value={q} onChange={e => { setQ(e.target.value); pg.setPage(0) }} style={sx("min-height:40px;min-width:260px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif")} /></label>
-          <button type="button" className="btn btn-pri" onClick={() => setAlta(true)}>Alta de custodio</button>
-        </div>
-      </header>
+      <PageHeader seccion="Equipo" titulo="Custodios"
+        descripcion="Quién está disponible, asignado o descansando, y el expediente de cada uno. Para el coordinador que arma los servicios."
+        accion={{ label: 'Alta de custodio', onClick: () => setAlta(true) }}>
+        <span style={sx('color:#5F6B7A;font-size:13px')}>{lista.length} custodios en {ZONAS.length} zonas · utilización {utilizacion}% · {horasProm} h promedio por semana</span>
+      </PageHeader>
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
+      <section aria-label="Sugerencia de la IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:14px 18px')}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · fatiga y cobertura</span><span style={sx('font-size:14px;color:#3E4A59')}>J. Ordaz lleva 52 h esta semana y 3 custodios de Bajío acumulan semanas sin descanso completo. <button type="button" onClick={() => { setSelId('C-0931'); setF('Todos'); setZona('Todas'); setQ('Rafael Uc'); pg.setPage(0) }} style={sx('background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline')}>Rafael Uc</button> lleva 9 días sin asignar: sugiero asignarlo al hueco de Bajío de mañana.</span></div>
+        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}>
+          <span style={sx('font-weight:600')}>Sugerencia de la IA: asignar a <button type="button" onClick={verRafael} style={sx('background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline')}>Rafael Uc</button> al hueco de Bajío de mañana</span>
+          <span style={sx('font-size:14px;color:#3E4A59')}>Lleva 9 días sin asignar. En cambio, J. Ordaz acumula 52 h esta semana y 3 custodios de Bajío llevan semanas sin descanso completo.</span>
+        </div>
         <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Utilización semanal de custodios en las últimas 6 semanas: 72, 74, 76, 79, 77 y 78 por ciento" style={sx('display:block')}><path d="M10 60H210" stroke="#E4E8ED"></path><path d="M10 12.8H210" stroke="#C7D0F2" strokeDasharray="4 3"></path><polyline points="10,46.4 50,36.8 90,27.2 130,12.8 170,22.4 210,17.6" fill="none" stroke="#475CC7" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"></polyline><circle cx="210" cy="17.6" r="4" fill="#475CC7"></circle><text x="176" y="34" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#1E6488">78%</text></svg>
+          <svg width="220" height="56" viewBox="0 0 220 64" role="img" aria-label="Utilización semanal de custodios en las últimas 6 semanas: 72, 74, 76, 79, 77 y 78 por ciento" style={sx('display:block')}><path d="M10 60H210" stroke="#E4E8ED"></path><path d="M10 12.8H210" stroke="#C7D0F2" strokeDasharray="4 3"></path><polyline points="10,46.4 50,36.8 90,27.2 130,12.8 170,22.4 210,17.6" fill="none" stroke="#475CC7" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"></polyline><circle cx="210" cy="17.6" r="4" fill="#475CC7"></circle><text x="176" y="34" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#1E6488">78%</text></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Utilización semanal · línea punteada: tope sano</figcaption>
         </figure>
-        <Link className="btn" to={ROUTES.AsignacionIA}>Abrir asignación</Link>
+        <Link className="btn" to={ROUTES.AsignacionIA} onClick={() => toast('Abriendo asignación con Rafael Uc sugerido', 'info')}>Asignar a Rafael Uc</Link>
       </section>
 
-      <div role="group" aria-label="Filtrar por estatus" style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr));gap:10px')}>
+      <div role="group" aria-label="Filtrar por estatus" style={sx('display:flex;flex-wrap:wrap;gap:10px')}>
         {FILTROS.map(label => (
-          <button key={label} type="button" aria-pressed={label === f} onClick={() => cambiarFiltro(label)} style={sx('display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;border-radius:10px;cursor:pointer;font-family:inherit;color:#0D1D41;text-align:left;background:#FFFFFF;border:1px solid ' + (label === f ? '#475CC7' : '#E4E8ED'))}>
-            <span style={sx('font-size:12px;color:#5F6B7A')}>{label}</span>
-            <span style={sx("font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>{counts[label]}</span>
+          <button key={label} type="button" className="chip" aria-pressed={label === f} onClick={() => cambiarFiltro(label)}>
+            <span>{label}</span><span className="n">{counts[label]}</span>
           </button>
         ))}
       </div>
 
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
-        <section className="card" style={sx('flex:999 1 560px;padding:8px 8px 8px')}>
-          <div style={sx('display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:6px 4px 10px')}>
-            <div style={sx('display:flex;gap:10px;flex-wrap:wrap;align-items:center')}>
-              <label style={sx('display:flex;align-items:center;gap:8px;font-size:12px;color:#5F6B7A')}>Zona
-                <select value={zona} onChange={e => { setZona(e.target.value as 'Todas' | Zona); pg.setPage(0) }} style={sx(inputStyle + ';width:auto;min-height:36px')}>
-                  <option value="Todas">Todas</option>
-                  {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
-                </select>
-              </label>
-              <span style={sx('font-size:13px;color:#5F6B7A')}>{rows.length} custodio{rows.length === 1 ? '' : 's'}{f !== 'Todos' ? ` · ${f}` : ''}{sort ? ` · orden: ${COLS.find(c => c[0] === sort.k)?.[1]}` : ''}</span>
-            </div>
+        <Section titulo={`${rows.length} custodio${rows.length === 1 ? '' : 's'}${f !== 'Todos' ? ` · ${f}` : ''}${zona !== 'Todas' ? ` · ${zona}` : ''}`}
+          ayuda="Haz clic en una fila para ver su expediente a la derecha. Los encabezados ordenan la tabla." style="flex:999 1 560px"
+          acciones={<>
+            <label style={sx('display:flex')}><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Buscar custodio</span><input type="search" placeholder="Buscar por nombre, ID o base" value={q} onChange={e => { setQ(e.target.value); pg.setPage(0) }} style={sx(inputStyle + ';min-height:36px;min-width:220px;width:auto')} /></label>
+            <select aria-label="Zona" value={zona} onChange={e => { setZona(e.target.value as 'Todas' | Zona); pg.setPage(0) }} style={sx(inputStyle + ';width:auto;min-height:36px')}>
+              <option value="Todas">Todas las zonas</option>
+              {ZONAS.map(z => <option key={z} value={z}>{z}</option>)}
+            </select>
             <button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={exportar}>Exportar CSV</button>
-          </div>
-          <div style={sx('overflow-x:auto')}>
+          </>}>
+          <div style={sx('overflow-x:auto;margin:0 -12px')}>
             <table className="tbl">
-              <thead><tr>{COLS.map(([k, label]) => <th key={k} className="sort" aria-sort={sort?.k === k ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'} onClick={() => ordenar(k)}>{label}{sort?.k === k ? (sort.dir === 1 ? ' ▲' : ' ▼') : ''}</th>)}<th><span style={sx('position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)')}>Acción</span></th></tr></thead>
+              <thead><tr>{COLS.map(([k, label]) => <th key={k} className="sort" aria-sort={sort?.k === k ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'} onClick={() => ordenar(k)}>{label}{sort?.k === k ? (sort.dir === 1 ? ' ▲' : ' ▼') : ''}</th>)}</tr></thead>
               <tbody>
                 {pagina.map(r => (
-                  <tr key={r.id} className="cus-row" aria-selected={r.id === sel.id} style={sx(r.id === sel.id ? 'background:#F3F5F8' : '')} onClick={() => setSelId(r.id)}>
-                    <td><span style={sx('display:flex;flex-direction:column')}><span>{r.nombre}</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{r.id}</span></span></td>
-                    <td>{r.zona}</td><td><span className={CLS[r.estatus]}>{r.estatus}</span></td><td>{r.asignacion}</td><td className="mono">{r.horasSemana}</td><td className="mono">{r.calificacion ? r.calificacion.toFixed(1) : '—'}</td><td><span className={docCls(r.docs)}>{r.docs}</span></td>
-                    <td><button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={e => { e.stopPropagation(); setSelId(r.id); document.getElementById('expediente')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }}>Expediente</button></td>
+                  <tr key={r.id} className="cus-row" aria-selected={r.id === sel.id} style={sx(r.id === sel.id ? 'background:#F3F5F8' : '')} onClick={() => verExpediente(r.id)}>
+                    <td><span style={sx('display:flex;flex-direction:column')}><span style={sx('font-weight:600')}>{r.nombre}</span><span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{r.id}</span></span></td>
+                    <td>{r.zona}</td><td><span className={CLS[r.estatus]}>{r.estatus}</span></td><td className="wrap">{r.asignacion}</td><td className="mono">{r.calificacion ? r.calificacion.toFixed(1) + ' / 5' : '—'}</td><td><span className={docCls(r.docs)}>{r.docs}</span></td>
                   </tr>
                 ))}
                 {rows.length === 0 && (
-                  <tr><td colSpan={8} style={sx('padding:24px 12px;color:#5F6B7A;text-align:center;white-space:normal')}>Sin custodios {f === 'Todos' ? '' : 'con estatus “' + f + '” '}{zona !== 'Todas' ? 'en ' + zona + ' ' : ''}{nq ? 'que coincidan con “' + q.trim() + '” ' : ''}en esta vista.</td></tr>
+                  <tr><td colSpan={6} style={sx('padding:24px 12px;color:#5F6B7A;text-align:center;white-space:normal')}>{vacio}</td></tr>
                 )}
               </tbody>
             </table>
           </div>
-          <div style={sx('padding:0 4px')}><Pager {...pg} /></div>
-        </section>
+          <Pager {...pg} />
+        </Section>
 
-        <aside id="expediente" className="card" aria-label="Expediente" style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:16px')}>
-          <div style={sx('display:flex;gap:14px;align-items:center')}>
-            <div style={sx('width:64px;height:64px;border-radius:10px;background:#E9EDFB;border:1px dashed #D5DBE3;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F6B7A')}>Foto</div>
-            <div style={sx('display:flex;flex-direction:column;gap:4px')}>
-              <span style={sx('font-weight:600;font-size:18px')}>{sel.nombre}</span>
-              <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{sel.id} · {sel.zona}</span>
-              <span className={CLS[sel.estatus]} style={sx('align-self:flex-start')}>{sel.estatus}</span>
+        <aside id="expediente" style={sx('flex:1 1 320px;min-width:0;display:flex')}>
+          <Section titulo="Expediente" ayuda="Datos, documentos e historial del custodio seleccionado." style="flex:1">
+            <div style={sx('display:flex;gap:14px;align-items:center')}>
+              <div style={sx('width:64px;height:64px;border-radius:10px;background:#E9EDFB;border:1px dashed #D5DBE3;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F6B7A')}>Foto</div>
+              <div style={sx('display:flex;flex-direction:column;gap:4px')}>
+                <span style={sx('font-weight:600;font-size:18px')}>{sel.nombre}</span>
+                <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{sel.id} · {sel.zona}</span>
+                <span className={CLS[sel.estatus]} style={sx('align-self:flex-start')}>{sel.estatus}</span>
+              </div>
             </div>
-          </div>
-          <dl style={sx('margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;font-size:14px')}>
-            <div><dt className="lbl">Base</dt><dd style={sx('margin:4px 0 0')}>{sel.base}</dd></div>
-            <div><dt className="lbl">Cobertura</dt><dd style={sx('margin:4px 0 0')}>{sel.zona === 'Centro' ? 'Centro, Bajío' : sel.zona === 'Bajío' ? 'Bajío, Centro' : sel.zona}</dd></div>
-            <div><dt className="lbl">Ingreso</dt><dd style={sx('margin:4px 0 0')}>{fmtIngreso(sel.ingreso)}</dd></div>
-            <div><dt className="lbl">Desempeño</dt><dd style={sx('margin:4px 0 0')}>{sel.calificacion ? sel.calificacion.toFixed(1) + ' / 5' : 'sin evaluar'}</dd></div>
-            <div><dt className="lbl">Teléfono</dt><dd className="mono" style={sx('margin:4px 0 0')}>{sel.telefono}</dd></div>
-            <div><dt className="lbl">Servicios</dt><dd style={sx('margin:4px 0 0')}>{sel.serviciosAcumulados} · {sel.incidentes} incidente{sel.incidentes === 1 ? '' : 's'}</dd></div>
-          </dl>
-          <div style={sx('display:flex;flex-direction:column;gap:8px')}>
-            <span className="lbl">Documentos y vigencias</span>
-            {sel.documentos.map(d => (
-              <div key={d.k} style={sx('display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:6px 0;border-top:1px solid #EEF1F4')}><span>{d.k}</span><span className={DOC_CLS[d.estado]}>{d.v}</span></div>
-            ))}
-          </div>
-          <div style={sx('display:flex;flex-direction:column;gap:8px')}>
-            <span className="lbl">Historial reciente</span>
-            {historial(sel).map(h => <span key={h} style={sx('font-size:14px;color:#3E4A59')}>{h}</span>)}
-          </div>
-          <div style={sx('display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #EEF1F4;padding-top:12px')}>
-            <button type="button" className="btn btn-pri" style={sx('min-height:36px;padding:0 12px')} onClick={() => { if (sel.estatus === 'Disponible') nav(ROUTES.AsignacionIA); else toast(`${sel.nombre} no está disponible (${sel.estatus})`, 'warn') }}>Asignar</button>
-            <button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={() => { setNuevoEstatus(sel.estatus); setEditar(true) }}>Cambiar estatus</button>
-            <a className="btn" style={sx('min-height:36px;padding:0 12px')} href={`tel:${sel.telefono.replace(/\s/g, '')}`} onClick={() => toast(`Llamando a ${sel.nombre} · ${sel.telefono}`, 'info')}>Llamar</a>
-            <button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={() => { window.print(); toast(`Expediente de ${sel.nombre} enviado a impresión`, 'info') }}>Imprimir</button>
-          </div>
+            <dl style={sx('margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;font-size:14px')}>
+              <div><dt className="lbl">Base</dt><dd style={sx('margin:4px 0 0')}>{sel.base}</dd></div>
+              <div><dt className="lbl">Cobertura</dt><dd style={sx('margin:4px 0 0')}>{sel.zona === 'Centro' ? 'Centro, Bajío' : sel.zona === 'Bajío' ? 'Bajío, Centro' : sel.zona}</dd></div>
+              <div><dt className="lbl">Ingreso</dt><dd style={sx('margin:4px 0 0')}>{fmtIngreso(sel.ingreso)}</dd></div>
+              <div><dt className="lbl">Desempeño</dt><dd style={sx('margin:4px 0 0')}>{sel.calificacion ? sel.calificacion.toFixed(1) + ' / 5' : 'sin evaluar'}</dd></div>
+              <div><dt className="lbl">Teléfono</dt><dd className="mono" style={sx('margin:4px 0 0')}>{sel.telefono}</dd></div>
+              <div><dt className="lbl">Servicios</dt><dd style={sx('margin:4px 0 0')}>{sel.serviciosAcumulados} · {sel.incidentes} incidente{sel.incidentes === 1 ? '' : 's'}</dd></div>
+              <div><dt className="lbl">Horas esta semana</dt><dd className="mono" style={sx('margin:4px 0 0' + (sel.horasSemana > 48 ? ';color:#B42318' : ''))}>{sel.horasSemana} h</dd></div>
+              <div><dt className="lbl">Servicio actual</dt><dd style={sx('margin:4px 0 0')}>{sel.asignacion}</dd></div>
+            </dl>
+            <div style={sx('display:flex;flex-direction:column;gap:8px')}>
+              <span className="lbl">Documentos y vigencias</span>
+              {sel.documentos.map(d => (
+                <div key={d.k} style={sx('display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:6px 0;border-top:1px solid #EEF1F4')}><span>{d.k}</span><span className={DOC_CLS[d.estado]}>{d.v}</span></div>
+              ))}
+            </div>
+            <div style={sx('display:flex;flex-direction:column;gap:8px')}>
+              <span className="lbl">Historial reciente</span>
+              {historial(sel).map(h => <span key={h} style={sx('font-size:14px;color:#3E4A59')}>{h}</span>)}
+            </div>
+            <div style={sx('display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #EEF1F4;padding-top:12px')}>
+              <button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={() => { if (sel.estatus === 'Disponible') nav(ROUTES.AsignacionIA); else toast(`${sel.nombre} no está disponible (${sel.estatus})`, 'warn') }}>Asignar a un servicio</button>
+              <button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={() => { setNuevoEstatus(sel.estatus); setEditar(true) }}>Cambiar estatus</button>
+              <a className="btn" style={sx('min-height:36px;padding:0 12px')} href={`tel:${sel.telefono.replace(/\s/g, '')}`} onClick={() => toast(`Llamando a ${sel.nombre} · ${sel.telefono}`, 'info')}>Llamar</a>
+              <button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={() => { window.print(); toast(`Expediente de ${sel.nombre} enviado a impresión`, 'info') }}>Imprimir</button>
+            </div>
+          </Section>
         </aside>
       </div>
 
-      <section className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
-        <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Turnos · {tituloTurnos} · semana 41</h2>
+      <Section titulo={`Turnos de la semana 41 · ${tituloTurnos}`} ayuda="Quién está en servicio, descansando o libre cada día. Útil para detectar fatiga y huecos de cobertura." plegable abierto={false}
+        acciones={
           <div style={sx('display:flex;gap:14px;font-size:12px;color:#3E4A59;flex-wrap:wrap')}>
             <span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#3FA7C9')}></span>En servicio</span>
             <span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#CBD3DD')}></span>Descanso</span>
             <span style={sx('display:flex;gap:6px;align-items:center')}><span style={sx('width:10px;height:10px;border-radius:2px;background:#4CC38A')}></span>Libre</span>
           </div>
-        </div>
+        }>
+        <Nota>Se muestran el custodio seleccionado y los primeros de la tabla. Haz clic en un nombre para abrir su expediente.</Nota>
         <div style={sx('overflow-x:auto')}>
           <div style={sx('display:grid;grid-template-columns:160px repeat(7,minmax(70px,1fr));gap:4px;min-width:720px;font-size:13px')}>
             <span></span>{DIAS.map(d => <span key={d} className="lbl" style={sx('text-align:center')}>{d}</span>)}
             {turnos.map(c => [
-              <button key={c.id} type="button" onClick={() => setSelId(c.id)} style={sx('display:flex;align-items:center;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left;' + (c.id === sel.id ? 'font-weight:600' : ''))}>{c.nombre}</button>,
+              <button key={c.id} type="button" onClick={() => verExpediente(c.id)} style={sx('display:flex;align-items:center;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left;' + (c.id === sel.id ? 'font-weight:600' : ''))}>{c.nombre}</button>,
               ...c.turnos.split('').map((d, j) => <span key={c.id + j} title={d === 's' ? 'En servicio' : d === 'd' ? 'Descanso' : 'Libre'} style={sx(shiftStyle(d))}></span>),
             ])}
           </div>
         </div>
-      </section>
+      </Section>
 
       <Modal open={alta} onClose={() => setAlta(false)} title="Alta de custodio" footer={<><button type="button" style={sx(btnStyle)} onClick={() => setAlta(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={guardarAlta}>Dar de alta</button></>}>
         <Field label="Nombre completo"><input value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre y apellido" style={sx(inputStyle)} autoFocus /></Field>

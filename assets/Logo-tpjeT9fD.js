@@ -1,1 +1,0 @@
-import{d as e}from"./index-DO2N_aoe.js";var t=e();function n({size:e=30}){return(0,t.jsx)(`img`,{src:`./logo.jpg`,alt:`AI27`,width:e,height:e,style:{width:e,height:e,borderRadius:Math.round(e*.22),objectFit:`cover`,flexShrink:0,display:`block`}})}export{n as t};

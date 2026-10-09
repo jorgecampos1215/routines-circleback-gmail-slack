@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/Shell'
+import { Nota, PageHeader, Pasos, Section } from '../components/Page'
 import { sx } from '../lib/sx'
 import { ROUTES } from '../lib/routes'
 import { actions, useStore, type DecisionIA } from '../lib/store'
@@ -11,22 +12,19 @@ import type { Zona } from '../data/seed'
 
 const CSS = `
 a{color:#3448A8}a:hover{color:#0D1D41}
-.card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
-.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
-.mono{font-family:'IBM Plex Mono',monospace}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-.p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E3F2F8;color:#0B6A8A}.p-mute{background:#EBEEF2;color:#4A5868}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
-.btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
 .field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A}
 .field select,.field input{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif}
 .track{height:6px;border-radius:3px;background:#EBEEF2;overflow:hidden}
 .gap{cursor:pointer;border:1px solid transparent;text-align:left;font:inherit;color:inherit}.gap:hover{border-color:#475CC7}
+.btn-ok{background:#E3F6EC;border-color:#9ED9BC;color:#17784A}.btn-ok:hover{background:#D5F0E1}
+.lnk{background:none;border:0;padding:0;font:inherit;font-size:13px;color:#3448A8;cursor:pointer;text-decoration:underline;text-align:left}
 `
 
 type Dec = 'Asignado' | 'Descartado'
 const bar = (v: number) => 'height:100%;width:' + v + '%;background:' + (v >= 80 ? '#4CC38A' : v >= 60 ? '#3FA7C9' : '#475CC7')
 const PASO = 4
+/** Primera frase del "porqué" (el resto se ve con "Ver por qué"). */
+const frase = (s: string) => { const m = s.match(/^.*?[.!?](\s|$)/); return m ? m[0].trim() : s }
 
 /** Última decisión registrada por custodio para este servicio (el store guarda la más reciente primero). */
 function desdeStore(decs: DecisionIA[], lista: Candidato[]): Record<string, Dec> {
@@ -53,6 +51,8 @@ export default function AsignacionIA() {
   const [dec, setDec] = useState<Record<string, Dec>>(() => desdeStore(decisiones, LIST))
   const [visibles, setVisibles] = useState(PASO)
   const [soloCumplen, setSoloCumplen] = useState(false)
+  const [editar, setEditar] = useState(false)
+  const [detalle, setDetalle] = useState<Record<string, boolean>>({})
   const [form, setForm] = useState({ cliente: SERVICIO.cliente, origen: SERVICIO.origen, destino: SERVICIO.destino, fecha: SERVICIO.fecha, salida: SERVICIO.salida, custodios: String(SERVICIO.custodios), unidades: String(SERVICIO.unidades) })
   const [unidadId, setUnidadId] = useState(UNIDADES[0]?.id ?? 'AU-2087')
   const [modal, setModal] = useState<'unidad' | Hueco | null>(null)
@@ -70,13 +70,22 @@ export default function AsignacionIA() {
     toast(v === 'Asignado' ? `${c.name} asignado a ${SERVICIO.id}` : `${c.name} descartado · la decisión alimenta al modelo`, v === 'Asignado' ? 'ok' : 'info')
   }
   const assigned = LIST.filter(c => dec[c.id] === 'Asignado')
-  const summary = assigned.length ? `Asignados ${assigned.length} de ${requeridos}: ${assigned.map(c => c.name).join(', ')} · la decisión queda registrada para el modelo` : 'Sin custodios asignados todavía'
-  const top = LIST.slice(0, requeridos).map(c => c.name)
+  const faltan = Math.max(0, requeridos - assigned.length)
+  const top = LIST.slice(0, requeridos)
+  const nombres = (cs: Candidato[]) => cs.map(c => c.name.split(' ')[0]).reduce((acc, n, i, arr) => (i === 0 ? n : acc + (i === arr.length - 1 ? (/^[iíIÍ]/.test(n) ? ' e ' : ' y ') : ', ') + n), '')
+
+  const asignarSugeridos = () => {
+    const pendientes = top.filter(c => dec[c.id] !== 'Asignado')
+    if (!pendientes.length) { toast('Los custodios sugeridos ya están asignados', 'info'); return }
+    setDec(d => { const n = { ...d }; pendientes.forEach(c => { n[c.id] = 'Asignado' }); return n })
+    pendientes.forEach(c => actions.registrarDecision({ servicio: SERVICIO.id, custodio: c.name, decision: 'aceptada' }))
+    toast(`${nombres(pendientes)} asignado${pendientes.length > 1 ? 's' : ''} a ${SERVICIO.id} siguiendo la sugerencia de la IA`)
+  }
 
   const confirmar = () => {
-    if (assigned.length < requeridos) { toast(`Asigna ${requeridos - assigned.length} custodio${requeridos - assigned.length > 1 ? 's' : ''} más antes de confirmar`, 'warn'); return }
+    if (faltan > 0) { toast(`Asigna ${faltan} custodio${faltan > 1 ? 's' : ''} más antes de confirmar`, 'warn'); return }
     actions.crearServicio({ cliente: form.cliente, tipo: 'Por evento', ruta: `${form.origen.split(',')[0]}–${form.destino.split(',')[0]}`, precio: 38500 })
-    toast(`${SERVICIO.id} confirmado con ${assigned.map(c => c.name.split(' ')[0]).join(' y ')} y unidad ${unidad?.id}. Pasando a monitoreo.`)
+    toast(`${SERVICIO.id} confirmado con ${nombres(assigned)} y unidad ${unidad?.id}. Pasando al mapa en vivo.`)
     navigate(ROUTES.Monitoreo)
   }
 
@@ -96,6 +105,7 @@ export default function AsignacionIA() {
     })
     return [...porZona, ...picos].sort((a, b) => a.diff - b.diff)
   }, [cobertura])
+  const huecosRojos = huecos.filter(h => h.diff < 0 && !cubiertos[h.key]).length
 
   const cubrir = (h: Hueco) => {
     const sug = sugerirCobertura(h.zona, -h.diff, cobertura)
@@ -105,73 +115,95 @@ export default function AsignacionIA() {
     setModal(null)
   }
 
+  const riesgoPill = riesgo.factor >= 1.4 ? 'pill p-bad' : riesgo.factor >= 1.2 ? 'pill p-warn' : 'pill p-ok'
+  const riesgoTxt = riesgo.factor >= 1.4 ? 'Alto' : riesgo.factor >= 1.2 ? 'Medio' : 'Bajo'
+  const dato = 'display:flex;flex-direction:column;gap:2px;min-width:0'
+  const val = 'font-size:14px;font-weight:600;color:#0D1D41;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'
+
   return (
     <Shell active="ia" css={CSS}>
-      <header style={sx('display:flex;flex-direction:column;gap:6px')}>
-        <span className="lbl">Nuevo servicio · paso 2 de 3</span>
-        <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Asignar custodios y unidad</h1>
-        <span style={sx('color:#5F6B7A;font-size:14px')}>Cotización COT-1182 aceptada por {form.cliente} y convertida en servicio sin recapturar.</span>
-      </header>
+      <PageHeader
+        seccion={`Operación · ${SERVICIO.id}`}
+        titulo="Asignar custodios"
+        descripcion="La IA ordena a los custodios disponibles para este servicio; tú eliges quién va y con qué unidad, y pasas al mapa en vivo."
+        accion={{ label: 'Confirmar y pasar al mapa en vivo', onClick: confirmar }}
+      >
+        <Pasos actual={2} />
+      </PageHeader>
 
-      <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
-        <section className="card" style={sx('flex:1 1 300px;display:flex;flex-direction:column;gap:16px')}>
-          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Servicio {SERVICIO.id}</h2>
-          <label className="field">Cliente<input type="text" value={form.cliente} onChange={e => setForm(f => ({ ...f, cliente: e.target.value }))} /></label>
-          <label className="field">Origen<input type="text" value={form.origen} onChange={e => setForm(f => ({ ...f, origen: e.target.value }))} /></label>
-          <label className="field">Destino<input type="text" value={form.destino} onChange={e => setForm(f => ({ ...f, destino: e.target.value }))} /></label>
-          <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px')}>
+      {/* Resumen compacto del servicio */}
+      <Section titulo={`Servicio ${SERVICIO.id} · ${form.cliente}`} ayuda="Viene de la cotización COT-1182 aceptada; nada se vuelve a capturar." style="padding:16px 18px;gap:12px"
+        acciones={<button type="button" className="btn" style={sx('min-height:34px;font-size:13px')} onClick={() => setEditar(e => !e)}>{editar ? 'Listo' : 'Editar datos'}</button>}>
+        {!editar ? (
+          <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:12px 20px')}>
+            <div style={sx(dato)}><span className="lbl">Ruta</span><span style={sx(val)} title={`${form.origen} → ${form.destino}`}>{form.origen.split(',')[0]} → {form.destino.split(',')[0]}</span></div>
+            <div style={sx(dato)}><span className="lbl">Salida</span><span style={sx(val)}>{form.fecha} · {form.salida}</span></div>
+            <div style={sx(dato)}><span className="lbl">Se necesitan</span><span style={sx(val)}>{requeridos} custodio{requeridos > 1 ? 's' : ''} · {form.unidades} unidad{parseInt(form.unidades) > 1 ? 'es' : ''}</span></div>
+            <div style={sx(dato)}><span className="lbl">Riesgo de la ruta</span><span className={riesgoPill} style={sx('align-self:flex-start')}>{riesgoTxt} · {riesgo.factor.toFixed(1)}</span></div>
+            <div style={sx(dato)}><span className="lbl">Pide el cliente</span><span style={sx('font-size:13px;color:#3E4A59')}>Portación vigente · confianza &lt; 12 meses · experiencia en alto valor</span></div>
+          </div>
+        ) : (
+          <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:12px')}>
+            <label className="field">Cliente<input type="text" value={form.cliente} onChange={e => setForm(f => ({ ...f, cliente: e.target.value }))} /></label>
+            <label className="field">Origen<input type="text" value={form.origen} onChange={e => setForm(f => ({ ...f, origen: e.target.value }))} /></label>
+            <label className="field">Destino<input type="text" value={form.destino} onChange={e => setForm(f => ({ ...f, destino: e.target.value }))} /></label>
             <label className="field">Fecha<input type="text" value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} /></label>
             <label className="field">Salida<input type="text" value={form.salida} onChange={e => setForm(f => ({ ...f, salida: e.target.value }))} /></label>
-          </div>
-          <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px')}>
             <label className="field">Custodios<input type="number" min={1} max={4} value={form.custodios} onChange={e => setForm(f => ({ ...f, custodios: e.target.value }))} /></label>
             <label className="field">Unidades<input type="number" min={1} max={3} value={form.unidades} onChange={e => setForm(f => ({ ...f, unidades: e.target.value }))} /></label>
           </div>
-          <div style={sx('display:flex;flex-direction:column;gap:8px;font-size:14px;background:#F3F5F8;border-radius:8px;padding:14px')}>
-            <span className="lbl">Requisitos del cliente</span>
-            <span>Portación vigente · evaluación de confianza &lt; 12 meses · experiencia en carga de alto valor</span>
-            <label style={sx('display:flex;gap:8px;align-items:center;font-size:13px;color:#3E4A59;cursor:pointer')}><input type="checkbox" checked={soloCumplen} onChange={e => { setSoloCumplen(e.target.checked); setVisibles(PASO) }} style={sx('accent-color:#475CC7')} />Mostrar solo quienes cumplen todos los requisitos ({LIST.filter(c => c.cumple).length})</label>
-          </div>
-          <div style={sx('display:flex;justify-content:space-between;align-items:center;font-size:14px')}>
-            <span>Riesgo de la ruta</span><span className={riesgo.factor >= 1.4 ? 'pill p-bad' : riesgo.factor >= 1.2 ? 'pill p-warn' : 'pill p-ok'}>{riesgo.factor >= 1.4 ? 'Alto' : riesgo.factor >= 1.2 ? 'Medio' : 'Bajo'} · {riesgo.factor.toFixed(1)}</span>
-          </div>
-          <span style={sx('font-size:13px;color:#5F6B7A')}>{SERVICIO.carretera} nocturno: {riesgo.n} incidentes en el trimestre, {riesgo.nocturnos} entre 23:00 y 03:00. <Link to={ROUTES.Reaccion}>Ver incidentes</Link></span>
-        </section>
+        )}
+        <Nota>Riesgo {riesgo.factor.toFixed(1)}: {SERVICIO.carretera} de noche acumula {riesgo.n} incidentes en el trimestre ({riesgo.nocturnos} entre 23:00 y 03:00); por eso se piden custodios con experiencia. <Link to={ROUTES.Reaccion}>Ver incidentes</Link></Nota>
+      </Section>
 
-        <section style={sx('flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px')}>
-          <div className="card" style={sx('display:flex;gap:12px;align-items:flex-start;border-color:#C7D0F2')}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475CC7" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none;margin-top:2px')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-            <div style={sx('display:flex;flex-direction:column;gap:4px')}>
-              <span style={sx('font-weight:600')}>Recomendación: {top.join(' + ')} con unidad {unidad?.id}</span>
-              <span style={sx('font-size:14px;color:#3E4A59')}>Evalué {resumen.zona} custodios de {SERVICIO.zona} y {resumen.apoyo} de {SERVICIO.zonaApoyo}; {resumen.disponibles} están disponibles y {resumen.cumplen} cumplen todos los requisitos y la ventana de descanso. Este es el ranking.</span>
+      <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
+        {/* Ranking */}
+        <section aria-label="Ranking de candidatos" style={sx('flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px')}>
+          <div className="card" style={sx('display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-color:#C7D0F2;background:#F0F3FD;padding:14px 18px')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475CC7" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+            <div style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:2px;min-width:0')}>
+              <span style={sx('font-weight:600;font-size:14px')}>La IA recomienda: {top.map(c => c.name).join(' + ')} con la unidad {unidad?.id}</span>
+              <span style={sx('font-size:13px;color:#3E4A59')}>Revisó {resumen.zona} custodios de {SERVICIO.zona} y {resumen.apoyo} de {SERVICIO.zonaApoyo}: {resumen.disponibles} están libres y {resumen.cumplen} cumplen todo lo que pide el cliente. Abajo van ordenados de mejor a peor.</span>
             </div>
+            <button type="button" className="btn" style={sx('min-height:36px')} onClick={asignarSugeridos}>Asignar a {nombres(top)}</button>
           </div>
+
+          <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
+            <span style={sx('font-size:13px;color:#5F6B7A')}>Mostrando {mostrados.length} de {lista.length} candidatos libres en {SERVICIO.zona} y {SERVICIO.zonaApoyo}.</span>
+            <label style={sx('display:flex;gap:8px;align-items:center;font-size:13px;color:#3E4A59;cursor:pointer')}><input type="checkbox" checked={soloCumplen} onChange={e => { setSoloCumplen(e.target.checked); setVisibles(PASO) }} style={sx('accent-color:#475CC7')} />Solo quienes cumplen todos los requisitos ({LIST.filter(c => c.cumple).length})</label>
+          </div>
+
+          {mostrados.length === 0 && <div className="card" style={sx('color:#5F6B7A;font-size:14px')}>Nadie cumple todos los requisitos con este filtro. Quita el filtro o revisa los requisitos del cliente.</div>}
 
           {mostrados.map((c, i) => {
             const d = dec[c.id]
+            const abierto = !!detalle[c.id]
             return (
-              <article key={c.id} className="card" style={sx(d === 'Asignado' ? 'border-color:#9ED9BC' : d === 'Descartado' ? 'opacity:.55' : '')}>
-                <div style={sx('display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start')}>
-                  <span style={sx('width:48px;height:48px;border-radius:50%;background:#E9EDFB;display:flex;align-items:center;justify-content:center;font-weight:600;color:#0D1D41;flex:none')}>{c.name.split(' ').map(s => s[0]).join('')}</span>
-                  <div style={sx('flex:1 1 260px;display:flex;flex-direction:column;gap:6px;min-width:0')}>
+              <article key={c.id} className="card" style={sx('padding:16px 18px;' + (d === 'Asignado' ? 'border-color:#9ED9BC;background:#FBFEFC' : d === 'Descartado' ? 'opacity:.55' : ''))}>
+                <div style={sx('display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start')}>
+                  <span style={sx('width:44px;height:44px;border-radius:50%;background:#E9EDFB;display:flex;align-items:center;justify-content:center;font-weight:600;color:#0D1D41;flex:none')}>{c.name.split(' ').map(s => s[0]).join('')}</span>
+                  <div style={sx('flex:1 1 260px;display:flex;flex-direction:column;gap:4px;min-width:0')}>
                     <div style={sx('display:flex;gap:10px;align-items:center;flex-wrap:wrap')}>
                       <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>#{i + 1}</span>
                       <Link to={ROUTES.Custodios} style={sx('font-weight:600;font-size:16px;color:inherit;text-decoration:none')} title="Abrir expediente">{c.name}</Link>
-                      <span className="pill p-mute">{c.id} · {c.base}</span>
+                      <span className="pill p-mute">{c.base}</span>
                       {!c.cumple && <span className="pill p-warn" title="No cumple todos los requisitos del cliente">Revisar requisitos</span>}
                       {d && <span className={d === 'Asignado' ? 'pill p-ok' : 'pill p-mute'}>{d}</span>}
                     </div>
-                    <span style={sx('font-size:14px;color:#3E4A59;text-wrap:pretty')}>{c.why}</span>
-                    <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr));gap:10px;margin-top:6px')}>
-                      {c.f.map((v, j) => (
-                        <div key={j} title={FACTORES[j] + ': ' + v + '/100'} style={sx('display:flex;flex-direction:column;gap:4px')}><span style={sx('font-size:12px;color:#5F6B7A')}>{FACTORES[j]}</span><div className="track"><div style={sx(bar(v))}></div></div></div>
-                      ))}
-                    </div>
+                    <span style={sx('font-size:14px;color:#3E4A59;text-wrap:pretty')}>{abierto ? c.why : frase(c.why)}</span>
+                    {abierto && (
+                      <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr));gap:10px;margin-top:6px')}>
+                        {c.f.map((v, j) => (
+                          <div key={j} title={FACTORES[j] + ': ' + v + '/100'} style={sx('display:flex;flex-direction:column;gap:4px')}><span style={sx('font-size:12px;color:#5F6B7A')}>{FACTORES[j]} · <span className="mono">{v}</span></span><div className="track"><div style={sx(bar(v))}></div></div></div>
+                        ))}
+                      </div>
+                    )}
+                    <button type="button" className="lnk" onClick={() => setDetalle(x => ({ ...x, [c.id]: !abierto }))}>{abierto ? 'Ocultar detalle' : 'Ver por qué'}</button>
                   </div>
-                  <div style={sx('display:flex;flex-direction:column;align-items:flex-end;gap:10px')}>
-                    <span style={sx("font-family:'Montserrat',sans-serif;font-size:28px;font-weight:600")} title="Promedio de los 4 factores">{c.score}</span>
+                  <div style={sx('display:flex;flex-direction:column;align-items:flex-end;gap:8px')}>
+                    <span style={sx('display:flex;flex-direction:column;align-items:flex-end')}><span style={sx("font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;line-height:1")} title="Promedio de cercanía, descanso, experiencia y desempeño">{c.score}</span><span style={sx('font-size:11px;color:#5F6B7A')}>puntos de 100</span></span>
                     <div style={sx('display:flex;gap:8px')}>
-                      <button type="button" className="btn btn-pri" aria-pressed={d === 'Asignado'} onClick={() => set(c, 'Asignado')}>Asignar</button>
+                      <button type="button" className={'btn' + (d === 'Asignado' ? ' btn-ok' : '')} aria-pressed={d === 'Asignado'} onClick={() => set(c, 'Asignado')}>{d === 'Asignado' ? 'Asignado ✓' : 'Asignar'}</button>
                       <button type="button" className="btn" aria-pressed={d === 'Descartado'} onClick={() => set(c, 'Descartado')}>Descartar</button>
                     </div>
                   </div>
@@ -183,27 +215,28 @@ export default function AsignacionIA() {
           <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
             {visibles < lista.length && <button type="button" className="btn" onClick={() => setVisibles(v => Math.min(lista.length, v + PASO))}>Ver más candidatos ({lista.length - visibles} más)</button>}
             {visibles > PASO && <button type="button" className="btn" onClick={() => setVisibles(PASO)}>Ver menos</button>}
-            <span style={sx('font-size:13px;color:#5F6B7A')}>Mostrando {mostrados.length} de {lista.length} candidatos disponibles en {SERVICIO.zona} y {SERVICIO.zonaApoyo}.</span>
-          </div>
-
-          <div className="card" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between')}>
-            <div style={sx('display:flex;flex-direction:column;gap:4px')}>
-              <span className="lbl">Unidad sugerida</span>
-              <span style={sx('font-weight:600')}>{unidad ? `${unidad.id} · ${unidad.vehiculo} · ${unidad.id === 'AU-2087' ? 'Tepotzotlán' : unidad.zona}` : 'Sin unidades disponibles'}</span>
-              <span style={sx('font-size:13px;color:#5F6B7A')}>{unidad?.id === 'AU-2087' ? 'A 6 km del origen · seguro y verificación vigentes · servicio en 4,200 km' : unidad ? `${unidad.placas} · GPS ${unidad.gps} · póliza ${unidad.poliza} · ${unidad.km.toLocaleString('es-MX')} km` : ''}</span>
-              <button type="button" className="btn" style={sx('align-self:flex-start;min-height:32px;padding:0 10px;font-size:13px')} onClick={() => setModal('unidad')}>Cambiar unidad ({UNIDADES.length} disponibles)</button>
-            </div>
-            <span style={sx('font-size:14px;color:#3E4A59')}>{summary}</span>
-            <button type="button" className="btn btn-pri" onClick={confirmar}>Confirmar y pasar a monitoreo</button>
           </div>
         </section>
+
+        {/* Unidad sugerida + avance */}
+        <aside style={sx('flex:1 1 300px;max-width:380px;display:flex;flex-direction:column;gap:14px;position:sticky;top:20px')}>
+          <Section titulo="Unidad sugerida" ayuda="El vehículo de AI27 que acompaña el viaje." style="padding:16px 18px;gap:10px">
+            <span style={sx('font-weight:600;font-size:15px')}>{unidad ? `${unidad.id} · ${unidad.vehiculo}` : 'Sin unidades disponibles'}</span>
+            <span style={sx('font-size:13px;color:#5F6B7A')}>{unidad?.id === 'AU-2087' ? 'En Tepotzotlán, a 6 km del origen · seguro y verificación vigentes · 4,200 km de uso' : unidad ? `${unidad.zona} · ${unidad.placas} · GPS ${unidad.gps} · póliza ${unidad.poliza} · ${unidad.km.toLocaleString('es-MX')} km` : ''}</span>
+            <button type="button" className="btn" style={sx('align-self:flex-start;min-height:34px;font-size:13px')} onClick={() => setModal('unidad')}>Cambiar unidad ({UNIDADES.length} disponibles)</button>
+          </Section>
+          <Section titulo="Avance" ayuda={`${assigned.length} de ${requeridos} custodios asignados`} style="padding:16px 18px;gap:10px">
+            <div className="track" style={sx('height:8px')}><div style={sx('height:100%;width:' + Math.min(100, Math.round(assigned.length / requeridos * 100)) + '%;background:#4CC38A')}></div></div>
+            {assigned.length > 0 ? (
+              <div style={sx('display:flex;flex-wrap:wrap;gap:6px')}>{assigned.map(c => <span key={c.id} className="pill p-ok">{c.name}</span>)}{unidad && <span className="pill p-info">{unidad.id}</span>}</div>
+            ) : <span style={sx('font-size:14px;color:#3E4A59')}>Sin custodios asignados todavía.</span>}
+            <Nota>{faltan > 0 ? `Falta${faltan > 1 ? 'n' : ''} ${faltan} custodio${faltan > 1 ? 's' : ''}. Cuando estén todos, usa "Confirmar y pasar al mapa en vivo" arriba a la derecha.` : 'Equipo completo. Confirma arriba a la derecha para empezar a monitorear.'} Cada decisión queda registrada y mejora las siguientes sugerencias.</Nota>
+          </Section>
+        </aside>
       </div>
 
-      <section className="card" style={sx('display:flex;flex-direction:column;gap:14px;border-color:#FBE3CF')}>
-        <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Detección de huecos · próximas 48 h</h2>
-          <Link className="btn" to={ROUTES.Custodios}>Ver calendario de turnos</Link>
-        </div>
+      <Section titulo={`Huecos de cobertura · próximas 48 h${huecosRojos ? ` (${huecosRojos} zona${huecosRojos > 1 ? 's' : ''} sin cubrir)` : ''}`} ayuda="Zonas donde mañana faltan custodios para los servicios agendados. Haz clic en una zona para ver quién hay y cubrirla." plegable abierto={false}
+        acciones={<Link className="btn" style={sx('min-height:34px;font-size:13px')} to={ROUTES.Custodios}>Ver calendario de turnos</Link>}>
         <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:12px')}>
           {huecos.map(g => (
             <button key={g.key} type="button" className="gap" title="Ver detalle del hueco" onClick={() => setModal(g)} style={sx('background:#F3F5F8;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:6px')}>
@@ -212,11 +245,11 @@ export default function AsignacionIA() {
             </button>
           ))}
         </div>
-        <span style={sx('font-size:13px;color:#5F6B7A')}>Disponibles = custodios con estatus Disponible en la zona · Requeridos = servicios agendados para mañana por zona.</span>
-      </section>
+        <Nota>Hueco de cobertura = más servicios agendados que custodios disponibles en la zona. Disponibles = custodios con estatus Disponible · Requeridos = servicios agendados para mañana.</Nota>
+      </Section>
 
       <Modal open={modal === 'unidad'} onClose={() => setModal(null)} title="Elegir unidad de custodia" width={560} footer={<button type="button" style={sx(btnPriStyle)} onClick={() => { setModal(null); toast(`Unidad ${unidadId} seleccionada`) }}>Usar esta unidad</button>}>
-        <span style={sx('font-size:14px;color:#3E4A59')}>Unidades disponibles en {SERVICIO.zona} (seed). La sugerida está primero.</span>
+        <span style={sx('font-size:14px;color:#3E4A59')}>Unidades disponibles en {SERVICIO.zona}. La sugerida está primero.</span>
         {UNIDADES.map(u => (
           <label key={u.id} style={sx('display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:8px;cursor:pointer;background:' + (u.id === unidadId ? '#E9EDFB' : '#F3F5F8'))}>
             <input type="radio" name="unidad" checked={u.id === unidadId} onChange={() => setUnidadId(u.id)} style={sx('accent-color:#475CC7')} />

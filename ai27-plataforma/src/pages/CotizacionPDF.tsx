@@ -45,6 +45,7 @@ const CSS = `
 body{margin:0;background:#FFFFFF}
 a{color:#0D1D41}a:hover{color:#5A3600}
 .pdf-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;width:816px;max-width:100%;box-sizing:border-box;margin:0 auto;padding:16px 0}
+.pdf-btn-pri:hover{color:#FFFFFF;background:#3448A8}
 .pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#0D1D41;font:500 14px 'Montserrat',sans-serif;cursor:pointer;text-decoration:none}
 .pdf-btn:hover{color:#0D1D41}
 .pdf-btn-pri{background:#475CC7;border-color:#475CC7;color:#FFFFFF}
@@ -99,7 +100,7 @@ export default function CotizacionPDF() {
     const ruta = p.info.find(i => i[0] === 'Ruta')?.[1] ?? p.modelo
     const tipo = p.modelo.startsWith('Custodio dedicado') ? 'Dedicado' : p.modelo.startsWith('Monitoreo') ? 'Monitoreo' : 'Por evento'
     const id = actions.crearServicio({ cliente: clienteNombre, tipo, ruta, precio: p.subtotal })
-    toast(`Cotización ${folio} aceptada: servicio ${id} creado`)
+    toast(`Cotización ${folio} aceptada: servicio ${id} creado. Ahora asigna custodios.`)
     navigate(ROUTES.AsignacionIA)
   }
   const td = 'padding:12px;border-bottom:1px solid #D5DBE3'
@@ -109,13 +110,18 @@ export default function CotizacionPDF() {
     <div className="pdf-wrap" style={sx('background:#F6F7F9;min-height:100vh;padding:0 16px;box-sizing:border-box')}>
       <style>{CSS}</style>
       <div className="pdf-bar">
-        <Link className="pdf-btn" to={ROUTES.Cotizador}>← Volver al cotizador</Link>
         <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
-          {p.formato && <span style={sx("font:400 13px 'Montserrat',sans-serif;color:#5F6B7A")}>Formato: {p.formato}</span>}
-          <button type="button" className="pdf-btn" onClick={copiar}>Copiar liga</button>
-          <button type="button" className="pdf-btn" onClick={() => setMail(true)}>Enviar por correo</button>
-          <button type="button" className="pdf-btn" onClick={aceptar}>Marcar aceptada</button>
-          <button type="button" className="pdf-btn pdf-btn-pri" onClick={() => { window.print(); toast(`${folio}.pdf listo para descargar / imprimir`, 'info') }}>Imprimir / descargar PDF</button>
+          <Link className="pdf-btn" to={ROUTES.Cotizador}>← Volver</Link>
+          <span style={sx("display:flex;flex-direction:column;gap:1px;font-family:'Montserrat',sans-serif;color:#0D1D41")}>
+            <span style={sx('font-weight:600;font-size:14px')}>Cotización {folio} · {clienteNombre}</span>
+            <span style={sx('font-size:12px;color:#5F6B7A')}>Así la recibe el cliente{p.formato ? ` (${p.formato})` : ''}. Si la acepta, márcala aquí.</span>
+          </span>
+        </div>
+        <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
+          <button type="button" className="pdf-btn" onClick={copiar} title="Copiar la liga de esta cotización">Copiar liga</button>
+          <button type="button" className="pdf-btn" onClick={() => setMail(true)}>Enviar</button>
+          <button type="button" className="pdf-btn" onClick={() => { window.print(); toast(`${folio}.pdf listo para descargar / imprimir`, 'info') }}>Descargar PDF</button>
+          <button type="button" className="pdf-btn pdf-btn-pri" onClick={aceptar}>Aceptada → asignar custodios</button>
         </div>
       </div>
 

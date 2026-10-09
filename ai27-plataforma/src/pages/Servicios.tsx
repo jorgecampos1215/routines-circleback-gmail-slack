@@ -1,6 +1,7 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Shell } from '../components/Shell'
+import { Nota, PageHeader, Section } from '../components/Page'
 import { Field, Modal, Pager, btnPriStyle, btnStyle, inputStyle, usePagination, useToast } from '../components/ui'
 import { sx, fmtMXN } from '../lib/sx'
 import { ROUTES } from '../lib/routes'
@@ -27,6 +28,9 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 .srv-row:hover td{background:#FAFBFC}
 .mon{background:#F3F5F8;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px;border:1px solid transparent;cursor:pointer;font-family:inherit;color:#0D1D41;text-align:left}
 .mon:hover,.mon[aria-pressed=true]{border-color:#475CC7}
+.tabbtn{background:#FFFFFF}.tabbtn[aria-selected=true]{background:#E9EDFB;border-color:#475CC7;color:#0D1D41}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100vw);background:#FFFFFF;border-left:1px solid #E4E8ED;box-shadow:-12px 0 40px rgba(18,24,33,.14);z-index:850;display:flex;flex-direction:column;overflow:auto;font-family:'Montserrat',system-ui,sans-serif;color:#0D1D41}
+.backdrop{position:fixed;inset:0;background:rgba(18,24,33,.18);z-index:840}
 `
 
 type Tab = 'all' | TipoServicio
@@ -36,7 +40,7 @@ type LogItem = { t: string; text: string; src: string; dot: string }
 const ST: Record<string, string> = { 'En tránsito': 'pill p-info', 'Con incidente': 'pill p-bad', 'Confirmado': 'pill p-ok', 'Cotizado': 'pill p-mute', 'Entregado': 'pill p-ok', 'Cerrado': 'pill p-mute', 'Activo': 'pill p-info' }
 const TABS: [Tab, string][] = [['all', 'Todos'], ['Por evento', 'Por evento'], ['Dedicado', 'Dedicados'], ['Monitoreo', 'Monitoreo']]
 const VISTAS: [Vista, string][] = [['Activos', 'Activos'], ['Todos', 'Todo el trimestre'], ['Entregado', 'Entregados'], ['Cerrado', 'Cerrados'], ['Con incidente', 'Con incidente']]
-const COLS: [keyof FilaServicio, string][] = [['id', 'Servicio'], ['client', 'Cliente'], ['type', 'Tipo'], ['route', 'Ruta / alcance'], ['cust', 'Custodios'], ['mon', 'Monitorista'], ['monto', 'Tarifa'], ['status', 'Estatus']]
+const COLS: [keyof FilaServicio, string][] = [['id', 'Servicio'], ['client', 'Cliente'], ['type', 'Tipo'], ['route', 'Ruta / alcance'], ['monto', 'Tarifa'], ['status', 'Estatus']]
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 const dot = (c: string) => 'width:10px;height:10px;border-radius:50%;margin-top:5px;background:' + c
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
@@ -108,6 +112,7 @@ export default function Servicios() {
   const [sort, setSort] = useState<{ k: keyof FilaServicio; dir: 1 | -1 } | null>(null)
   const [fMon, setFMon] = useState<string | null>(null)
   const [sel, setSel] = useState('SRV-24817')
+  const [detalleAbierto, setDetalleAbierto] = useState(false)
   const [avisado, setAvisado] = useState(false)
   const [notas, setNotas] = useState<Record<string, LogItem[]>>({})
   const [evid, setEvid] = useState<Record<string, number>>({})
@@ -146,7 +151,13 @@ export default function Servicios() {
     return { name, n, srv: mios.length, texto, bar: 'height:100%;width:' + Math.min(100, Math.round(n / (name === 'S. Campos' ? Math.max(80, unidadesMon) : 18) * 100)) + '%;background:' + (n >= 16 && name !== 'S. Campos' ? '#F0605D' : '#3FA7C9') }
   })
 
-  const seleccionar = (id: string) => setSel(id)
+  const seleccionar = (id: string) => { setSel(id); setDetalleAbierto(true) }
+  useEffect(() => {
+    if (!detalleAbierto) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDetalleAbierto(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [detalleAbierto])
   const cambiarTab = (k: Tab) => { setTab(k); pg.setPage(0); const vis = k === 'all' ? enVista : enVista.filter(x => x.type === k); if (vis.length && !vis.some(x => x.id === sel)) setSel(vis[0].id) }
   const cambiarVista = (v: Vista) => { setVista(v); pg.setPage(0); const vis = all.filter(x => v === 'Activos' ? x.activo : v === 'Todos' ? true : x.status === v); if (vis.length && !vis.some(x => x.id === sel)) setSel(vis[0].id) }
   const ordenar = (k: keyof FilaServicio) => { setSort(s => (s && s.k === k ? (s.dir === 1 ? { k, dir: -1 } : null) : { k, dir: 1 })); pg.setPage(0) }
@@ -173,7 +184,7 @@ export default function Servicios() {
     const monto = parseInt(form.monto.replace(/\D/g, '')) || (evento ? 24500 : form.tipo === 'Dedicado' ? 96000 : 43200)
     const nombres = form.custodios.map(id => { const c = custodios.find(x => x.id === id)!; const p = c.nombre.split(' '); return `${p[0][0]}. ${p[1]}` })
     const id = actions.crearServicio({ cliente: form.cliente, tipo: form.tipo, ruta, precio: monto, fecha: form.fecha, custodios: form.tipo === 'Monitoreo' ? undefined : nombres.join(', ') || undefined, unidad: form.tipo === 'Monitoreo' ? undefined : form.unidad || undefined, monitorista: form.monitorista })
-    setOpen(false); setVista('Activos'); setTab('all'); setQ(''); setFMon(null); pg.setPage(0); setSel(id)
+    setOpen(false); setVista('Activos'); setTab('all'); setQ(''); setFMon(null); pg.setPage(0); setSel(id); setDetalleAbierto(true)
     toast(`Servicio ${id} creado para ${form.cliente} · ${fmtMXN(monto)}${evento ? '' : '/mes'}`)
   }
   const exportar = () => {
@@ -183,123 +194,139 @@ export default function Servicios() {
   }
   const selectSt = inputStyle + ';width:auto;min-height:36px'
 
+  const kpis: [string, number, string][] = [['Activos ahora', activos.length, 'pill p-info'], ['En tránsito', activos.filter(x => x.status === 'En tránsito').length, 'pill p-info'], ['Con incidente', activos.filter(x => x.status === 'Con incidente').length, 'pill p-bad'], ['Confirmados por salir', activos.filter(x => x.status === 'Confirmado').length, 'pill p-ok']]
+
   return (
     <Shell active="servicios" css={CSS}>
-      <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between')}>
-        <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-          <span className="lbl">Operación</span>
-          <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:32px;font-weight:600")}>Servicios</h1>
-        </div>
-        <div style={sx('display:flex;gap:12px;flex-wrap:wrap')}>
-          <Link className="btn" to={ROUTES.Cotizador}>Desde cotización</Link>
-          <button type="button" className="btn btn-pri" onClick={abrirNuevo}>Nuevo servicio</button>
-        </div>
-      </header>
+      <PageHeader
+        seccion="Operación"
+        titulo="Servicios"
+        descripcion="Todo lo contratado en un solo lugar: custodias por evento (un viaje), custodios dedicados (equipo fijo por mes) y monitoreo como servicio (vigilamos la flota del cliente). Clic en una fila para ver detalle y bitácora."
+        accion={{ label: 'Nuevo servicio', onClick: abrirNuevo }}
+        secundarias={<><Link className="btn" to={ROUTES.Cotizador}>Desde cotización</Link><button type="button" className="btn" onClick={exportar}>Exportar CSV</button></>}
+      />
 
-      <section aria-label="Sugerencia de IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>IA · servicios en riesgo de retraso</span><span style={sx('font-size:14px;color:#3E4A59')}><button type="button" onClick={() => { cambiarVista('Activos'); setSel('SRV-24822') }} style={sx('background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline')}>SRV-24822</button> (Farmacéutica Orión) va 40 min atrás de su ETA por tráfico en Querétaro. Avisar al cliente ahora mantiene el SLA de puntualidad, que va en 96.4%.</span></div>
-        <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Puntualidad mensual de abril a septiembre: 94.1, 94.8, 95.2, 95.0, 95.9 y 96.4 por ciento" style={sx('display:block')}><path d="M10 60H210" stroke="#E4E8ED"></path><polyline points="10,47.8 50,38.2 90,32.7 130,35.4 170,23.1 210,16.2" fill="none" stroke="#3448A8" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"></polyline><circle cx="210" cy="16.2" r="4" fill="#3448A8"></circle><text x="168" y="10" fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#0D1D41">96.4%</text></svg>
+      {/* Sugerencia de la IA: una sola tarjeta */}
+      <section aria-label="Sugerencia de la IA" style={sx('display:flex;flex-wrap:wrap;gap:14px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:12px;padding:12px 18px')}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
+        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:2px;min-width:0')}>
+          <span style={sx('font-weight:600;font-size:14px')}>La IA recomienda avisar a Farmacéutica Orión: <button type="button" onClick={() => { cambiarVista('Activos'); seleccionar('SRV-24822') }} style={sx('background:none;border:0;padding:0;font:inherit;color:#3448A8;cursor:pointer;text-decoration:underline')}>SRV-24822</button> va 40 min tarde.</span>
+          <span style={sx('font-size:13px;color:#3E4A59')}>Tráfico en Querétaro. Avisar ahora mantiene la puntualidad de entregas en 96.4%.</span>
+        </div>
+        <figure style={sx('margin:0;display:flex;flex-direction:column;gap:2px')}>
+          <svg width="180" height="44" viewBox="0 0 220 64" role="img" aria-label="Puntualidad mensual de abril a septiembre: 94.1, 94.8, 95.2, 95.0, 95.9 y 96.4 por ciento" style={sx('display:block')}><path d="M10 60H210" stroke="#E4E8ED"></path><polyline points="10,47.8 50,38.2 90,32.7 130,35.4 170,23.1 210,16.2" fill="none" stroke="#3448A8" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"></polyline><circle cx="210" cy="16.2" r="4" fill="#3448A8"></circle><text x="168" y="10" fontFamily="IBM Plex Mono, monospace" fontSize="11" fill="#0D1D41">96.4%</text></svg>
           <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Puntualidad de entregas · abr a sep</figcaption>
         </figure>
-        <button type="button" className="btn" onClick={avisar} disabled={avisado} style={sx(avisado ? 'background:#E3F6EC;border-color:#9ED9BC;color:#17784A;cursor:default' : '')}>{avisado ? 'Cliente avisado' : 'Avisar al cliente'}</button>
+        <button type="button" className="btn" onClick={avisar} disabled={avisado} style={sx('min-height:34px;font-size:13px' + (avisado ? ';background:#E3F6EC;border-color:#9ED9BC;color:#17784A;cursor:default' : ''))}>{avisado ? 'Cliente avisado ✓' : 'Avisar al cliente'}</button>
       </section>
 
-      <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between')}>
-        <div role="tablist" aria-label="Tipo de servicio" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
-          {TABS.map(([k, label]) => (
-            <button key={k} type="button" role="tab" aria-selected={k === tab} className="btn" style={sx(k === tab ? 'background:#E9EDFB;border-color:#475CC7;color:#0D1D41' : '')} onClick={() => cambiarTab(k)}>{label} <span className="mono" style={sx('font-size:12px;opacity:.8')}>{count(k)}</span></button>
-          ))}
-        </div>
-        <div style={sx('display:flex;gap:10px;flex-wrap:wrap;align-items:center')}>
-          <select aria-label="Vista" value={vista} onChange={e => cambiarVista(e.target.value as Vista)} style={sx(selectSt)}>{VISTAS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
-          {fMon && <button type="button" className="pill p-warn" style={sx('border:0;cursor:pointer;font-family:inherit')} onClick={() => { setFMon(null); pg.setPage(0) }}>Monitorista: {fMon} ×</button>}
-          <input type="search" aria-label="Buscar servicio" placeholder="Buscar folio, cliente, ruta" value={q} onChange={e => { setQ(e.target.value); pg.setPage(0) }} style={sx(selectSt + ';min-width:220px')} />
-          <button type="button" className="btn" style={sx('min-height:36px;padding:0 12px')} onClick={exportar}>Exportar CSV</button>
-        </div>
+      <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px')}>
+        {kpis.map(([k, v, cls]) => (
+          <div key={k} className="card" style={sx('padding:12px 16px;display:flex;flex-direction:column;gap:2px')}><span className="lbl">{k}</span><span className="kpi" style={sx('font-size:24px;display:flex;align-items:center;gap:10px')}>{v}<span className={cls} style={sx('font-size:11px')}>{k === 'Con incidente' ? 'atender' : k === 'Confirmados por salir' ? 'listos' : 'en curso'}</span></span></div>
+        ))}
       </div>
 
-      <section className="card" style={sx('padding:8px 8px 8px')}>
-        <div style={sx('overflow-x:auto')}>
+      <Section titulo="Lista de servicios" ayuda="Filtra por tipo, elige qué periodo ver y busca por folio, cliente o ruta." style="padding:16px 18px 10px;gap:12px"
+        acciones={<>
+          <select aria-label="Qué servicios ver" value={vista} onChange={e => cambiarVista(e.target.value as Vista)} style={sx(selectSt)}>{VISTAS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+          <input type="search" aria-label="Buscar servicio" placeholder="Buscar folio, cliente, ruta" value={q} onChange={e => { setQ(e.target.value); pg.setPage(0) }} style={sx(selectSt + ';min-width:220px')} />
+        </>}>
+        <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
+          <div role="tablist" aria-label="Tipo de servicio" style={sx('display:flex;gap:8px;flex-wrap:wrap')}>
+            {TABS.map(([k, label]) => (
+              <button key={k} type="button" role="tab" aria-selected={k === tab} className="btn tabbtn" style={sx('min-height:36px')} onClick={() => cambiarTab(k)}>{label} <span className="mono" style={sx('font-size:12px;opacity:.8')}>{count(k)}</span></button>
+            ))}
+          </div>
+          {fMon && <button type="button" className="pill p-warn" style={sx('border:0;cursor:pointer;font-family:inherit')} onClick={() => { setFMon(null); pg.setPage(0) }}>Monitorista: {fMon} ×</button>}
+        </div>
+        <div style={sx('overflow-x:auto;margin:0 -10px')}>
           <table className="tbl">
-            <thead><tr>{COLS.map(([k, label]) => <th key={k} aria-sort={sort?.k === k ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'} onClick={() => ordenar(k)}>{label}{sort?.k === k ? (sort.dir === 1 ? ' ▲' : ' ▼') : ''}</th>)}</tr></thead>
+            <thead><tr>{COLS.map(([k, label]) => <th key={k} aria-sort={sort?.k === k ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'} onClick={() => ordenar(k)} title="Ordenar">{label}{sort?.k === k ? (sort.dir === 1 ? ' ▲' : ' ▼') : ''}</th>)}</tr></thead>
             <tbody>
               {rows.slice(pg.from, pg.to).map(x => (
-                <tr key={x.id} className="srv-row" aria-selected={x.id === r.id} tabIndex={0}
+                <tr key={x.id} className="srv-row" aria-selected={detalleAbierto && x.id === r.id} tabIndex={0}
                   onClick={() => seleccionar(x.id)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionar(x.id) } }}
-                  style={sx(x.id === r.id ? (x.status === 'Con incidente' ? 'background:#FFF5F5' : 'background:#F0F3FD') : x.status === 'Con incidente' ? 'background:#FFF5F5' : '')}>
-                  <td className="mono">{x.id}</td><td>{x.client}{x.nuevo && <span className="pill p-warn" style={sx('margin-left:8px')}>Nuevo</span>}</td><td><span className="pill p-mute">{x.type}</span></td><td>{x.route}</td><td>{x.cust}</td><td>{x.mon}</td><td className="mono">{x.fee}</td><td><span className={ST[x.status]}>{x.status}</span></td>
+                  style={sx(detalleAbierto && x.id === r.id ? (x.status === 'Con incidente' ? 'background:#FFF5F5' : 'background:#F0F3FD') : x.status === 'Con incidente' ? 'background:#FFF5F5' : '')}>
+                  <td className="mono">{x.id}</td><td>{x.client}{x.nuevo && <span className="pill p-warn" style={sx('margin-left:8px')}>Nuevo</span>}</td><td><span className="pill p-mute">{x.type}</span></td><td>{x.route}</td><td className="mono">{x.fee}</td><td><span className={ST[x.status]}>{x.status}</span></td>
                 </tr>
               ))}
-              {rows.length === 0 && <tr><td colSpan={8} style={sx('padding:24px 12px;color:#5F6B7A;text-align:center;white-space:normal')}>Sin servicios que coincidan con los filtros.</td></tr>}
+              {rows.length === 0 && <tr><td colSpan={6} style={sx('padding:24px 12px;color:#5F6B7A;text-align:center;white-space:normal')}>Sin servicios con estos filtros. Prueba con otro tipo, otro periodo o borra la búsqueda.</td></tr>}
             </tbody>
           </table>
         </div>
-        <div style={sx('padding:0 4px')}><Pager {...pg} /></div>
-      </section>
+        <Pager {...pg} />
+      </Section>
 
-      <section style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:16px')}>
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:18px')}>
-          <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start')}>
-            <div style={sx('display:flex;flex-direction:column;gap:4px')}>
-              <span className="lbl">{r.id} · {r.type}</span>
-              <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:22px;font-weight:600")}>{r.client} · {r.route}</h2>
-            </div>
-            <span className={ST[r.status]}>{r.status}</span>
-          </div>
-          <dl style={sx('margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:14px 20px;font-size:14px')}>
-            {d.dl.map(([k, v, mono]) => (
-              <div key={k}><dt className="lbl">{k}</dt><dd className={mono ? 'mono' : undefined} style={sx('margin:4px 0 0')}>{v}</dd></div>
-            ))}
-          </dl>
-          <div style={sx('display:flex;gap:6px;flex-wrap:wrap')}>
-            {etapas(r).map(e => <span key={e.s} className={e.cls}>{e.s}</span>)}
-          </div>
-          <div style={sx('display:flex;gap:12px;flex-wrap:wrap;align-items:center')}>
-            <Link className="btn btn-pri" to={ROUTES.Reaccion}>Escalar a Reacción</Link>
-            <Link className="btn" to={ROUTES.Monitoreo}>Ver en mapa</Link>
-            <button type="button" className="btn" onClick={() => fileRef.current?.click()}>Adjuntar evidencia</button>
-            <input ref={fileRef} type="file" multiple accept="image/*,application/pdf" style={sx('display:none')}
-              onChange={e => { const n = e.target.files?.length ?? 0; if (n) { setEvid(v => ({ ...v, [r.id]: (v[r.id] ?? 0) + n })); toast(`${n} evidencia${n === 1 ? '' : 's'} adjunta${n === 1 ? '' : 's'} a ${r.id}`) } e.target.value = '' }} />
-            {nEvid > 0 && <span className="pill p-ok">{nEvid} {nEvid === 1 ? 'evidencia adjunta' : 'evidencias adjuntas'}</span>}
-          </div>
-        </div>
-
-        <div className="card" style={sx('display:flex;flex-direction:column;gap:14px')}>
-          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Bitácora del servicio</h2>
-          <ol style={sx('list-style:none;margin:0;padding:0;display:flex;flex-direction:column')}>
-            {log.map((l, i) => (
-              <li key={i} style={sx('display:grid;grid-template-columns:56px 14px minmax(0,1fr);gap:12px;padding:8px 0')}>
-                <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{l.t}</span>
-                <span style={sx(l.dot)}></span>
-                <span style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('font-size:14px')}>{l.text}</span><span style={sx('font-size:12px;color:#5F6B7A')}>{l.src}</span></span>
-              </li>
-            ))}
-          </ol>
-          <label style={sx('display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A')}>Comentario del monitorista
-            <textarea rows={2} placeholder="Agregar nota a la bitácora (Enter para guardar)" value={nota} onChange={e => setNota(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); agregarNota() } }}
-              style={sx("background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:10px 12px;font:400 14px 'Montserrat',sans-serif;resize:vertical")}></textarea>
-          </label>
-        </div>
-      </section>
-
-      <section className="card" style={sx('display:flex;flex-direction:column;gap:16px')}>
-        <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
-          <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:18px;font-weight:600")}>Consola de monitoristas</h2>
-          <span style={sx('font-size:13px;color:#5F6B7A')}>Turno vespertino · {MONITORISTAS.length} monitoristas · {activos.length} servicios activos</span>
-        </div>
+      <Section titulo="Consola de monitoristas" ayuda={`Quién vigila qué en el turno vespertino: ${MONITORISTAS.length} monitoristas, ${activos.length} servicios activos. Clic en uno para filtrar la tabla.`} plegable abierto={false}>
         <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:12px')}>
           {mons.map(m => (
             <button key={m.name} type="button" className="mon" aria-pressed={fMon === m.name} title="Filtrar la tabla por este monitorista" onClick={() => { setFMon(f => (f === m.name ? null : m.name)); setVista('Activos'); setTab('all'); pg.setPage(0) }}>
-              <div style={sx('display:flex;justify-content:space-between;gap:8px')}><span style={sx('font-weight:500')}>{m.name}</span><span className="mono" style={sx('font-size:13px')}>{m.n} srv</span></div>
+              <div style={sx('display:flex;justify-content:space-between;gap:8px')}><span style={sx('font-weight:500')}>{m.name}</span><span className="mono" style={sx('font-size:13px')}>{m.n} {m.name === 'S. Campos' ? 'unid.' : 'srv'}</span></div>
               <div className="track"><div style={sx(m.bar)}></div></div>
               <span style={sx('font-size:12px;color:#5F6B7A')}>{m.texto}</span>
             </button>
           ))}
         </div>
-      </section>
+        <Nota>La barra muestra la carga del monitorista; en rojo cuando pasa de 16 servicios a la vez.</Nota>
+      </Section>
+
+      {/* Detalle lateral del servicio seleccionado */}
+      {detalleAbierto && (
+        <>
+          <div className="backdrop" onClick={() => setDetalleAbierto(false)} />
+          <aside className="drawer" role="dialog" aria-modal="true" aria-label={`Detalle de ${r.id}`}>
+            <div style={sx('display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:18px 22px;border-bottom:1px solid #EEF1F4')}>
+              <div style={sx('display:flex;flex-direction:column;gap:4px;min-width:0')}>
+                <span className="lbl">{r.id} · {r.type}</span>
+                <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:20px;font-weight:600")}>{r.client}</h2>
+                <span style={sx('font-size:14px;color:#3E4A59')}>{r.route}</span>
+              </div>
+              <div style={sx('display:flex;gap:8px;align-items:center;flex:none')}>
+                <span className={ST[r.status]}>{r.status}</span>
+                <button type="button" onClick={() => setDetalleAbierto(false)} aria-label="Cerrar" style={sx('width:32px;height:32px;border-radius:8px;border:1px solid #D5DBE3;background:#F3F5F8;color:#3E4A59;font-size:16px;cursor:pointer')}>×</button>
+              </div>
+            </div>
+            <div style={sx('padding:18px 22px;display:flex;flex-direction:column;gap:18px')}>
+              <div style={sx('display:flex;gap:6px;flex-wrap:wrap')}>
+                {etapas(r).map(e => <span key={e.s} className={e.cls}>{e.s}</span>)}
+              </div>
+              <dl style={sx('margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px;font-size:14px')}>
+                {d.dl.map(([k, v, mono]) => (
+                  <div key={k} style={sx('min-width:0')}><dt className="lbl">{k}</dt><dd className={mono ? 'mono' : undefined} style={sx('margin:4px 0 0;overflow-wrap:anywhere')}>{v}</dd></div>
+                ))}
+              </dl>
+              <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
+                <Link className="btn" to={ROUTES.Monitoreo}>Ver en mapa en vivo</Link>
+                <Link className="btn" to={ROUTES.Reaccion} style={sx(r.status === 'Con incidente' ? 'border-color:#F5C2C0;color:#B42318' : '')}>Atender incidente</Link>
+                <button type="button" className="btn" onClick={() => fileRef.current?.click()}>Adjuntar evidencia</button>
+                <input ref={fileRef} type="file" multiple accept="image/*,application/pdf" style={sx('display:none')}
+                  onChange={e => { const n = e.target.files?.length ?? 0; if (n) { setEvid(v => ({ ...v, [r.id]: (v[r.id] ?? 0) + n })); toast(`${n} evidencia${n === 1 ? '' : 's'} adjunta${n === 1 ? '' : 's'} a ${r.id}`) } e.target.value = '' }} />
+                {nEvid > 0 && <span className="pill p-ok">{nEvid} {nEvid === 1 ? 'evidencia adjunta' : 'evidencias adjuntas'}</span>}
+              </div>
+              <div style={sx('display:flex;flex-direction:column;gap:10px;border-top:1px solid #EEF1F4;padding-top:16px')}>
+                <div style={sx('display:flex;flex-direction:column;gap:2px')}>
+                  <h3 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:600")}>Bitácora del servicio</h3>
+                  <span style={sx('font-size:13px;color:#5F6B7A')}>Lo que pasó, en orden, con quién lo reportó.</span>
+                </div>
+                <ol style={sx('list-style:none;margin:0;padding:0;display:flex;flex-direction:column')}>
+                  {log.map((l, i) => (
+                    <li key={i} style={sx('display:grid;grid-template-columns:48px 14px minmax(0,1fr);gap:10px;padding:8px 0')}>
+                      <span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{l.t}</span>
+                      <span style={sx(l.dot)}></span>
+                      <span style={sx('display:flex;flex-direction:column;gap:2px')}><span style={sx('font-size:14px')}>{l.text}</span><span style={sx('font-size:12px;color:#5F6B7A')}>{l.src}</span></span>
+                    </li>
+                  ))}
+                </ol>
+                <label style={sx('display:flex;flex-direction:column;gap:6px;font-size:12px;color:#5F6B7A')}>Comentario del monitorista
+                  <textarea rows={2} placeholder="Agregar nota a la bitácora (Enter para guardar)" value={nota} onChange={e => setNota(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); agregarNota() } }}
+                    style={sx("background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:10px 12px;font:400 14px 'Montserrat',sans-serif;resize:vertical")}></textarea>
+                </label>
+              </div>
+            </div>
+          </aside>
+        </>
+      )}
 
       <Modal open={open} onClose={() => setOpen(false)} title="Nuevo servicio" width={640} footer={<><button type="button" style={sx(btnStyle)} onClick={() => setOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={crear}>Crear servicio</button></>}>
         <div style={sx('display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px')}>

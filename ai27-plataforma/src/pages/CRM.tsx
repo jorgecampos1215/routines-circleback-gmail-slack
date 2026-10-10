@@ -1,12 +1,14 @@
 import { useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Shell } from '../components/Shell'
 import { Field, Modal, Pager, btnPriStyle, btnStyle, inputStyle, usePagination, useToast } from '../components/ui'
 import { Nota, PageHeader, Section } from '../components/Page'
 import { ROUTES } from '../lib/routes'
-import { actions, useStore, type Lead } from '../lib/store'
+import { actions, useStore, type AsignacionNueva } from '../lib/store'
 import { sx, fmtMXN } from '../lib/sx'
 import { AUTOPARTES, clientesCRM, fmtM, incidentesDe, serviciosDe, todosLosClientes, type ClienteCRM } from '../data/crm'
+import { asignacionesDeCliente, HOY_DEMO, type Asignacion } from '../data/asignaciones'
+import { custodios as seedCustodios, unidades as seedUnidades, type TipoServicio } from '../data/seed'
 
 const CSS = `
 a{color:#3448A8}a:hover{color:#0D1D41}
@@ -22,61 +24,72 @@ a{color:#3448A8}a:hover{color:#0D1D41}
 .crm-row{cursor:pointer}.crm-row:hover td{background:#FAFBFC}
 .crm-row.sel td{background:#F0F3FD}
 button.pill{border:0;cursor:pointer;font-family:'Montserrat',sans-serif}
-.crm-deal{cursor:pointer}.crm-deal:hover{outline:1px solid #D5DBE3}
 .crm-th{cursor:pointer;user-select:none}.crm-th:hover{color:#0D1D41}
-.mv{width:24px;height:24px;border-radius:6px;border:1px solid #D5DBE3;background:#FFFFFF;color:#3E4A59;font-size:13px;cursor:pointer;padding:0;line-height:1}
-.mv:disabled{opacity:.35;cursor:default}
 .field select,.field input,.field textarea{min-height:40px;background:#F3F5F8;border:1px solid #D5DBE3;border-radius:8px;color:#0D1D41;padding:0 12px;font:400 14px 'Montserrat',sans-serif;width:100%;box-sizing:border-box}
 .cli{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:52px;padding:6px 12px;border-radius:8px;border:0;cursor:pointer;font:400 14px 'Montserrat',sans-serif;text-align:left;background:transparent;color:#0D1D41}
 .cli:hover{background:#F3F5F8}
 .cli[aria-pressed="true"]{background:#E9EDFB}
 .kpi{background:#F3F5F8;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.chk{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;border:1px solid transparent}
+.chk:hover{background:#F3F5F8}.chk[data-on="true"]{background:#E9EDFB;border-color:#C7D0F2}
+.chk input{width:16px;height:16px;margin:0;min-height:0;accent-color:#475CC7}
+.lista{display:flex;flex-direction:column;gap:2px;max-height:200px;overflow:auto;border:1px solid #E4E8ED;border-radius:8px;padding:4px}
 `
 
 /** Clientes de la lista lateral del diseño (en ese orden). */
 const LATERAL = ['Alpura', 'Marsh', 'Farmacéutica Orión', 'Autopartes Saltillo', 'Electrónica del Bajío', 'Logística Pacífico Norte', 'Bebidas del Golfo']
 
-type Etapa = Lead['etapa']
-const ETAPAS: Etapa[] = ['Prospecto', 'Diagnóstico', 'Cotizado', 'Negociación', 'Ganado']
-type Deal = { id: string; name: string; what: string; amt: string; next: string; cls: string; etapa: Etapa; store?: boolean }
-const D = (id: string, etapa: Etapa, name: string, what: string, amt: string, next: string, cls: string): Deal => ({ id, etapa, name, what, amt, next, cls: 'pill ' + cls })
-const DEALS0: Deal[] = [
-  D('d1', 'Prospecto', 'Grupo Textil Arrayán', 'Eventos Puebla–Pacífico', '$420K', 'Llamar 9 oct', 'p-mute'),
-  D('d2', 'Prospecto', 'Cementos del Centro', 'Monitoreo 60 unidades', '$780K', 'Correo hoy', 'p-warn'),
-  D('d3', 'Diagnóstico', 'Distribuidora Peninsular', 'Dedicado 4 custodios', '$560K', 'Visita 10 oct', 'p-info'),
-  D('d4', 'Cotizado', 'Marsh', 'Méx–SLP nocturno', '$190K/evento', 'Seguimiento 8 oct', 'p-warn'),
-  D('d5', 'Cotizado', 'Agroexport Sinaloa', 'Eventos Culiacán–Nogales', '$1.4M', 'Vencido 2 días', 'p-bad'),
-  D('d6', 'Negociación', 'Farmacéutica Orión', 'Ampliar a Monterrey dedicado', '$1.6M', 'Junta 14 oct', 'p-info'),
-  D('d7', 'Ganado', 'Autopartes Saltillo', 'Renovación 12 meses', '$188K/mes', 'Firmado', 'p-ok'),
-]
-/** Totales por etapa del diseño; al mover deals se ajustan con la diferencia. */
-const TOTAL0: Record<Etapa, number> = { Prospecto: 1.2e6, Diagnóstico: 0.9e6, Cotizado: 2.1e6, Negociación: 1.6e6, Ganado: 0.7e6 }
-const monto = (s: string) => { const m = /\$?([\d.]+)\s*([KM])?/i.exec(s); if (!m) return 0; const n = parseFloat(m[1]); return m[2]?.toUpperCase() === 'M' ? n * 1e6 : m[2]?.toUpperCase() === 'K' ? n * 1e3 : n }
-
 type Actividad = { cliente: string; tipo: string; nota: string; fecha: string }
 type SortKey = 'nombre' | 'modelo' | 'activos' | 'trimestre' | 'margen' | 'diasCobro' | 'ultimo'
+/** Fila de la tabla de asignaciones: las derivadas de seed y las creadas por el usuario comparten los campos esenciales. */
+type FilaAsg = Asignacion | AsignacionNueva
 
 const TH = 'text-align:left;font-weight:500;font-size:12px;color:#5F6B7A;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid #E4E8ED'
 const TH_R = TH + ';text-align:right'
 const PILL_ON = 'background:#E9EDFB;color:#0D1D41'
 const td = 'padding:12px;border-bottom:1px solid #EEF1F4;white-space:nowrap'
+/** Celdas de la tabla de asignaciones: más compactas y con salto de línea para caber a 1440 px. */
+const tdA = 'padding:10px 8px;border-bottom:1px solid #EEF1F4;vertical-align:top;font-size:13px'
 const hoy = () => new Date().toISOString().slice(0, 10)
+
+/** "07 oct · 14:32" */
+const fmtFH = (iso: string) => {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }).replace('.', '') + ' · ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false })
+}
+/** Date → valor de <input type="datetime-local"> en hora local. */
+const toLocalInput = (d: Date) => {
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+}
+const pillEstatus = (e: FilaAsg['estatus']) => 'pill ' + (e === 'En curso' ? 'p-ok' : e === 'Programada' ? 'p-info' : e === 'Cancelada' ? 'p-bad' : 'p-mute')
+const nombreCustodio = (id: string) => seedCustodios.find(c => c.id === id)?.nombre ?? 'Custodio'
+const unidadDe = (id: string) => seedUnidades.find(u => u.id === id)
+
+const defInicio = () => { const d = new Date(HOY_DEMO.getTime() + 86_400_000); d.setHours(8, 0, 0, 0); return d }
+const formVacio = (ruta = '') => {
+  const ini = defInicio()
+  return { tipo: 'Por evento' as TipoServicio, servicio: '', ruta, custodios: [] as string[], unidades: [] as string[], inicio: toLocalInput(ini), fin: toLocalInput(new Date(ini.getTime() + 10 * 3_600_000)), notas: '' }
+}
 
 export default function CRM() {
   const toast = useToast()
   const nuevos = useStore(s => s.clientesNuevos ?? [])
-  const leadsStore = useStore(s => s.leads ?? [])
+  const asgStore = useStore(s => s.asignaciones ?? [])
+  const overrides = useStore(s => s.estatusUnidades ?? [])
   const todos = useMemo(() => [...todosLosClientes(nuevos), AUTOPARTES], [nuevos])
   const tabla = useMemo(() => todosLosClientes(nuevos), [nuevos]) // los 25 de seed + altas
   const lateral = [...LATERAL.map(n => todos.find(c => c.nombre === n)!).filter(Boolean), ...nuevos.map(n => todos.find(c => c.nombre === n.nombre)!).filter(Boolean)]
 
-  const [selName, setSelName] = useState('Alpura')
+  const [search] = useSearchParams()
+  const [selName, setSelName] = useState(() => search.get('cliente') || 'Alpura')
   const [filtro, setFiltro] = useState<'todos' | 'portal' | 'vencidos'>('todos')
   const [busca, setBusca] = useState('')
   const [buscaLat, setBuscaLat] = useState('')
   const [sort, setSort] = useState<{ k: SortKey; d: 1 | -1 }>({ k: 'trimestre', d: -1 })
   const [desdeTabla, setDesdeTabla] = useState(false)
-  const [deals, setDeals] = useState<Deal[]>(DEALS0)
+  const [verTodasAsg, setVerTodasAsg] = useState(false)
   const [acts, setActs] = useState<Actividad[]>([
     { cliente: 'Alpura', tipo: 'Llamada', nota: 'Confirmó 3 eventos nocturnos para la semana del 13 oct.', fecha: '2026-10-06' },
     { cliente: 'Marsh', tipo: 'Correo', nota: 'Enviada cotización COT-1182 Méx–SLP.', fecha: '2026-10-07' },
@@ -84,21 +97,34 @@ export default function CRM() {
   // modales
   const [altaOpen, setAltaOpen] = useState(false)
   const [alta, setAlta] = useState({ nombre: '', sector: 'Alimentos y bebidas', contacto: '', correo: '', telefono: '', tipo: 'Por evento' as ClienteCRM['modelo'], tarifa: '' })
-  const [leadOpen, setLeadOpen] = useState(false)
-  const [lead, setLead] = useState({ empresa: '', que: '', monto: '', siguiente: 'Llamar mañana' })
   const [actOpen, setActOpen] = useState(false)
   const [act, setAct] = useState({ tipo: 'Llamada', nota: '' })
   const [propOpen, setPropOpen] = useState(false)
   const [prop, setProp] = useState({ para: '', asunto: '', msg: '' })
+  const [asgOpen, setAsgOpen] = useState(false)
+  const [asg, setAsg] = useState(formVacio())
+  const [qCust, setQCust] = useState('')
+  const [qUni, setQUni] = useState('')
 
   const sel = todos.find(c => c.nombre === selName) ?? clientesCRM[0]
   const svSel = useMemo(() => serviciosDe(sel.nombre), [sel.nombre])
   const incSel = useMemo(() => incidentesDe(sel.nombre), [sel.nombre])
   const actsSel = acts.filter(a => a.cliente === sel.nombre)
+  /** Asignaciones del cliente: las creadas en el demo primero, luego las derivadas de seed (más recientes arriba). */
+  const asgSel = useMemo<FilaAsg[]>(() => {
+    const desc = (a: FilaAsg, b: FilaAsg) => b.inicio.localeCompare(a.inicio)
+    const propias = asgStore.filter(a => a.cliente === sel.nombre).sort(desc)
+    return [...propias, ...asignacionesDeCliente(sel.nombre).sort(desc)]
+  }, [asgStore, sel.nombre])
+  const asgVista = verTodasAsg ? asgSel : asgSel.slice(0, 8)
+  const custodiosActivos = new Set(asgSel.filter(a => a.estatus === 'En curso' || a.estatus === 'Programada').flatMap(a => a.custodios)).size
+  const unidadesActivas = new Set(asgSel.filter(a => a.estatus === 'En curso' || a.estatus === 'Programada').flatMap(a => a.unidades)).size
+
   const vista = useRef<HTMLDivElement>(null)
   const pick = (name: string, scroll = true) => {
     if (!todos.some(c => c.nombre === name)) return
     setSelName(name)
+    setVerTodasAsg(false)
     if (scroll) vista.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
@@ -124,22 +150,38 @@ export default function CRM() {
   const toggleSort = (k: SortKey) => setSort(s => (s.k === k ? { k, d: s.d === 1 ? -1 : 1 } : { k, d: k === 'nombre' || k === 'modelo' ? 1 : -1 }))
   const arrow = (k: SortKey) => (sort.k === k ? (sort.d === 1 ? ' ▲' : ' ▼') : '')
 
-  // Pipeline: deals del diseño (estado local) + leads del store
-  const allDeals: Deal[] = [...deals, ...leadsStore.map(l => D(l.id, l.etapa, l.empresa, l.que, l.monto || '—', l.siguiente, 'p-mute')).map(d => ({ ...d, store: true }))]
-  const totalEtapa = (e: Etapa) => {
-    const base = TOTAL0[e] - DEALS0.filter(d => d.etapa === e).reduce((a, d) => a + monto(d.amt), 0)
-    return Math.max(0, base + allDeals.filter(d => d.etapa === e).reduce((a, d) => a + monto(d.amt), 0))
-  }
-  const mover = (d: Deal, dir: 1 | -1) => {
-    const i = ETAPAS.indexOf(d.etapa) + dir
-    if (i < 0 || i >= ETAPAS.length) return
-    const etapa = ETAPAS[i]
-    if (d.store) actions.moverLead(d.id, etapa)
-    else setDeals(ds => ds.map(x => (x.id === d.id ? { ...x, etapa, cls: etapa === 'Ganado' ? 'pill p-ok' : x.cls, next: etapa === 'Ganado' ? 'Firmado' : x.next } : x)))
-    toast(`${d.name} movido a ${etapa}`, 'info')
-  }
+  // Disponibles para asignar (estatus real de la unidad = override del demo ?? seed)
+  const estatusUnidad = (id: string, seed: string) => overrides.find(o => o.unidad === id)?.estatus ?? seed
+  const ocupados = useMemo(() => {
+    const ini = new Date(asg.inicio).getTime(), fin = new Date(asg.fin).getTime()
+    const todasAsg: FilaAsg[] = [...asgStore, ...asignacionesDeCliente(sel.nombre)]
+    const c = new Set<string>(), u = new Set<string>()
+    todasAsg.forEach(a => { if (a.estatus !== 'Cancelada' && new Date(a.inicio).getTime() < fin && new Date(a.fin).getTime() > ini) { a.custodios.forEach(x => c.add(x)); a.unidades.forEach(x => u.add(x)) } })
+    return { c, u }
+  }, [asg.inicio, asg.fin, asgStore, sel.nombre])
+  const qc = qCust.trim().toLowerCase()
+  const custDisp = seedCustodios.filter(c => c.estatus === 'Disponible' && !ocupados.c.has(c.id) && (!qc || c.nombre.toLowerCase().includes(qc) || c.id.toLowerCase().includes(qc) || c.zona.toLowerCase().includes(qc)))
+  const qu = qUni.trim().toLowerCase()
+  const uniDisp = seedUnidades.filter(u => estatusUnidad(u.id, u.estatus) === 'Disponible' && !ocupados.u.has(u.id) && (!qu || u.id.toLowerCase().includes(qu) || u.placas.toLowerCase().includes(qu) || u.vehiculo.toLowerCase().includes(qu) || u.zona.toLowerCase().includes(qu)))
+  const toggleIn = (k: 'custodios' | 'unidades', id: string) => setAsg(f => ({ ...f, [k]: f[k].includes(id) ? f[k].filter(x => x !== id) : [...f[k], id] }))
+  const horasForm = Math.max(0, Math.round((new Date(asg.fin).getTime() - new Date(asg.inicio).getTime()) / 3_600_000))
 
   // Acciones
+  function abrirAsignar() {
+    setAsg(formVacio(sel.rutas !== '—' ? sel.rutas.split(',')[0].trim() : ''))
+    setQCust(''); setQUni('')
+    setAsgOpen(true)
+  }
+  function guardarAsignacion() {
+    if (asg.custodios.length === 0) { toast('Elige al menos un custodio', 'warn'); return }
+    if (asg.unidades.length === 0) { toast('Elige al menos una unidad', 'warn'); return }
+    if (!(new Date(asg.fin).getTime() > new Date(asg.inicio).getTime())) { toast('El fin debe ser después del inicio', 'warn'); return }
+    const servicio = asg.servicio || `SRV-${24300 + asgStore.length}`
+    actions.crearAsignacion({ cliente: sel.nombre, servicio, tipo: asg.tipo, ruta: asg.ruta.trim() || sel.rutas, custodios: asg.custodios, unidades: asg.unidades, inicio: new Date(asg.inicio).toISOString(), fin: new Date(asg.fin).toISOString(), notas: asg.notas.trim() || undefined })
+    setAsgOpen(false)
+    setVerTodasAsg(false)
+    toast(`${asg.custodios.length} custodio${asg.custodios.length > 1 ? 's' : ''} y ${asg.unidades.length} unidad${asg.unidades.length > 1 ? 'es' : ''} asignados a ${sel.nombre} (${horasForm} h)`)
+  }
   function guardarAlta() {
     if (!alta.nombre.trim()) { toast('Escribe el nombre del cliente', 'warn'); return }
     const nombre = alta.nombre.trim()
@@ -149,13 +191,6 @@ export default function CRM() {
     setDesdeTabla(true)
     setAlta({ nombre: '', sector: 'Alimentos y bebidas', contacto: '', correo: '', telefono: '', tipo: 'Por evento', tarifa: '' })
     toast(`Cliente ${nombre} dado de alta (${tabla.length + 1} clientes)`)
-  }
-  function guardarLead() {
-    if (!lead.empresa.trim()) { toast('Escribe la empresa de la oportunidad', 'warn'); return }
-    actions.crearLead({ empresa: lead.empresa.trim(), que: lead.que.trim() || 'Por calificar', monto: lead.monto.trim(), siguiente: lead.siguiente })
-    setLeadOpen(false)
-    setLead({ empresa: '', que: '', monto: '', siguiente: 'Llamar mañana' })
-    toast(`Oportunidad ${lead.empresa.trim()} agregada a Prospecto`)
   }
   function guardarActividad() {
     if (!act.nota.trim()) { toast('Escribe una nota de la actividad', 'warn'); return }
@@ -174,34 +209,25 @@ export default function CRM() {
     toast(`Propuesta enviada a ${sel.nombre} (${prop.para})`)
   }
 
-  const leadsAbiertos = 18 + leadsStore.filter(l => l.etapa !== 'Ganado').length
   const portalCount = tabla.filter(c => c.portal).length
   const vencidosCount = tabla.filter(c => c.cobranza !== 'Al corriente').length
-  const pipelineTotal = ETAPAS.filter(e => e !== 'Ganado').reduce((a, e) => a + totalEtapa(e), 0)
 
   return (
     <Shell active="crm" css={CSS}>
       <PageHeader seccion="Comercial" titulo="Clientes"
-        descripcion={`A quién le damos servicio y cómo va cada cuenta: ${tabla.length} clientes activos y ${leadsAbiertos} oportunidades abiertas. Elige un cliente para ver su resumen, contactos y servicios recientes.`}
+        descripcion={`A quién le damos servicio y cómo va cada cuenta: ${tabla.length} clientes activos. Elige un cliente para ver su ficha: contactos, contrato, custodios y unidades asignadas, servicios e incidentes.`}
         accion={{ label: 'Alta de cliente', onClick: () => setAltaOpen(true) }}
-        secundarias={<Link className="btn" to={ROUTES.Cotizador + '?cliente=' + encodeURIComponent(sel.nombre)}>Cotizar a {sel.nombre}</Link>} />
-
-      <section aria-label="Sugerencia de la IA" style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:center;background:#F0F3FD;border:1px solid #C7D0F2;border-radius:10px;padding:16px 18px')}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3448A8" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
-        <div style={sx('flex:1 1 360px;display:flex;flex-direction:column;gap:4px;min-width:0')}><span style={sx('font-weight:600')}>Sugerencia de la IA: llamar hoy a Agroexport Sinaloa</span><span style={sx('font-size:14px;color:#3E4A59')}>Su cotización venció hace 2 días y abrió el PDF 4 veces. Si se le llama hoy, la probabilidad de cierre estimada es 64%. Farmacéutica Orión es la oportunidad con más probabilidad (85%).</span></div>
-        <figure style={sx('margin:0;display:flex;flex-direction:column;gap:4px')}>
-          <svg width="220" height="64" viewBox="0 0 220 64" role="img" aria-label="Probabilidad de cierre por oportunidad: Orión 85, Peninsular 71, Agroexport 64, Marsh 52, Cementos 38" style={sx('display:block')}><g fontFamily="IBM Plex Mono, monospace" fontSize="10" fill="#3E4A59"><rect x="4" y="9.2" width="30" height="51" rx="2" fill="#2B9A66"></rect><rect x="48" y="17.4" width="30" height="42.6" rx="2" fill="#475CC7"></rect><rect x="92" y="21.6" width="30" height="38.4" rx="2" fill="#3448A8"></rect><rect x="136" y="28.8" width="30" height="31.2" rx="2" fill="#475CC7"></rect><rect x="180" y="37.2" width="30" height="22.8" rx="2" fill="#AEB8C4"></rect><text x="8" y="6">85%</text><text x="96" y="18">64%</text></g></svg>
-          <figcaption style={sx('font-size:11px;color:#5F6B7A')}>Probabilidad de cierre por oportunidad</figcaption>
-        </figure>
-        <Link className="btn" to={ROUTES.AsistenteIA}>Preguntarle a la IA</Link>
-      </section>
+        secundarias={<>
+          <Link className="btn" to={ROUTES.Oportunidades}>Ver oportunidades</Link>
+          <Link className="btn" to={ROUTES.Cotizador + '?cliente=' + encodeURIComponent(sel.nombre)}>Cotizar a {sel.nombre}</Link>
+        </>} />
 
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
         <nav aria-label="Clientes" className="card" style={sx('flex:1 1 260px;padding:10px;display:flex;flex-direction:column;gap:4px')}>
           <input type="search" value={buscaLat} onChange={e => setBuscaLat(e.target.value)} placeholder="Buscar cliente…" aria-label="Buscar cliente en la lista" style={sx(inputStyle + ';min-height:38px;margin-bottom:4px')} />
           <span className="lbl" style={sx('padding:4px 12px')}>{ql ? `${lateralView.length} resultados` : 'Clientes principales · ingreso mensual'}</span>
           {lateralView.map(c => (
-            <button key={c.nombre} type="button" className="cli" aria-pressed={c.nombre === sel.nombre} onClick={() => { setSelName(c.nombre); setDesdeTabla(false) }}>
+            <button key={c.nombre} type="button" className="cli" aria-pressed={c.nombre === sel.nombre} onClick={() => { pick(c.nombre, false); setDesdeTabla(false) }}>
               <span style={sx('display:flex;flex-direction:column;align-items:flex-start;gap:2px')}><span style={sx('font-weight:500')}>{c.nombre}</span><span style={sx('font-size:12px;color:#5F6B7A')}>{c.modelo}{c.nuevo ? ' · nuevo' : ''}</span></span>
               <span className="mono" style={sx('font-size:13px;color:#3E4A59')}>{c.nuevo ? '—' : fmtM(c.ingresosMes)}</span>
             </button>
@@ -210,10 +236,10 @@ export default function CRM() {
           {!ql && <Nota>Los demás clientes están en “Todos los clientes”, más abajo, o búscalos aquí arriba.</Nota>}
         </nav>
 
-        <section ref={vista} aria-label="Resumen del cliente" style={sx('flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px')}>
-          <div className="card" style={sx('display:flex;flex-direction:column;gap:16px')}>
+        <section ref={vista} aria-label="Ficha del cliente" style={sx('flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px')}>
+          <div className="card" data-tour="cliente" style={sx('display:flex;flex-direction:column;gap:16px')}>
             <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start')}>
-              <div style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">Resumen del cliente</span><h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>{sel.nombre}</h2><span style={sx('font-size:14px;color:#5F6B7A')}>{sel.modelo} · {sel.sector} · cliente desde {sel.desde}</span></div>
+              <div style={sx('display:flex;flex-direction:column;gap:4px')}><span className="lbl">Ficha del cliente</span><h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:24px;font-weight:600")}>{sel.nombre}</h2><span style={sx('font-size:14px;color:#5F6B7A')}>{sel.modelo} · {sel.sector} · cliente desde {sel.desde}</span></div>
               <div style={sx('display:flex;gap:8px;flex-wrap:wrap;align-items:center')}>
                 <span className={sel.nuevo ? 'pill p-info' : sel.cobranza === 'Al corriente' ? 'pill p-ok' : 'pill p-warn'}>{sel.nuevo ? 'Alta reciente' : sel.cobranza === 'Al corriente' ? 'Contrato vigente · al corriente' : `Cobranza ${sel.cobranza}`}</span>
                 <button type="button" className="btn btn-sm" onClick={() => setActOpen(true)}>Registrar llamada o visita</button>
@@ -230,75 +256,105 @@ export default function CRM() {
               <div style={sx('display:flex;flex-direction:column;gap:8px')}>
                 <span className="lbl">Contactos</span>
                 <span>{sel.contacto}</span>
-                {sel.contacto2 && <span>{sel.contacto2}</span>}
+                {sel.contacto2 && sel.contacto2 !== '—' && <span>{sel.contacto2}</span>}
                 <span style={sx('color:#5F6B7A;font-size:13px')}><a href={'mailto:' + sel.correo}>{sel.correo}</a> · {sel.telefono}</span>
               </div>
-              <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-                <span className="lbl">Servicios recientes · {svSel.length} en el trimestre</span>
-                {svSel.length === 0 && <span style={sx('color:#5F6B7A;font-size:13px')}>Sin servicios registrados todavía.</span>}
-                {svSel.slice(0, 5).map(s => (
-                  <Link key={s.id} to={ROUTES.Servicios} style={sx('display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:#0D1D41;font-size:13px')}><span><span className="mono" style={sx('color:#3E4A59')}>{s.id}</span> · {s.ruta}</span><span className={'pill ' + (s.estatus === 'En tránsito' ? 'p-info' : s.estatus === 'Con incidente' ? 'p-bad' : s.estatus === 'Confirmado' ? 'p-warn' : 'p-mute')}>{s.estatus}</span></Link>
-                ))}
+              <div style={sx('display:flex;flex-direction:column;gap:8px')}>
+                <span className="lbl">Contrato</span>
+                <span>{sel.modelo} · tarifa <span className="mono">{sel.tarifa}</span></span>
+                <span style={sx('color:#5F6B7A;font-size:13px')}>Cobranza: {sel.cobranza}{sel.cxc ? ` · por cobrar ${fmtMXN(sel.cxc)}` : ''}{sel.portal ? ' · portal en vivo activo' : ''}</span>
               </div>
             </div>
             <Nota>Margen: lo que queda del ingreso después del costo directo (custodios, combustible, casetas). El objetivo de la empresa es 28%.</Nota>
           </div>
 
-          <Section titulo="Más detalle del cliente" ayuda="Rutas frecuentes, tarifa pactada, requisitos, incidentes y actividad comercial." plegable abierto={false}>
+          <Section titulo="Custodios y unidades asignados" ayuda={`${custodiosActivos} custodio${custodiosActivos === 1 ? '' : 's'} y ${unidadesActivas} unidad${unidadesActivas === 1 ? '' : 'es'} en curso o programados para ${sel.nombre}. Cada asignación tiene un rango de fecha y hora.`}
+            acciones={<button type="button" className="btn btn-sm" onClick={abrirAsignar}>Asignar custodios y unidades</button>} style="padding:20px 8px 12px">
+            <div style={sx('overflow-x:auto')}>
+              <table style={sx('width:100%;border-collapse:collapse;font-size:14px')}>
+                <thead><tr>
+                  <th style={sx(TH + ';padding:10px 8px')}>Custodio(s)</th>
+                  <th style={sx(TH + ';padding:10px 8px')}>Unidad(es)</th>
+                  <th style={sx(TH + ';padding:10px 8px')}>Servicio</th>
+                  <th style={sx(TH + ';padding:10px 8px')}>Desde – hasta</th>
+                  <th style={sx(TH_R + ';padding:10px 8px')}>Horas</th>
+                  <th style={sx(TH + ';padding:10px 8px')}>Estatus</th>
+                </tr></thead>
+                <tbody>
+                  {asgVista.map(a => {
+                    const propia = asgStore.some(s => s.id === a.id)
+                    return (
+                      <tr key={a.id}>
+                        <td style={sx(tdA + ';min-width:130px')}>
+                          {a.custodios.length === 0 && <span style={sx('color:#5F6B7A')}>Sin custodio (monitoreo)</span>}
+                          {a.custodios.map(id => <div key={id}><Link to={ROUTES.Custodios} style={sx('text-decoration:none;color:#0D1D41;font-weight:500')}>{nombreCustodio(id)}</Link> <span className="mono" style={sx('font-size:12px;color:#5F6B7A')}>{id}</span></div>)}
+                        </td>
+                        <td style={sx(tdA + ';min-width:130px')}>
+                          {a.unidades.length === 0 && <span style={sx('color:#5F6B7A')}>—</span>}
+                          {a.unidades.map(id => { const u = unidadDe(id); return <div key={id}><Link to={ROUTES.Flotilla} className="mono" style={sx('text-decoration:none;color:#0D1D41;font-size:13px')}>{id}</Link> <span style={sx('font-size:12px;color:#5F6B7A')}>{u ? `${u.vehiculo} · ${u.placas}` : ''}</span></div> })}
+                        </td>
+                        <td style={sx(tdA + ';min-width:120px')}><span className="mono" style={sx('font-size:13px;color:#3E4A59')}>{a.servicio}</span><div style={sx('font-size:12px;color:#5F6B7A')}>{a.tipo} · {a.ruta}</div></td>
+                        <td style={sx(tdA + ';white-space:nowrap')}><span className="mono" style={sx('font-size:13px')}>{fmtFH(a.inicio)}</span><div className="mono" style={sx('font-size:13px;color:#5F6B7A')}>→ {fmtFH(a.fin)}</div></td>
+                        <td className="mono" style={sx(tdA + ';text-align:right;white-space:nowrap')}>{a.horas ? `${a.horas} h` : '—'}</td>
+                        <td style={sx(tdA + ';min-width:120px')}>
+                          <div style={sx('display:flex;gap:6px;flex-wrap:wrap;align-items:center')}>
+                            <span className={pillEstatus(a.estatus)}>{a.estatus}</span>
+                            {'resultado' in a && a.resultado && a.resultado !== 'Sin novedad' && <span className={'pill ' + (a.resultado === 'Con incidente' ? 'p-bad' : 'p-warn')}>{a.resultado}</span>}
+                          </div>
+                          {propia && a.estatus !== 'Terminada' && a.estatus !== 'Cancelada' && (
+                            <div style={sx('display:flex;gap:6px;flex-wrap:wrap;margin-top:6px')}>
+                              {a.estatus === 'Programada' && <button type="button" className="btn btn-sm" style={sx('min-height:28px;padding:0 8px')} onClick={() => { actions.cambiarEstatusAsignacion(a.id, 'En curso'); toast(`Asignación ${a.id} en curso`) }}>Iniciar</button>}
+                              {a.estatus === 'En curso' && <button type="button" className="btn btn-sm" style={sx('min-height:28px;padding:0 8px')} onClick={() => { actions.cambiarEstatusAsignacion(a.id, 'Terminada'); toast(`Asignación ${a.id} terminada`) }}>Terminar</button>}
+                              {a.estatus === 'Programada' && <button type="button" className="btn btn-sm" style={sx('min-height:28px;padding:0 8px')} onClick={() => { actions.cambiarEstatusAsignacion(a.id, 'Cancelada'); toast(`Asignación ${a.id} cancelada`, 'info') }}>Cancelar</button>}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                  {asgSel.length === 0 && <tr><td colSpan={6} style={sx('padding:20px 12px;color:#5F6B7A;text-align:center')}>Este cliente aún no tiene custodios ni unidades asignados. Usa “Asignar custodios y unidades”.</td></tr>}
+                </tbody>
+              </table>
+            </div>
+            <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:0 12px')}>
+              <Nota>Una asignación une al cliente con uno o más custodios y una o más unidades por un tiempo (fecha y hora de inicio y fin). Haz clic en un custodio o unidad para ver su ficha.</Nota>
+              {asgSel.length > 8 && <button type="button" className="btn btn-sm" onClick={() => setVerTodasAsg(v => !v)}>{verTodasAsg ? 'Ver menos' : `Ver las ${asgSel.length} asignaciones`}</button>}
+            </div>
+          </Section>
+
+          <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:16px')}>
+            <Section titulo="Servicios recientes" ayuda={`${svSel.length} en el trimestre. Haz clic para ir a Servicios.`}>
+              {svSel.length === 0 && <span style={sx('color:#5F6B7A;font-size:13px')}>Sin servicios registrados todavía.</span>}
+              {svSel.slice(0, 5).map(s => (
+                <Link key={s.id} to={ROUTES.Servicios} style={sx('display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:#0D1D41;font-size:13px')}><span><span className="mono" style={sx('color:#3E4A59')}>{s.id}</span> · {s.ruta}</span><span className={'pill ' + (s.estatus === 'En tránsito' ? 'p-info' : s.estatus === 'Con incidente' ? 'p-bad' : s.estatus === 'Confirmado' ? 'p-warn' : 'p-mute')}>{s.estatus}</span></Link>
+              ))}
+            </Section>
+            <Section titulo="Incidentes" ayuda={`${incSel.length} en el historial. Haz clic para ver el seguimiento.`}>
+              {incSel.length === 0 && <span style={sx('color:#5F6B7A;font-size:13px')}>Sin incidentes en el trimestre.</span>}
+              {incSel.slice(0, 5).map(i => (
+                <Link key={i.id} to={ROUTES.Reaccion} style={sx('display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:#0D1D41;font-size:13px')}><span><span className="mono" style={sx('color:#3E4A59')}>{i.id}</span> · {i.tipo} · {i.carretera}</span><span className={'pill ' + (i.resultado === 'Pérdida' ? 'p-bad' : i.resultado === 'Recuperación parcial' ? 'p-warn' : 'p-ok')}>{i.resultado}</span></Link>
+              ))}
+            </Section>
+          </div>
+
+          <Section titulo="Más detalle del cliente" ayuda="Rutas frecuentes, tarifa pactada, requisitos y actividad comercial." plegable abierto={false}>
             <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:20px;font-size:14px')}>
               <div style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Rutas frecuentes</span><span>{sel.rutas}</span></div>
               <div style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Tarifa pactada</span><span className="mono">{sel.tarifa}</span></div>
               <div style={sx('display:flex;flex-direction:column;gap:8px')}><span className="lbl">Requisitos especiales</span><span>{sel.requisitos}</span></div>
             </div>
-            <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:20px;font-size:13px;border-top:1px solid #EEF1F4;padding-top:14px')}>
-              <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-                <span className="lbl">Incidentes · {incSel.length}</span>
-                {incSel.length === 0 && <span style={sx('color:#5F6B7A')}>Sin incidentes en el trimestre</span>}
-                {incSel.slice(0, 4).map(i => (
-                  <Link key={i.id} to={ROUTES.Reaccion} style={sx('display:flex;justify-content:space-between;gap:8px;text-decoration:none;color:#0D1D41')}><span><span className="mono" style={sx('color:#3E4A59')}>{i.id}</span> · {i.tipo} · {i.carretera}</span><span className={'pill ' + (i.resultado === 'Pérdida' ? 'p-bad' : i.resultado === 'Recuperación parcial' ? 'p-warn' : 'p-ok')}>{i.resultado}</span></Link>
-                ))}
-              </div>
-              <div style={sx('display:flex;flex-direction:column;gap:6px')}>
-                <span className="lbl">Actividad comercial · {actsSel.length}</span>
-                {actsSel.length === 0 && <span style={sx('color:#5F6B7A')}>Sin actividad registrada. Usa “Registrar llamada o visita”.</span>}
-                {actsSel.slice(0, 4).map((a, i) => (
-                  <span key={i}><span className="mono" style={sx('color:#3E4A59')}>{a.fecha}</span> · <b style={sx('font-weight:500')}>{a.tipo}</b>: {a.nota}</span>
-                ))}
-              </div>
+            <div style={sx('display:flex;flex-direction:column;gap:6px;font-size:13px;border-top:1px solid #EEF1F4;padding-top:14px')}>
+              <span className="lbl">Actividad comercial · {actsSel.length}</span>
+              {actsSel.length === 0 && <span style={sx('color:#5F6B7A')}>Sin actividad registrada. Usa “Registrar llamada o visita”.</span>}
+              {actsSel.slice(0, 6).map((a, i) => (
+                <span key={i}><span className="mono" style={sx('color:#3E4A59')}>{a.fecha}</span> · <b style={sx('font-weight:500')}>{a.tipo}</b>: {a.nota}</span>
+              ))}
             </div>
           </Section>
         </section>
       </div>
 
-      <Section titulo="Oportunidades en curso" ayuda={`${allDeals.filter(d => d.etapa !== 'Ganado').length} oportunidades por ${fmtM(pipelineTotal)} al mes en negociación. Usa ‹ › para avanzar o regresar de etapa; haz clic en una para ver al cliente.`} plegable abierto={false}
-        acciones={<button type="button" className="btn btn-sm" onClick={() => setLeadOpen(true)}>Nueva oportunidad</button>}>
-        <div style={sx('overflow-x:auto')}>
-          <div style={sx('display:grid;grid-template-columns:repeat(5,minmax(210px,1fr));gap:12px;min-width:1080px')}>
-            {ETAPAS.map((e, ei) => (
-              <div key={e} style={sx('background:#F3F5F8;border:1px solid #E4E8ED;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px')}>
-                <div style={sx('display:flex;justify-content:space-between;gap:8px')}><span style={sx('font-weight:600;font-size:14px')}>{ei + 1}. {e}</span><span className="mono" style={sx('font-size:13px;color:#5F6B7A')}>{fmtM(totalEtapa(e))}</span></div>
-                {allDeals.filter(d => d.etapa === e).map(d => (
-                  <div key={d.id} className={todos.some(c => c.nombre === d.name) ? 'crm-deal' : undefined} onClick={() => pick(d.name)} style={sx('background:#FFFFFF;border:1px solid #E4E8ED;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px')}>
-                    <div style={sx('display:flex;justify-content:space-between;gap:6px;align-items:flex-start')}>
-                      <span style={sx('font-weight:500;font-size:14px')}>{d.name}</span>
-                      <span style={sx('display:flex;gap:4px;flex:none')} onClick={ev => ev.stopPropagation()}>
-                        <button type="button" className="mv" aria-label="Etapa anterior" title="Regresar a la etapa anterior" disabled={ei === 0} onClick={() => mover(d, -1)}>‹</button>
-                        <button type="button" className="mv" aria-label="Siguiente etapa" title="Avanzar a la siguiente etapa" disabled={ei === ETAPAS.length - 1} onClick={() => mover(d, 1)}>›</button>
-                      </span>
-                    </div>
-                    <span style={sx('font-size:12px;color:#5F6B7A')}>{d.what}</span>
-                    <div style={sx('display:flex;justify-content:space-between;gap:8px;align-items:center')}><span className="mono" style={sx('font-size:13px')}>{d.amt}</span><span className={d.cls}>{d.next}</span></div>
-                  </div>
-                ))}
-                {allDeals.filter(d => d.etapa === e).length === 0 && <span style={sx('font-size:12px;color:#5F6B7A')}>Sin oportunidades en esta etapa</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-        <Nota>Valor mensual estimado en MXN. Las etapas van de izquierda a derecha: 1 Prospecto → 5 Ganado.</Nota>
-      </Section>
-
-      <Section titulo="Todos los clientes" ayuda={`Los ${tabla.length} clientes activos con su facturación, margen y cobranza. Haz clic en una fila para ver su resumen arriba.`} plegable abierto={false} style="padding:20px 8px 12px"
+      <Section titulo="Todos los clientes" ayuda={`Los ${tabla.length} clientes activos con su facturación, margen y cobranza. Haz clic en una fila para ver su ficha arriba.`} plegable abierto={false} style="padding:20px 8px 12px"
         acciones={<><input type="search" value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar cliente…" aria-label="Buscar cliente" style={sx(inputStyle + ';width:180px;min-height:34px')} />
           <button type="button" aria-pressed={filtro === 'todos'} className="pill p-mute" style={sx(filtro === 'todos' ? PILL_ON : '')} onClick={() => setFiltro('todos')}>{tabla.length} activos</button>
           <button type="button" aria-pressed={filtro === 'portal'} className="pill p-mute" style={sx(filtro === 'portal' ? PILL_ON : '')} onClick={() => setFiltro(f => (f === 'portal' ? 'todos' : 'portal'))}>{portalCount} con portal en vivo</button>
@@ -319,7 +375,7 @@ export default function CRM() {
                 const cls = c.cobranza === 'Al corriente' ? 'pill p-ok' : (parseInt(c.cobranza) > 60 ? 'pill p-bad' : 'pill p-warn')
                 const bar = 'height:100%;width:' + Math.min(100, Math.round(c.margen / 45 * 100)) + '%;background:' + (c.margen < 28 ? '#3448A8' : '#2B9A66')
                 return (
-                  <tr key={c.nombre} className={'crm-row' + (desdeTabla && c.nombre === sel.nombre ? ' sel' : '')} onClick={() => { pick(c.nombre); setDesdeTabla(true) }} title="Ver resumen del cliente">
+                  <tr key={c.nombre} className={'crm-row' + (desdeTabla && c.nombre === sel.nombre ? ' sel' : '')} onClick={() => { pick(c.nombre); setDesdeTabla(true) }} title="Ver ficha del cliente">
                     <td style={sx(td + ';font-weight:500')}>{c.nombre}{c.nuevo ? <span className="pill p-info" style={sx('margin-left:8px')}>nuevo</span> : null}</td>
                     <td style={sx(td)}>{c.modelo}</td>
                     <td className="mono" style={sx(td + ';text-align:right')}>{c.activos}</td>
@@ -337,6 +393,52 @@ export default function CRM() {
         <div style={sx('padding:0 12px')}><Pager {...pg} /></div>
       </Section>
 
+      <Modal open={asgOpen} onClose={() => setAsgOpen(false)} title={`Asignar custodios y unidades · ${sel.nombre}`} width={720}
+        footer={<><span style={sx('flex:1;font-size:13px;color:#5F6B7A;align-self:center')}>{asg.custodios.length} custodio{asg.custodios.length === 1 ? '' : 's'} · {asg.unidades.length} unidad{asg.unidades.length === 1 ? '' : 'es'} · {horasForm} h</span><button type="button" style={sx(btnStyle)} onClick={() => setAsgOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={guardarAsignacion}>Asignar</button></>}>
+        <div style={sx('display:grid;grid-template-columns:1fr 1fr;gap:12px')}>
+          <Field label="Tipo de servicio"><select style={sx(inputStyle)} value={asg.tipo} onChange={e => setAsg({ ...asg, tipo: e.target.value as TipoServicio })}>{['Por evento', 'Dedicado', 'Monitoreo'].map(s => <option key={s}>{s}</option>)}</select></Field>
+          <Field label="Servicio (folio)"><select style={sx(inputStyle)} value={asg.servicio} onChange={e => setAsg({ ...asg, servicio: e.target.value })}>
+            <option value="">Servicio nuevo (folio automático)</option>
+            {svSel.filter(s => s.estatus === 'Confirmado' || s.estatus === 'En tránsito' || s.estatus === 'Cotizado').slice(0, 12).map(s => <option key={s.id} value={s.id}>{s.id} · {s.ruta} · {s.estatus}</option>)}
+          </select></Field>
+        </div>
+        <Field label="Ruta o tramo"><input style={sx(inputStyle)} value={asg.ruta} onChange={e => setAsg({ ...asg, ruta: e.target.value })} placeholder="Ej. Cuautitlán–Guadalajara" /></Field>
+        <div style={sx('display:grid;grid-template-columns:1fr 1fr;gap:12px')}>
+          <Field label="Inicio (fecha y hora)"><input type="datetime-local" style={sx(inputStyle)} value={asg.inicio} onChange={e => setAsg({ ...asg, inicio: e.target.value })} /></Field>
+          <Field label="Fin (fecha y hora)"><input type="datetime-local" style={sx(inputStyle)} value={asg.fin} onChange={e => setAsg({ ...asg, fin: e.target.value })} /></Field>
+        </div>
+        <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:14px')}>
+          <div style={sx('display:flex;flex-direction:column;gap:8px')}>
+            <span className="lbl">Custodios disponibles · {custDisp.length}</span>
+            <input type="search" style={sx(inputStyle + ';min-height:36px')} value={qCust} onChange={e => setQCust(e.target.value)} placeholder="Buscar por nombre, id o zona…" aria-label="Buscar custodio disponible" />
+            <div className="lista" role="group" aria-label="Custodios disponibles">
+              {custDisp.slice(0, 40).map(c => (
+                <label key={c.id} className="chk" data-on={asg.custodios.includes(c.id)}>
+                  <input type="checkbox" checked={asg.custodios.includes(c.id)} onChange={() => toggleIn('custodios', c.id)} />
+                  <span style={sx('flex:1;display:flex;flex-direction:column')}><span style={sx('font-weight:500')}>{c.nombre}</span><span style={sx('font-size:12px;color:#5F6B7A')}><span className="mono">{c.id}</span> · {c.zona} · ★ {c.calificacion}</span></span>
+                </label>
+              ))}
+              {custDisp.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A;padding:8px 10px')}>Sin custodios disponibles con ese filtro en ese horario.</span>}
+            </div>
+          </div>
+          <div style={sx('display:flex;flex-direction:column;gap:8px')}>
+            <span className="lbl">Unidades disponibles · {uniDisp.length}</span>
+            <input type="search" style={sx(inputStyle + ';min-height:36px')} value={qUni} onChange={e => setQUni(e.target.value)} placeholder="Buscar por id, placas o vehículo…" aria-label="Buscar unidad disponible" />
+            <div className="lista" role="group" aria-label="Unidades disponibles">
+              {uniDisp.slice(0, 40).map(u => (
+                <label key={u.id} className="chk" data-on={asg.unidades.includes(u.id)}>
+                  <input type="checkbox" checked={asg.unidades.includes(u.id)} onChange={() => toggleIn('unidades', u.id)} />
+                  <span style={sx('flex:1;display:flex;flex-direction:column')}><span style={sx('font-weight:500')}><span className="mono">{u.id}</span> · {u.vehiculo}</span><span style={sx('font-size:12px;color:#5F6B7A')}>{u.placas} · {u.zona} · GPS {u.gps}</span></span>
+                </label>
+              ))}
+              {uniDisp.length === 0 && <span style={sx('font-size:13px;color:#5F6B7A;padding:8px 10px')}>Sin unidades disponibles con ese filtro en ese horario.</span>}
+            </div>
+          </div>
+        </div>
+        <Field label="Notas"><textarea rows={2} style={sx(inputStyle + ';padding:10px 12px;resize:vertical')} value={asg.notas} onChange={e => setAsg({ ...asg, notas: e.target.value })} placeholder="Requisitos del cliente, punto de encuentro, contacto en planta…" /></Field>
+        <Nota>Solo se muestran custodios y unidades sin otra asignación en ese horario. La asignación aparece también en la ficha del custodio y de la unidad.</Nota>
+      </Modal>
+
       <Modal open={altaOpen} onClose={() => setAltaOpen(false)} title="Alta de cliente" footer={<><button type="button" style={sx(btnStyle)} onClick={() => setAltaOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={guardarAlta}>Dar de alta</button></>}>
         <Field label="Nombre o razón social"><input style={sx(inputStyle)} value={alta.nombre} onChange={e => setAlta({ ...alta, nombre: e.target.value })} placeholder="Ej. Cementos del Centro" autoFocus /></Field>
         <div style={sx('display:grid;grid-template-columns:1fr 1fr;gap:12px')}>
@@ -349,16 +451,7 @@ export default function CRM() {
           <Field label="Teléfono"><input style={sx(inputStyle)} value={alta.telefono} onChange={e => setAlta({ ...alta, telefono: e.target.value })} placeholder="55 0000 0000" /></Field>
         </div>
         <Field label="Tarifa pactada"><input style={sx(inputStyle)} value={alta.tarifa} onChange={e => setAlta({ ...alta, tarifa: e.target.value })} placeholder={alta.tipo === 'Dedicado' ? '$46,000/mes por custodio' : alta.tipo === 'Monitoreo' ? '$880/unidad/mes' : '$29.00/km'} /></Field>
-        <Nota>El cliente nuevo aparece en la lista y en “Todos los clientes”; después puedes cotizarle desde el botón del encabezado.</Nota>
-      </Modal>
-
-      <Modal open={leadOpen} onClose={() => setLeadOpen(false)} title="Nueva oportunidad" footer={<><button type="button" style={sx(btnStyle)} onClick={() => setLeadOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={guardarLead}>Agregar a Prospecto</button></>}>
-        <Field label="Empresa"><input style={sx(inputStyle)} value={lead.empresa} onChange={e => setLead({ ...lead, empresa: e.target.value })} placeholder="Ej. Agroindustrias del Bajío" autoFocus /></Field>
-        <Field label="Qué necesita"><input style={sx(inputStyle)} value={lead.que} onChange={e => setLead({ ...lead, que: e.target.value })} placeholder="Ej. Eventos Qro–Mty nocturnos" /></Field>
-        <div style={sx('display:grid;grid-template-columns:1fr 1fr;gap:12px')}>
-          <Field label="Valor mensual estimado"><input style={sx(inputStyle)} value={lead.monto} onChange={e => setLead({ ...lead, monto: e.target.value })} placeholder="$350K" /></Field>
-          <Field label="Siguiente paso"><select style={sx(inputStyle)} value={lead.siguiente} onChange={e => setLead({ ...lead, siguiente: e.target.value })}>{['Llamar mañana', 'Correo hoy', 'Visita esta semana', 'Enviar cotización', 'Calificar hoy'].map(s => <option key={s}>{s}</option>)}</select></Field>
-        </div>
+        <Nota>El cliente nuevo aparece en la lista y en “Todos los clientes”; después puedes cotizarle o asignarle custodios y unidades desde su ficha.</Nota>
       </Modal>
 
       <Modal open={actOpen} onClose={() => setActOpen(false)} title={`Registrar llamada o visita · ${sel.nombre}`} footer={<><button type="button" style={sx(btnStyle)} onClick={() => setActOpen(false)}>Cancelar</button><button type="button" style={sx(btnPriStyle)} onClick={guardarActividad}>Guardar</button></>}>

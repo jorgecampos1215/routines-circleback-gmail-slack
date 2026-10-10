@@ -9,7 +9,7 @@ export function Logo({ height = 26, variant = 'color' }: { height?: number; vari
       src={`${import.meta.env.BASE_URL}logo.png`}
       alt="AI27"
       height={height}
-      style={{ height, width: 'auto', display: 'block', flexShrink: 0, filter: variant === 'light' ? 'brightness(0) invert(1)' : undefined }}
+      style={{ height, width: 'auto', display: 'block', flexShrink: 0, alignSelf: 'flex-start', filter: variant === 'light' ? 'brightness(0) invert(1)' : undefined }}
     />
   )
 }

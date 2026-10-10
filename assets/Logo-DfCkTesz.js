@@ -1,1 +1,0 @@
-import{d as e}from"./index-MydOTUQX.js";var t=e();function n({height:e=26,variant:n=`color`}){return(0,t.jsx)(`img`,{src:`./logo.png`,alt:`AI27`,height:e,style:{height:e,width:`auto`,display:`block`,flexShrink:0,filter:n===`light`?`brightness(0) invert(1)`:void 0}})}export{n as t};

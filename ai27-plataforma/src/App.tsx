@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { ROUTES, type PageName } from './lib/routes'
 import { Tour } from './components/Tour'
+import { useViewport } from './lib/viewport'
 
 const pages: Record<PageName, ReturnType<typeof lazy>> = {
   Main: lazy(() => import('./pages/Main')),
@@ -33,6 +34,8 @@ function ScrollTop() {
 }
 
 export default function App() {
+  // Al cruzar un corte (celular / tablet / escritorio) toda la app se vuelve a renderizar y `sx()` adapta los estilos.
+  useViewport()
   return (
     <HashRouter>
       <ScrollTop />

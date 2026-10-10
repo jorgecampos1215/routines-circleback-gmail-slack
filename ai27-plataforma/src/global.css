@@ -13,3 +13,22 @@ html, body { margin: 0; background: #F6F7F9; }
 .p-ok{background:#E3F6EC;color:#17784A}.p-warn{background:#FFF3DC;color:#9A5B00}.p-bad{background:#FDE8E8;color:#B42318}.p-info{background:#E9EDFB;color:#3448A8}.p-mute{background:#EEF1F4;color:#4A5868}
 a{color:#3448A8}
 button,input,select,textarea{font-family:'Montserrat',system-ui,sans-serif}
+
+/* ───────────── Responsive ─────────────
+   El diseño es de escritorio con estilos inline; src/lib/sx.ts adapta rejillas, filas y anchos en tablet y celular.
+   Aquí van los ajustes que sí se pueden expresar con media queries (usan !important para ganarle al inline). */
+html { -webkit-text-size-adjust: 100%; }
+@media (max-width: 1023px) {
+  .card { padding: 16px; }
+}
+@media (max-width: 719px) {
+  .card { padding: 14px; border-radius: 10px; }
+  h1 { font-size: 22px !important; line-height: 1.2 !important; }
+  h2 { font-size: 16px !important; }
+  /* iOS hace zoom en campos con letra menor a 16px */
+  input, select, textarea { font-size: 16px !important; }
+  .btn, button { min-height: 44px; }
+  .pill { white-space: normal; }
+  table { font-size: 13px; }
+  th, td { padding-left: 8px !important; padding-right: 8px !important; }
+}

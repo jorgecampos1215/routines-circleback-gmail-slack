@@ -36,6 +36,12 @@ export const NAV_GROUPS: { name: string; items: Item[] }[] = [
   ]},
 ]
 
+/** Etiqueta visible de una sección del menú (para la barra superior en celular y tablet). */
+export function etiquetaNav(id: NavId): string {
+  for (const g of NAV_GROUPS) for (const it of g.items) if (it.id === id) return it.label
+  return ''
+}
+
 const base = 'display:flex;align-items:center;gap:10px;min-height:40px;padding:0 12px;border-radius:8px;text-decoration:none;font-size:14px;'
 
 export function Nav({ active }: { active: NavId }) {

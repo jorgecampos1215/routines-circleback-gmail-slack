@@ -1,6 +1,6 @@
 # Desplegar AI27 con Supabase + Vercel
 
-La plataforma ya está en GitHub (`jorgecampos1215/routines-circleback-gmail-slack`, carpeta `ai27-plataforma/`, rama `claude/ai27-plataforma`). Lo que falta es una base de datos en Supabase y el hosting en Vercel. Las dos tienen plan gratuito y entras a ambas con tu cuenta de GitHub.
+La plataforma ya está en GitHub (`jorgecampos1215/routines-circleback-gmail-slack`, carpeta `ai27-plataforma/`, en `main` y en la rama de trabajo `claude/ai27-plataforma`). Lo que falta es una base de datos en Supabase y el hosting en Vercel. Las dos tienen plan gratuito y entras a ambas con tu cuenta de GitHub.
 
 Hay tres formas de hacerlo. Todas terminan igual: un link `https://ai27-plataforma.vercel.app` conectado a tu base.
 
@@ -62,7 +62,7 @@ El repo ya trae dos workflows en `.github/workflows/`:
    | `VITE_SUPABASE_URL` | Project Settings → API → Project URL |
    | `VITE_SUPABASE_ANON_KEY` | Project Settings → API → anon public |
 
-2. Pestaña **Actions** → *AI27 · Migrar y cargar Supabase* → **Run workflow** (rama `claude/ai27-plataforma`, *seed* marcado). Tarda ~2 minutos.
+2. Pestaña **Actions** → *AI27 · Migrar y cargar Supabase* → **Run workflow** (rama `main`, *seed* marcado). Tarda ~2 minutos. Si creas la variable `AI27_SUPABASE_AUTO` = `true`, además corre solo en cada push que toque `supabase/`.
 3. **Actions** → *AI27 · Desplegar en Vercel* → **Run workflow**. En el resumen del job aparece el link.
 4. Si tu cuenta de Vercel pertenece a **más de un equipo**, en **Settings → Secrets and variables → Actions → Variables** crea `VERCEL_SCOPE` con el slug del equipo (el que aparece en la URL `vercel.com/<slug>`). Una cuenta nueva con un solo equipo no lo necesita.
 5. Opcional: en la misma pestaña **Variables** crea `AI27_AUTODEPLOY` = `true` para que cada push a la rama vuelva a desplegar solo. El workflow *AI27 · Verificar build* corre siempre y no necesita secretos.
@@ -81,11 +81,11 @@ El repo ya trae dos workflows en `.github/workflows/`:
    npm run dev                     # http://localhost:5173 → en el menú verás "Base de datos · Supabase"
    ```
 
-### Vercel
+### Vercel (conectado a GitHub)
 1. **Add New… → Project → Import** el repo `jorgecampos1215/routines-circleback-gmail-slack`.
-2. **Root Directory:** `ai27-plataforma` (clic en *Edit*). **Framework Preset:** Vite (lo detecta; `vercel.json` ya trae build y rewrites). **Production Branch:** `claude/ai27-plataforma` (o `main` si haces merge).
-3. **Environment Variables** (Production y Preview): `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. **No** pongas la service_role en Vercel.
-4. **Deploy**. En ~1 minuto tienes el link. Cada push vuelve a desplegar; cada pull request genera un preview.
+2. **Root Directory:** puedes dejarlo vacío (el `vercel.json` de la raíz del repo construye `ai27-plataforma/`) o poner `ai27-plataforma`; las dos opciones funcionan. **Production Branch:** `main` (ya contiene la plataforma; `claude/ai27-plataforma` también sirve).
+3. **Deploy**. En ~1 minuto tienes el link `https://<proyecto>.vercel.app`. Cada push a `main` vuelve a desplegar; cada pull request genera un preview.
+4. Para conectar la base: **Project → Settings → Environment Variables**, agrega `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (Production y Preview) y luego **Deployments → ⋯ → Redeploy**. **No** pongas la service_role en Vercel. Alternativa: guarda `VERCEL_TOKEN`, `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` como secretos del repo y la variable `VERCEL_PROJECT` con el nombre que Vercel le puso al proyecto; el workflow *AI27 · Desplegar en Vercel* las escribe por ti.
 5. Opcional: **Settings → Domains** para `demo.ai27.com` u otro dominio tuyo.
 
 ---

@@ -9,7 +9,12 @@ name: AI27 · Desplegar en Vercel
 # Variables del repo (pestaña Variables):
 #   VERCEL_SCOPE     opcional. Slug de tu equipo en Vercel. Solo hace falta si tu cuenta pertenece a más de un equipo
 #                    (la CLI no elige equipo sola cuando no hay terminal). Una cuenta nueva con un solo equipo no lo necesita.
+#   VERCEL_PROJECT   opcional. Nombre del proyecto en Vercel si ya lo creaste con otro nombre (p. ej. al importar el repo
+#                    desde el dashboard). Por defecto: ai27-plataforma.
 #   AI27_AUTODEPLOY  = true para desplegar en cada push a la rama (si no, solo con "Run workflow").
+#
+# Si conectaste el repo a Vercel desde su dashboard (Git integration), Vercel ya despliega solo en cada push y este
+# workflow no hace falta para desplegar; sigue siendo útil para guardar las variables VITE_SUPABASE_* en el proyecto.
 
 on:
   workflow_dispatch:
@@ -23,7 +28,7 @@ concurrency:
 
 env:
   VERCEL_CLI: vercel@63.1.2   # versión fija y verificada; súbela a propósito, no con latest
-  PROYECTO: ai27-plataforma
+  PROYECTO: ${{ vars.VERCEL_PROJECT || 'ai27-plataforma' }}
 
 jobs:
   deploy:

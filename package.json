@@ -1,0 +1,11 @@
+{
+  "name": "routines-circleback-gmail-slack",
+  "private": true,
+  "description": "Raíz del repo. La plataforma AI27 vive en ai27-plataforma/; este archivo solo fija Node para Vercel cuando el proyecto se importa sin Root Directory.",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "build": "cd ai27-plataforma && npm ci && npm run build"
+  }
+}

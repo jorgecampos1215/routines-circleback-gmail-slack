@@ -8,6 +8,10 @@ name: AI27 · Migrar y cargar Supabase
 #   SUPABASE_SERVICE_ROLE_KEY  solo si quieres cargar la seed (Project Settings → API → service_role).
 #                              Vive únicamente aquí como secreto cifrado; nunca en Vercel ni en el código.
 
+#
+# Se corre con "Run workflow" en la pestaña Actions. Si además creas la variable del repo AI27_SUPABASE_AUTO = true,
+# también corre solo en cada push que toque supabase/ (la seed es idempotente: upsert por id).
+
 on:
   workflow_dispatch:
     inputs:
@@ -15,6 +19,9 @@ on:
         description: 'Cargar la seed data del demo (custodios, unidades, servicios, etc.)'
         type: boolean
         default: true
+  push:
+    branches: [main, claude/ai27-plataforma]
+    paths: ['ai27-plataforma/supabase/**', 'ai27-plataforma/scripts/**', '.github/workflows/ai27-supabase.yml']
 
 concurrency:
   group: ai27-supabase
@@ -22,6 +29,7 @@ concurrency:
 
 jobs:
   migrar:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.AI27_SUPABASE_AUTO == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,6 +43,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Revisar secretos
+        id: chk
         run: |
           faltan=""
           for s in SUPABASE_ACCESS_TOKEN SUPABASE_PROJECT_ID SUPABASE_DB_PASSWORD; do
@@ -48,10 +57,20 @@ jobs:
             echo "::error::SUPABASE_PROJECT_ID debe ser el Reference ID del proyecto (20 letras minúsculas, Project Settings → General), no el nombre."
             exit 1
           fi
-          if [ "${{ inputs.seed }}" = "true" ] && [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "::error::Pediste cargar la seed pero falta SUPABASE_SERVICE_ROLE_KEY. Vuelve a correr sin seed o agrega el secreto."
-            exit 1
+          # ¿Cargar la seed? Con "Run workflow" manda la casilla; en un push se carga si está la llave service_role.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            seed="${{ inputs.seed }}"
+            if [ "$seed" = "true" ] && [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+              echo "::error::Pediste cargar la seed pero falta SUPABASE_SERVICE_ROLE_KEY. Vuelve a correr sin seed o agrega el secreto."
+              exit 1
+            fi
+          elif [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            seed=true
+          else
+            seed=false
+            echo "::notice::Sin SUPABASE_SERVICE_ROLE_KEY: se aplican migraciones pero no se carga la seed."
           fi
+          echo "seed=$seed" >> "$GITHUB_OUTPUT"
 
       - uses: supabase/setup-cli@v1
         with:
@@ -67,14 +86,14 @@ jobs:
         run: supabase db push --include-all --yes --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
 
       - uses: actions/setup-node@v4
-        if: ${{ inputs.seed }}
+        if: ${{ steps.chk.outputs.seed == 'true' }}
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: ai27-plataforma/package-lock.json
 
       - name: Cargar seed data
-        if: ${{ inputs.seed }}
+        if: ${{ steps.chk.outputs.seed == 'true' }}
         env:
           SUPABASE_URL: https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co
         run: npm ci && npm run seed:supabase
@@ -86,7 +105,7 @@ jobs:
             echo
             echo "- Proyecto: https://supabase.com/dashboard/project/$SUPABASE_PROJECT_ID"
             echo "- Migraciones en el repo (db push aplica solo las que faltan): $(ls supabase/migrations | tr '\n' ' ')"
-            echo "- Seed cargada: ${{ inputs.seed }}"
+            echo "- Seed cargada: ${{ steps.chk.outputs.seed }}"
             echo
             echo "Siguiente paso: en Vercel (o en el secreto VITE_SUPABASE_URL) usa https://$SUPABASE_PROJECT_ID.supabase.co y la llave anon public."
           } >> "$GITHUB_STEP_SUMMARY"

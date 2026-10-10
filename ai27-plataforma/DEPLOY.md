@@ -48,7 +48,7 @@ El repo ya trae dos workflows en `.github/workflows/`:
 | Workflow | Qué hace |
 |---|---|
 | **AI27 · Migrar y cargar Supabase** | `supabase link` + `supabase db push` (crea las tablas) y, si lo pides, `npm run seed:supabase` (carga la seed data). |
-| **AI27 · Desplegar en Vercel** | `npm run build` como verificación, crea o vincula el proyecto `ai27-plataforma` en tu cuenta de Vercel, guarda las variables `VITE_SUPABASE_*` y despliega a producción. El link queda en el resumen del job. |
+| **AI27 · Desplegar en Vercel** | `npm run build` como verificación, crea o vincula el proyecto `ai27-plataforma` en tu cuenta de Vercel (sin conectar el repo entero a Vercel), guarda las variables `VITE_SUPABASE_*` y despliega a producción. El link y los dominios quedan en el resumen del job. |
 
 1. En GitHub: repo → **Settings → Secrets and variables → Actions → New repository secret**. Crea:
 
@@ -64,7 +64,8 @@ El repo ya trae dos workflows en `.github/workflows/`:
 
 2. Pestaña **Actions** → *AI27 · Migrar y cargar Supabase* → **Run workflow** (rama `claude/ai27-plataforma`, *seed* marcado). Tarda ~2 minutos.
 3. **Actions** → *AI27 · Desplegar en Vercel* → **Run workflow**. En el resumen del job aparece el link.
-4. Opcional: en **Settings → Secrets and variables → Actions → Variables** crea `AI27_AUTODEPLOY` = `true` para que cada push a la rama vuelva a desplegar solo. El workflow *AI27 · Verificar build* corre siempre y no necesita secretos.
+4. Si tu cuenta de Vercel pertenece a **más de un equipo**, en **Settings → Secrets and variables → Actions → Variables** crea `VERCEL_SCOPE` con el slug del equipo (el que aparece en la URL `vercel.com/<slug>`). Una cuenta nueva con un solo equipo no lo necesita.
+5. Opcional: en la misma pestaña **Variables** crea `AI27_AUTODEPLOY` = `true` para que cada push a la rama vuelva a desplegar solo. El workflow *AI27 · Verificar build* corre siempre y no necesita secretos.
 
 ---
 

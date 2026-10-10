@@ -1,0 +1,7 @@
+# Lo que no hace falta subir a Vercel para construir la app (Vercel reconstruye dist/ con npm run build).
+node_modules
+dist
+design
+supabase
+scripts
+.github

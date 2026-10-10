@@ -1,12 +1,15 @@
 name: AI27 · Desplegar en Vercel
 
 # Despliega ai27-plataforma a Vercel con la CLI, sin tocar el dashboard.
-# Secretos del repo (Settings → Secrets and variables → Actions):
+# Secretos del repo (Settings → Secrets and variables → Actions → Secrets):
 #   VERCEL_TOKEN            obligatorio. vercel.com → Account Settings → Tokens.
 #   VITE_SUPABASE_URL       opcional. Si están, la app sale conectada a Supabase.
 #   VITE_SUPABASE_ANON_KEY  opcional (llave "anon public"; NUNCA la service_role).
-#   VERCEL_ORG_ID / VERCEL_PROJECT_ID  opcionales; solo si ya existe el proyecto en Vercel y quieres forzarlo.
-# Variable del repo (pestaña Variables): AI27_AUTODEPLOY = true para desplegar en cada push a la rama.
+#   VERCEL_ORG_ID / VERCEL_PROJECT_ID  opcionales, los dos juntos; solo si ya existe el proyecto en Vercel y quieres forzarlo.
+# Variables del repo (pestaña Variables):
+#   VERCEL_SCOPE     opcional. Slug de tu equipo en Vercel. Solo hace falta si tu cuenta pertenece a más de un equipo
+#                    (la CLI no elige equipo sola cuando no hay terminal). Una cuenta nueva con un solo equipo no lo necesita.
+#   AI27_AUTODEPLOY  = true para desplegar en cada push a la rama (si no, solo con "Run workflow").
 
 on:
   workflow_dispatch:
@@ -18,17 +21,23 @@ concurrency:
   group: ai27-vercel
   cancel-in-progress: false
 
+env:
+  VERCEL_CLI: vercel@63.1.2   # versión fija y verificada; súbela a propósito, no con latest
+  PROYECTO: ai27-plataforma
+
 jobs:
   deploy:
     if: ${{ github.event_name == 'workflow_dispatch' || vars.AI27_AUTODEPLOY == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
+        shell: bash
         working-directory: ai27-plataforma
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_SCOPE: ${{ vars.VERCEL_SCOPE }}
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
       VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
     steps:
@@ -49,6 +58,10 @@ jobs:
             echo "::error::Pusiste VITE_SUPABASE_URL pero falta VITE_SUPABASE_ANON_KEY."
             exit 1
           fi
+          if { [ -n "$VERCEL_ORG_ID" ] && [ -z "$VERCEL_PROJECT_ID" ]; } || { [ -z "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; }; then
+            echo "::error::VERCEL_ORG_ID y VERCEL_PROJECT_ID van juntos: pon los dos o ninguno."
+            exit 1
+          fi
 
       - name: Build local (si falla aquí, no se despliega)
         run: npm ci && npm run build
@@ -56,32 +69,40 @@ jobs:
       - name: Vincular o crear el proyecto en Vercel
         run: |
           if [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; then
-            echo "Usando VERCEL_ORG_ID / VERCEL_PROJECT_ID."
-          else
-            # --yes toma los valores por defecto: crea (o vincula) el proyecto "ai27-plataforma" en tu cuenta.
-            npx vercel@latest link --yes --token "$VERCEL_TOKEN"
+            echo "Usando VERCEL_ORG_ID / VERCEL_PROJECT_ID; no hace falta vincular."
+            exit 0
           fi
+          scope=()
+          if [ -n "$VERCEL_SCOPE" ]; then scope=(--scope "$VERCEL_SCOPE"); fi
+          # Crear el proyecto primero (si ya existe, el comando falla y seguimos) y luego vincularlo por nombre.
+          # Así `link` no conecta el repo de GitHub completo al proyecto, que es lo que hace cuando crea el proyecto él mismo.
+          npx "$VERCEL_CLI" project add "$PROYECTO" "${scope[@]}" --token "$VERCEL_TOKEN" || echo "El proyecto $PROYECTO ya existe; se vincula."
+          npx "$VERCEL_CLI" link --yes --project "$PROYECTO" "${scope[@]}" --token "$VERCEL_TOKEN"
 
       - name: Guardar variables de Supabase en el proyecto
         if: ${{ env.VITE_SUPABASE_URL != '' }}
         run: |
+          # --type config: las VITE_* son públicas por diseño (van al navegador); sin esto la CLI pregunta cómo guardar la anon key.
           for nombre in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY; do
             valor="${!nombre}"
             for entorno in production preview; do
-              npx vercel@latest env rm "$nombre" "$entorno" --yes --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
-              printf '%s' "$valor" | npx vercel@latest env add "$nombre" "$entorno" --token "$VERCEL_TOKEN"
+              printf '%s' "$valor" | npx "$VERCEL_CLI" env add "$nombre" "$entorno" --yes --force --type config --token "$VERCEL_TOKEN"
             done
           done
 
       - name: Desplegar a producción
         id: deploy
         run: |
-          url=$(npx vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN")
+          url=$(npx "$VERCEL_CLI" deploy --prod --yes --token "$VERCEL_TOKEN")
           echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deploy: $url"
+          dominios=$(npx "$VERCEL_CLI" inspect "$url" --json --token "$VERCEL_TOKEN" | jq -r '.aliases[]? | "- https://\(.)"' || true)
           {
             echo "## AI27 desplegado en Vercel"
             echo
             echo "- Deploy: $url"
-            echo "- Dominios del proyecto:"
-            npx vercel@latest inspect "$url" --token "$VERCEL_TOKEN" 2>&1 | sed -n '/Aliases/,/^$/p' | sed 's/^/  /'
+            echo
+            echo "Dominios del proyecto:"
+            echo
+            echo "${dominios:-- (no se pudieron leer; míralos en el dashboard de Vercel)}"
           } >> "$GITHUB_STEP_SUMMARY"

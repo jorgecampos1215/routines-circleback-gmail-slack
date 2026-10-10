@@ -28,5 +28,8 @@
     "vite": "^8.3.3"
   },
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "type": "module"
 }

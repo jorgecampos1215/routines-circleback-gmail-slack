@@ -1,4 +1,4 @@
-import{a as e,h as t,p as n,r,t as i,u as a}from"./jsx-runtime-DqzFiGwU.js";import{c as o,d as s,r as c,s as l}from"./index-B6kAmJi1.js";import{t as u}from"./Shell-t6y23zSC.js";import{i as d,n as f,t as p}from"./Page-DW9Qv4N7.js";import{_ as m,a as h,c as g,i as _,l as v,n as y,o as b,r as x,s as S,t as C}from"./asistente-DPe39xSB.js";var w=t(n(),1),T=i(),E=`
+import{a as e,h as t,p as n,r,t as i,u as a}from"./jsx-runtime-DqzFiGwU.js";import{c as o,d as s,r as c,s as l}from"./index-BaGJAEWE.js";import{t as u}from"./Shell-D9CzDJF_.js";import{i as d,n as f,t as p}from"./Page-DW9Qv4N7.js";import{_ as m,a as h,c as g,i as _,l as v,n as y,o as b,r as x,s as S,t as C}from"./asistente-DbERPwHz.js";var w=t(n(),1),T=i(),E=`
 a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}

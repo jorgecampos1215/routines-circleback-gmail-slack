@@ -1,4 +1,4 @@
-import{a as e,d as t,h as n,p as r,r as i,t as a}from"./jsx-runtime-DqzFiGwU.js";import{c as o,d as s,u as c}from"./index-B6kAmJi1.js";import{t as l}from"./Nav-BMje7xck.js";import{i as u,n as d,t as f}from"./Page-DW9Qv4N7.js";import{i as p,n as m}from"./reaccion-BDIZFqVU.js";var h=n(r(),1),g=a(),_=`
+import{a as e,d as t,h as n,p as r,r as i,t as a}from"./jsx-runtime-DqzFiGwU.js";import{c as o,d as s,u as c}from"./index-BaGJAEWE.js";import{t as l}from"./Nav-CFc0WrgZ.js";import{i as u,n as d,t as f}from"./Page-DW9Qv4N7.js";import{i as p,n as m}from"./reaccion-BDIZFqVU.js";var h=n(r(),1),g=a(),_=`
 a{color:#3448A8}a:hover{color:#0D1D41}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}
 .mono{font-family:'IBM Plex Mono',monospace}

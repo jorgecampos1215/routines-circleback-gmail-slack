@@ -1,4 +1,4 @@
-import{a as e,h as t,p as n,r,t as i,u as a}from"./jsx-runtime-DqzFiGwU.js";import{a as o,c as ee,d as s,i as c,n as l,o as u,r as te,s as ne,t as d}from"./index-B6kAmJi1.js";import{t as re}from"./Shell-t6y23zSC.js";import{i as f,n as ie,t as p}from"./Page-DW9Qv4N7.js";import{n as m,t as h}from"./store-BWre5UDi.js";import{o as ae,r as g,t as oe}from"./crm-B7MbwL13.js";var _=t(n(),1),v=i(),se=`
+import{a as e,h as t,p as n,r,t as i,u as a}from"./jsx-runtime-DqzFiGwU.js";import{a as o,c as ee,d as s,i as c,n as l,o as u,r as te,s as ne,t as d}from"./index-BaGJAEWE.js";import{t as re}from"./Shell-D9CzDJF_.js";import{i as f,n as ie,t as p}from"./Page-DW9Qv4N7.js";import{n as m,t as h}from"./store-B6a1AVC9.js";import{o as ae,r as g,t as oe}from"./crm-B7MbwL13.js";var _=t(n(),1),v=i(),se=`
 a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}

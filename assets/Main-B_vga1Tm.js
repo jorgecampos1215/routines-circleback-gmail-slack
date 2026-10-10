@@ -1,4 +1,4 @@
-import{a as e,h as t,p as n,r,t as i,u as a}from"./jsx-runtime-DqzFiGwU.js";import{c as o,d as s}from"./index-B6kAmJi1.js";import{t as c}from"./Shell-t6y23zSC.js";import{i as l,n as u,t as d}from"./Page-DW9Qv4N7.js";import{r as f,t as ee}from"./seed-CxPpx6mk.js";import{_ as te,b as ne,c as p,d as m,f as re,g as h,h as g,m as _,p as v,s as y,u as b,v as x,y as S}from"./asistente-DPe39xSB.js";var C=t(n(),1),w=i(),ie=`
+import{a as e,h as t,p as n,r,t as i,u as a}from"./jsx-runtime-DqzFiGwU.js";import{c as o,d as s}from"./index-BaGJAEWE.js";import{t as c}from"./Shell-D9CzDJF_.js";import{i as l,n as u,t as d}from"./Page-DW9Qv4N7.js";import{r as f,t as ee}from"./seed-CxPpx6mk.js";import{_ as te,b as ne,c as p,d as m,f as re,g as h,h as g,m as _,p as v,s as y,u as b,v as x,y as S}from"./asistente-DbERPwHz.js";var C=t(n(),1),w=i(),ie=`
 a{color:#3448A8}a:hover{color:#0D1D41}
 .kpi{font-family:'Montserrat',sans-serif;font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}

@@ -1,0 +1,3 @@
+# Configuración mínima para la CLI de Supabase (`supabase link` y `supabase db push`).
+# El id del proyecto remoto NO va aquí: se pasa con `supabase link --project-ref <ref>`.
+project_id = "ai27-plataforma"

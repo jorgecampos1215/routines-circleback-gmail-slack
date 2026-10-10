@@ -1,45 +1,106 @@
 # Desplegar AI27 con Supabase + Vercel
 
-Tiempo estimado: 20 minutos. Necesitas una cuenta en [supabase.com](https://supabase.com) y otra en [vercel.com](https://vercel.com) (las dos tienen plan gratuito), y acceso al repo `jorgecampos1215/routines-circleback-gmail-slack`.
+La plataforma ya está en GitHub (`jorgecampos1215/routines-circleback-gmail-slack`, carpeta `ai27-plataforma/`, rama `claude/ai27-plataforma`). Lo que falta es una base de datos en Supabase y el hosting en Vercel. Las dos tienen plan gratuito y entras a ambas con tu cuenta de GitHub.
 
-## 1. Supabase (base de datos)
+Hay tres formas de hacerlo. Todas terminan igual: un link `https://ai27-plataforma.vercel.app` conectado a tu base.
 
-1. Entra a Supabase → **New project**. Nombre: `ai27-demo`. Región: la más cercana (p. ej. `East US`). Guarda la contraseña de la base.
-2. Cuando termine de crearse, ve a **SQL Editor → New query**, pega el contenido completo de `supabase/migrations/0001_esquema.sql` y presiona **Run**. Crea las tablas (custodios, unidades, servicios, incidentes, colaboradores, clientes, taller, combustible, telemetría) y la tabla `demo_estado` donde la plataforma guarda lo que el usuario crea.
-3. Ve a **Project Settings → API** y copia tres valores:
-   - **Project URL** (`https://xxxx.supabase.co`)
-   - **anon public** key
-   - **service_role** key (secreta; solo para cargar datos desde tu máquina)
-4. En tu computadora, dentro de `ai27-plataforma/`:
+| Forma | Qué haces tú | Quién corre el deploy |
+|---|---|---|
+| **A. Claude lo hace** | Creas las cuentas, generas 2 tokens y los guardas en el entorno de Claude Code (no en el chat) | Claude, desde una sesión nueva |
+| **B. GitHub Actions** | Creas las cuentas, generas 2 tokens y los guardas como secretos del repo | GitHub, con un clic en *Run workflow* |
+| **C. A mano** | Todo desde los dashboards de Supabase y Vercel, ~15 minutos | Vercel, al importar el repo |
+
+Las llaves y tokens **nunca se pegan en el chat ni en el código**: van a los secretos de GitHub, a los *Network secrets* del entorno de Claude Code o a las variables de Vercel.
+
+---
+
+## Paso 0 (común): crear las cuentas y el proyecto de Supabase
+
+1. **Supabase** → [supabase.com](https://supabase.com) → *Start your project* → entra con GitHub → **New project**.
+   - Nombre: `ai27-demo`. Región: la más cercana (p. ej. *East US*). **Guarda la contraseña de la base**: la vas a necesitar.
+   - Cuando termine, en **Project Settings → General** copia el **Reference ID** (algo como `abcdefghijklmnop`).
+   - En **Project Settings → API** verás la **Project URL**, la llave **anon public** y la **service_role** (secreta).
+2. **Vercel** → [vercel.com](https://vercel.com) → *Sign up* con GitHub. No hace falta crear nada más: el deploy crea el proyecto.
+
+---
+
+## A. Que Claude lo haga por ti
+
+El entorno de Claude Code en la nube solo tiene salida de red a GitHub, así que hoy no puede hablar con Vercel ni con Supabase. Para que pueda, cambia tres cosas en la configuración de tu entorno (menú del entorno en la barra de título → **Edit**):
+
+1. **Network access → Allowed domains**: agrega `api.vercel.com`, `vercel.com`, `api.supabase.com`, `supabase.com`, `*.supabase.co`, `*.pooler.supabase.com` (deja marcados los gestores de paquetes).
+2. **Network secrets** (variables de entorno): crea
+   - `VERCEL_TOKEN` = token de vercel.com → *Account Settings → Tokens → Create* (scope: tu cuenta, expiración la que quieras).
+   - `SUPABASE_ACCESS_TOKEN` = token de supabase.com → *Account → Access Tokens → Generate new token*.
+   - `SUPABASE_PROJECT_ID` = el Reference ID del proyecto.
+   - `SUPABASE_DB_PASSWORD` = la contraseña de la base.
+   - `SUPABASE_SERVICE_ROLE_KEY` = la llave service_role (solo para cargar la seed data).
+3. Guarda y **abre una sesión nueva** de Claude Code (los cambios del entorno no llegan a la sesión abierta). Pídele: *"despliega ai27-plataforma en Supabase y Vercel"*. Con eso Claude corre la migración, carga los 400 custodios / 600 unidades / 300 servicios, crea el proyecto en Vercel con las variables correctas y te pasa el link.
+
+Documentación: [Network access](https://code.claude.com/docs/en/cloud-environments#network-access) y [variables de entorno](https://code.claude.com/docs/en/cloud-environments#environment-variables).
+
+---
+
+## B. Desde GitHub Actions (sin que nadie instale nada)
+
+El repo ya trae dos workflows en `.github/workflows/`:
+
+| Workflow | Qué hace |
+|---|---|
+| **AI27 · Migrar y cargar Supabase** | `supabase link` + `supabase db push` (crea las tablas) y, si lo pides, `npm run seed:supabase` (carga la seed data). |
+| **AI27 · Desplegar en Vercel** | `npm run build` como verificación, crea o vincula el proyecto `ai27-plataforma` en tu cuenta de Vercel, guarda las variables `VITE_SUPABASE_*` y despliega a producción. El link queda en el resumen del job. |
+
+1. En GitHub: repo → **Settings → Secrets and variables → Actions → New repository secret**. Crea:
+
+   | Secreto | De dónde sale |
+   |---|---|
+   | `SUPABASE_ACCESS_TOKEN` | supabase.com → Account → Access Tokens |
+   | `SUPABASE_PROJECT_ID` | Project Settings → General → Reference ID |
+   | `SUPABASE_DB_PASSWORD` | la contraseña que pusiste al crear el proyecto |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → service_role (opcional, solo para la seed) |
+   | `VERCEL_TOKEN` | vercel.com → Account Settings → Tokens |
+   | `VITE_SUPABASE_URL` | Project Settings → API → Project URL |
+   | `VITE_SUPABASE_ANON_KEY` | Project Settings → API → anon public |
+
+2. Pestaña **Actions** → *AI27 · Migrar y cargar Supabase* → **Run workflow** (rama `claude/ai27-plataforma`, *seed* marcado). Tarda ~2 minutos.
+3. **Actions** → *AI27 · Desplegar en Vercel* → **Run workflow**. En el resumen del job aparece el link.
+4. Opcional: en **Settings → Secrets and variables → Actions → Variables** crea `AI27_AUTODEPLOY` = `true` para que cada push a la rama vuelva a desplegar solo. El workflow *AI27 · Verificar build* corre siempre y no necesita secretos.
+
+---
+
+## C. A mano desde los dashboards
+
+### Supabase
+1. **SQL Editor → New query**, pega el contenido completo de `supabase/migrations/20261010120000_esquema.sql` y **Run**. Crea las tablas (custodios, unidades, servicios, incidentes, colaboradores, clientes, taller, combustible, telemetría) y `demo_estado`, donde la plataforma guarda lo que el usuario crea.
+2. Para cargar la seed data, en tu computadora dentro de `ai27-plataforma/`:
    ```bash
-   cp .env.example .env.local      # y llena los 4 valores con lo que copiaste
+   cp .env.example .env.local      # llena los 4 valores (URL, anon, service_role)
    npm install
    npm run seed:supabase           # sube los 400 custodios, 600 unidades, 300 servicios, etc.
-   npm run dev                     # abre http://localhost:5173 → en el menú verás "Base de datos · Supabase"
+   npm run dev                     # http://localhost:5173 → en el menú verás "Base de datos · Supabase"
    ```
-   Prueba: da de alta un cliente en Clientes, abre la plataforma en otro navegador y verás el cliente ahí también (sincronización en tiempo real).
 
-## 2. Vercel (hosting)
+### Vercel
+1. **Add New… → Project → Import** el repo `jorgecampos1215/routines-circleback-gmail-slack`.
+2. **Root Directory:** `ai27-plataforma` (clic en *Edit*). **Framework Preset:** Vite (lo detecta; `vercel.json` ya trae build y rewrites). **Production Branch:** `claude/ai27-plataforma` (o `main` si haces merge).
+3. **Environment Variables** (Production y Preview): `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. **No** pongas la service_role en Vercel.
+4. **Deploy**. En ~1 minuto tienes el link. Cada push vuelve a desplegar; cada pull request genera un preview.
+5. Opcional: **Settings → Domains** para `demo.ai27.com` u otro dominio tuyo.
 
-1. Entra a Vercel → **Add New… → Project** → **Import** el repo `jorgecampos1215/routines-circleback-gmail-slack`.
-2. En la configuración del proyecto:
-   - **Root Directory:** `ai27-plataforma` (haz clic en *Edit* y elígela).
-   - **Framework Preset:** Vite (lo detecta solo; `vercel.json` ya trae build y rewrites).
-   - **Production Branch:** `claude/ai27-plataforma` (o `main` si haces merge de la rama).
-3. En **Environment Variables** agrega (para Production y Preview):
-   - `VITE_SUPABASE_URL` = tu Project URL
-   - `VITE_SUPABASE_ANON_KEY` = tu anon key
-   
-   No agregues la service_role key en Vercel.
-4. **Deploy**. En ~1 minuto tendrás un link tipo `https://ai27-demo.vercel.app`. Cada push a la rama vuelve a desplegar solo; cada pull request genera un link de preview.
-5. Opcional: **Settings → Domains** para usar `demo.ai27.com` u otro dominio tuyo.
+---
+
+## Repo propio en GitHub (opcional)
+
+Hoy la plataforma vive en una carpeta del repo `routines-circleback-gmail-slack`. Si prefieres un repo dedicado (`jorgecampos1215/ai27-plataforma`), créalo vacío en GitHub (**New repository**, sin README) y dile a Claude; él mueve el código ahí con todo el historial, los workflows y el `gh-pages` del demo. La app de GitHub de Claude no tiene permiso para crear repos, por eso ese clic es tuyo.
+
+---
 
 ## Qué queda conectado
 
 | Parte | Dónde vive | Notas |
 |---|---|---|
-| Catálogos (custodios, unidades, servicios, incidentes, colaboradores, clientes, taller, combustible) | Tablas de Supabase, cargadas por `npm run seed:supabase` | La app todavía los lee de `src/data/seed.ts` (mismos datos). El siguiente paso es leerlos de Supabase con `supabase.from('custodios').select()` en `src/data/*.ts`. |
-| Lo que crea el usuario (clientes nuevos, leads, servicios, vacaciones, trámites, decisiones de la IA) | Tabla `demo_estado` | Se guarda al instante y se sincroniza en tiempo real entre navegadores (`src/lib/store.ts`). Sin Supabase, cae a localStorage. |
+| Catálogos (custodios, unidades, servicios, incidentes, colaboradores, clientes, taller, combustible) | Tablas de Supabase, cargadas por la seed | La app todavía los lee de `src/data/seed.ts` (mismos datos). Siguiente paso: leerlos con `supabase.from('custodios').select()` en `src/data/*.ts`. |
+| Lo que crea el usuario (clientes nuevos, oportunidades, servicios, asignaciones, taller, combustible, vacaciones, trámites, decisiones de la IA) | Tabla `demo_estado` | Se guarda al instante y se sincroniza en tiempo real entre navegadores (`src/lib/store.ts`). Sin Supabase, cae a localStorage. |
 | Telemetría | Tabla `eventos_telemetria` (vacía) | `src/lib/telemetria.ts` ya normaliza Samsara y Ruptela; cuando AI27 dé acceso a sus APIs, un cron o edge function inserta aquí los eventos. |
 | Seguridad | RLS en modo demo | La llave anónima lee todo y escribe solo en `demo_estado`. Antes de producción: Supabase Auth y políticas por rol (los 9 roles de la pantalla Usuarios). |
 

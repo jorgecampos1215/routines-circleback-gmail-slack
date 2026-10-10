@@ -1,0 +1,85 @@
+name: AI27 · Migrar y cargar Supabase
+
+# Aplica supabase/migrations al proyecto de Supabase y (opcional) carga la seed data del demo.
+# Secretos del repo (Settings → Secrets and variables → Actions):
+#   SUPABASE_ACCESS_TOKEN      obligatorio. supabase.com → Account → Access Tokens → Generate new token.
+#   SUPABASE_PROJECT_ID        obligatorio. El "Reference ID" del proyecto (Project Settings → General).
+#   SUPABASE_DB_PASSWORD       obligatorio. La contraseña de la base que pusiste al crear el proyecto.
+#   SUPABASE_SERVICE_ROLE_KEY  solo si quieres cargar la seed (Project Settings → API → service_role).
+#                              Vive únicamente aquí como secreto cifrado; nunca en Vercel ni en el código.
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'Cargar la seed data del demo (custodios, unidades, servicios, etc.)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: ai27-supabase
+  cancel-in-progress: false
+
+jobs:
+  migrar:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai27-plataforma
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar secretos
+        run: |
+          faltan=""
+          for s in SUPABASE_ACCESS_TOKEN SUPABASE_PROJECT_ID SUPABASE_DB_PASSWORD; do
+            [ -n "${!s}" ] || faltan="$faltan $s"
+          done
+          if [ -n "$faltan" ]; then
+            echo "::error::Faltan secretos:$faltan"
+            exit 1
+          fi
+          if [ "${{ inputs.seed }}" = "true" ] && [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error::Pediste cargar la seed pero falta SUPABASE_SERVICE_ROLE_KEY. Vuelve a correr sin seed o agrega el secreto."
+            exit 1
+          fi
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Vincular el proyecto
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+
+      - name: Aplicar migraciones
+        run: supabase db push --include-all
+
+      - uses: actions/setup-node@v4
+        if: ${{ inputs.seed }}
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ai27-plataforma/package-lock.json
+
+      - name: Cargar seed data
+        if: ${{ inputs.seed }}
+        env:
+          SUPABASE_URL: https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co
+        run: npm ci && npm run seed:supabase
+
+      - name: Resumen
+        run: |
+          {
+            echo "## Supabase listo"
+            echo
+            echo "- Proyecto: https://supabase.com/dashboard/project/$SUPABASE_PROJECT_ID"
+            echo "- Migraciones aplicadas: $(ls supabase/migrations | tr '\n' ' ')"
+            echo "- Seed cargada: ${{ inputs.seed }}"
+            echo
+            echo "Siguiente paso: en Vercel (o en el secreto VITE_SUPABASE_URL) usa https://$SUPABASE_PROJECT_ID.supabase.co y la llave anon public."
+          } >> "$GITHUB_STEP_SUMMARY"

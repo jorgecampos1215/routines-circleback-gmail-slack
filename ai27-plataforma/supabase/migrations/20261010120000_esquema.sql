@@ -1,6 +1,6 @@
 -- AI27 · Plataforma de operación de custodia
 -- Esquema inicial para Supabase (Postgres). Pégalo en el SQL Editor de tu proyecto y ejecútalo,
--- o corre `supabase db push` con la CLI.
+-- o corre `supabase db push` con la CLI (también lo hace el workflow "AI27 · Migrar y cargar Supabase").
 
 create extension if not exists "pgcrypto";
 

@@ -4,7 +4,7 @@ name: AI27 · Migrar y cargar Supabase
 # Secretos del repo (Settings → Secrets and variables → Actions):
 #   SUPABASE_ACCESS_TOKEN      obligatorio. supabase.com → Account → Access Tokens → Generate new token.
 #   SUPABASE_PROJECT_ID        obligatorio. El "Reference ID" del proyecto (Project Settings → General).
-#   SUPABASE_DB_PASSWORD       obligatorio. La contraseña de la base que pusiste al crear el proyecto.
+#   SUPABASE_DB_PASSWORD       obligatorio. La contraseña de la base que pusiste al crear el proyecto (la usa `db push`).
 #   SUPABASE_SERVICE_ROLE_KEY  solo si quieres cargar la seed (Project Settings → API → service_role).
 #                              Vive únicamente aquí como secreto cifrado; nunca en Vercel ni en el código.
 
@@ -44,6 +44,10 @@ jobs:
             echo "::error::Faltan secretos:$faltan"
             exit 1
           fi
+          if ! [[ "$SUPABASE_PROJECT_ID" =~ ^[a-z]{20}$ ]]; then
+            echo "::error::SUPABASE_PROJECT_ID debe ser el Reference ID del proyecto (20 letras minúsculas, Project Settings → General), no el nombre."
+            exit 1
+          fi
           if [ "${{ inputs.seed }}" = "true" ] && [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
             echo "::error::Pediste cargar la seed pero falta SUPABASE_SERVICE_ROLE_KEY. Vuelve a correr sin seed o agrega el secreto."
             exit 1
@@ -51,13 +55,16 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Versión fija (verificada): `latest` puede saltar a 3.x sin avisar.
+          version: 2.120.0
+          github-token: ${{ github.token }}
 
       - name: Vincular el proyecto
-        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID" --yes
 
       - name: Aplicar migraciones
-        run: supabase db push --include-all
+        # --project-ref permite al CLI pedir la configuración del pooler (IPv4) a la API si hace falta.
+        run: supabase db push --include-all --yes --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
 
       - uses: actions/setup-node@v4
         if: ${{ inputs.seed }}
@@ -78,7 +85,7 @@ jobs:
             echo "## Supabase listo"
             echo
             echo "- Proyecto: https://supabase.com/dashboard/project/$SUPABASE_PROJECT_ID"
-            echo "- Migraciones aplicadas: $(ls supabase/migrations | tr '\n' ' ')"
+            echo "- Migraciones en el repo (db push aplica solo las que faltan): $(ls supabase/migrations | tr '\n' ' ')"
             echo "- Seed cargada: ${{ inputs.seed }}"
             echo
             echo "Siguiente paso: en Vercel (o en el secreto VITE_SUPABASE_URL) usa https://$SUPABASE_PROJECT_ID.supabase.co y la llave anon public."

@@ -18,7 +18,7 @@ Las llaves y tokens **nunca se pegan en el chat ni en el código**: van a los se
 
 1. **Supabase** → [supabase.com](https://supabase.com) → *Start your project* → entra con GitHub → **New project**.
    - Nombre: `ai27-demo`. Región: la más cercana (p. ej. *East US*). **Guarda la contraseña de la base**: la vas a necesitar.
-   - Cuando termine, en **Project Settings → General** copia el **Reference ID** (algo como `abcdefghijklmnop`).
+   - Cuando termine, en **Project Settings → General** copia el **Reference ID** (exactamente 20 letras minúsculas, algo como `abcdefghijklmnopqrst`; no es el nombre del proyecto).
    - En **Project Settings → API** verás la **Project URL**, la llave **anon public** y la **service_role** (secreta).
 2. **Vercel** → [vercel.com](https://vercel.com) → *Sign up* con GitHub. No hace falta crear nada más: el deploy crea el proyecto.
 
@@ -33,7 +33,7 @@ El entorno de Claude Code en la nube solo tiene salida de red a GitHub, así que
    - `VERCEL_TOKEN` = token de vercel.com → *Account Settings → Tokens → Create* (scope: tu cuenta, expiración la que quieras).
    - `SUPABASE_ACCESS_TOKEN` = token de supabase.com → *Account → Access Tokens → Generate new token*.
    - `SUPABASE_PROJECT_ID` = el Reference ID del proyecto.
-   - `SUPABASE_DB_PASSWORD` = la contraseña de la base.
+   - `SUPABASE_DB_PASSWORD` = la contraseña de la base (la usa `supabase db push`).
    - `SUPABASE_SERVICE_ROLE_KEY` = la llave service_role (solo para cargar la seed data).
 3. Guarda y **abre una sesión nueva** de Claude Code (los cambios del entorno no llegan a la sesión abierta). Pídele: *"despliega ai27-plataforma en Supabase y Vercel"*. Con eso Claude corre la migración, carga los 400 custodios / 600 unidades / 300 servicios, crea el proyecto en Vercel con las variables correctas y te pasa el link.
 
@@ -55,7 +55,7 @@ El repo ya trae dos workflows en `.github/workflows/`:
    | Secreto | De dónde sale |
    |---|---|
    | `SUPABASE_ACCESS_TOKEN` | supabase.com → Account → Access Tokens |
-   | `SUPABASE_PROJECT_ID` | Project Settings → General → Reference ID |
+   | `SUPABASE_PROJECT_ID` | Project Settings → General → Reference ID (20 letras minúsculas) |
    | `SUPABASE_DB_PASSWORD` | la contraseña que pusiste al crear el proyecto |
    | `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → service_role (opcional, solo para la seed) |
    | `VERCEL_TOKEN` | vercel.com → Account Settings → Tokens |

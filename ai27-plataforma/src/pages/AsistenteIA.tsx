@@ -128,7 +128,7 @@ export default function AsistenteIA() {
         <Nota>Puede responder sobre servicios, custodios, flotilla, incidentes, clientes y finanzas. Usa los datos de la plataforma (GPS de Samsara y Ruptela, CRM, finanzas) y respeta los permisos de tu rol.</Nota>
       </PageHeader>
 
-      <Section titulo="Preguntas que puedes hacer" ayuda="Toca una para ver la respuesta, o escribe la tuya abajo.">
+      <Section tour="preguntas" titulo="Preguntas que puedes hacer" ayuda="Toca una para ver la respuesta, o escribe la tuya abajo.">
         <div style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:10px')}>
           {P.map((p, n) => {
             const on = p === last.p && last.asked === null

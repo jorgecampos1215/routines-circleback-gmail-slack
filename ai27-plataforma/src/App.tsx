@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { ROUTES, type PageName } from './lib/routes'
+import { Tour } from './components/Tour'
 
 const pages: Record<PageName, ReturnType<typeof lazy>> = {
   Main: lazy(() => import('./pages/Main')),
@@ -22,6 +23,7 @@ const pages: Record<PageName, ReturnType<typeof lazy>> = {
   Reportes: lazy(() => import('./pages/Reportes')),
   CustodioMovil: lazy(() => import('./pages/CustodioMovil')),
   Flujo: lazy(() => import('./pages/Flujo')),
+  Oportunidades: lazy(() => import('./pages/Oportunidades')),
 }
 
 function ScrollTop() {
@@ -34,6 +36,7 @@ export default function App() {
   return (
     <HashRouter>
       <ScrollTop />
+      <Tour />
       <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F6F7F9' }} />}>
         <Routes>
           {(Object.keys(ROUTES) as PageName[]).map(k => {

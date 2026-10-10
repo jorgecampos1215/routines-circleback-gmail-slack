@@ -2,8 +2,9 @@ import { Logo } from './Logo'
 import { NavLink } from 'react-router-dom'
 import { sx } from '../lib/sx'
 import { supabaseActivo } from '../lib/supabase'
+import { iniciarTour } from './Tour'
 
-export type NavId = 'dashboard' | 'asistente' | 'servicios' | 'ia' | 'monitoreo' | 'reaccion' | 'custodios' | 'flotilla' | 'rh' | 'cotizador' | 'crm' | 'finanzas' | 'reportes' | 'portal' | 'usuarios' | 'movil'
+export type NavId = 'oportunidades' | 'dashboard' | 'asistente' | 'servicios' | 'ia' | 'monitoreo' | 'reaccion' | 'custodios' | 'flotilla' | 'rh' | 'cotizador' | 'crm' | 'finanzas' | 'reportes' | 'portal' | 'usuarios' | 'movil'
 
 type Item = { id: NavId; label: string; to: string; d: string }
 
@@ -24,6 +25,7 @@ export const NAV_GROUPS: { name: string; items: Item[] }[] = [
   { name: 'Comercial', items: [
     { id: 'cotizador', label: 'Cotizaciones', to: '/cotizador', d: 'M6 3h12v18H6zM9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01M9 17h.01M12 17h3' },
     { id: 'crm', label: 'Clientes', to: '/clientes', d: 'M3 8h18v12H3zM8 8V5h8v3M3 13h18' },
+    { id: 'oportunidades', label: 'Oportunidades', to: '/oportunidades', d: 'M3 17l6-6 4 4 8-8M14 7h7v7' },
     { id: 'finanzas', label: 'Finanzas', to: '/finanzas', d: 'M3 3v18h18M7 15l4-4 3 3 5-6' },
   ]},
   { name: 'Administración', items: [
@@ -53,6 +55,10 @@ export function Nav({ active }: { active: NavId }) {
           ))}
         </div>
       ))}
+      <button type="button" onClick={() => iniciarTour(0)} style={sx("display:flex;align-items:center;gap:10px;min-height:40px;padding:0 12px;border-radius:8px;border:1px dashed #C7D0F2;background:#F0F3FD;color:#3448A8;font:600 13px 'Montserrat',sans-serif;cursor:pointer;text-align:left")}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M10 9l5 3-5 3z" /></svg>
+        Recorrido guiado
+      </button>
       <div style={sx('display:flex;flex-direction:column;gap:8px;padding:14px 12px;border:1px solid #E4E8ED;border-radius:10px;font-size:12px;color:#3E4A59')}>
         <span style={sx('font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6B7684')}>Fuentes de telemetría</span>
         <span style={sx('display:flex;align-items:center;gap:8px')}><span style={sx('width:8px;height:8px;border-radius:50%;background:#4CC38A')} />Samsara · principal</span>

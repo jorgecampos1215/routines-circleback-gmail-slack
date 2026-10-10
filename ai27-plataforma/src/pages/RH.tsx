@@ -270,7 +270,7 @@ export default function RH() {
 
   return (
     <Shell active="rh" css={CSS} mainStyle="flex:999 1 560px;min-width:0;padding:28px 32px 48px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
-      <PageHeader seccion="Equipo" titulo="Equipo"
+      <PageHeader tour="equipo" seccion="Equipo" titulo="Equipo"
         descripcion={`Quién trabaja en AI27 y qué necesita de RH: ${headcount} colaboradores en ${areas.filter(([, n]) => n > 0).length} áreas y ${sedesAll.length} sedes. Aquí das de alta, apruebas vacaciones y llevas ingresos, bajas y reclutamiento.`}
         accion={{ label: 'Alta de colaborador', onClick: abrirAlta }}
         secundarias={<Link className="btn" to={ROUTES.PortalColaborador}>Ver Mi portal</Link>} />

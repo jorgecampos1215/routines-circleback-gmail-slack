@@ -190,7 +190,7 @@ export default function Monitoreo() {
       </section>
 
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:stretch')}>
-        <section className="card" aria-label="Mapa de rutas activas" style={sx('flex:999 1 620px;padding:0;overflow:hidden;position:relative;display:flex;flex-direction:column')}>
+        <section className="card" aria-label="Mapa de rutas activas" data-tour="mapa" style={sx('flex:999 1 620px;padding:0;overflow:hidden;position:relative;display:flex;flex-direction:column')}>
           <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:14px 20px;border-bottom:1px solid #E4E8ED')}>
             <div style={sx('display:flex;flex-direction:column;gap:2px')}>
               <h2 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:17px;font-weight:600;color:#0D1D41")}>{unidades.length} rutas activas</h2>

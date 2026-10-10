@@ -268,7 +268,7 @@ export default function Cotizador() {
             </div>
           </Section>
 
-          <Section titulo="2 · Ruta y condiciones" ayuda={tab === 'evt' ? 'De dónde a dónde y en qué horario. La ruta define distancia, casetas y riesgo.' : tab === 'ded' ? 'Dónde opera el equipo y por cuánto tiempo.' : 'Cómo y cuándo monitoreamos la flota del cliente.'} style={bloque}>
+          <Section tour="precio" titulo="2 · Ruta y condiciones" ayuda={tab === 'evt' ? 'De dónde a dónde y en qué horario. La ruta define distancia, casetas y riesgo.' : tab === 'ded' ? 'Dónde opera el equipo y por cuánto tiempo.' : 'Cómo y cuándo monitoreamos la flota del cliente.'} style={bloque}>
             {tab === 'evt' && (
               <>
                 <div style={sx(grid)}>

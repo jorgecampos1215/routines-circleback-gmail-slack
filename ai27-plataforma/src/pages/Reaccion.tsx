@@ -131,7 +131,7 @@ export default function Reaccion() {
         <Link className="btn" to={ROUTES.AsistenteIA}>Preguntarle a la IA</Link>
       </section>
 
-      <Section titulo={cerrado ? 'Incidente cerrado' : `Paso ${step + 1} de 6 · ${LABELS[step]}`} ayuda={cerrado ? 'Las 6 etapas están completas. Falta enviar el reporte al cliente.' : AYUDA_PASO[step]}
+      <Section tour="stepper" titulo={cerrado ? 'Incidente cerrado' : `Paso ${step + 1} de 6 · ${LABELS[step]}`} ayuda={cerrado ? 'Las 6 etapas están completas. Falta enviar el reporte al cliente.' : AYUDA_PASO[step]}
         acciones={<button type="button" className="btn" onClick={next} disabled={cerrado} style={sx(cerrado ? 'cursor:default;opacity:.55' : 'border-color:#0D1D41')}>{cerrado ? 'Incidente cerrado' : `Avanzar a ${LABELS[Math.min(step + 1, 5)]} ›`}</button>}>
         <ol aria-label="Etapas del incidente" style={sx('list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:8px')}>
           {LABELS.map((label, i) => {

@@ -9,9 +9,9 @@ import { sx } from '../lib/sx'
  *               accion={{ label: 'Nueva cotización', to: '/cotizador' }} secundarias={<button className="btn">Exportar</button>} />
  */
 export type Accion = { label: string; to?: string; onClick?: () => void }
-export function PageHeader({ seccion, titulo, descripcion, accion, secundarias, children }: { seccion?: string; titulo: string; descripcion: string; accion?: Accion; secundarias?: ReactNode; children?: ReactNode }) {
+export function PageHeader({ seccion, titulo, descripcion, accion, secundarias, children, tour }: { seccion?: string; titulo: string; descripcion: string; accion?: Accion; secundarias?: ReactNode; children?: ReactNode; tour?: string }) {
   return (
-    <header style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;justify-content:space-between')}>
+    <header data-tour={tour} style={sx('display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;justify-content:space-between')}>
       <div style={sx('display:flex;flex-direction:column;gap:6px;max-width:720px;min-width:0')}>
         {seccion && <span className="lbl">{seccion}</span>}
         <h1 style={sx("margin:0;font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;color:#0D1D41;letter-spacing:-.01em")}>{titulo}</h1>
@@ -64,7 +64,7 @@ export function Pasos({ actual }: { actual: 1 | 2 | 3 | 4 }) {
  * para que a primera vista solo se vea lo esencial.
  *   <Section titulo="Tarifas base por zona" ayuda="Editables. Alimentan el cálculo del precio." plegable abierto={false}>…</Section>
  */
-export function Section({ titulo, ayuda, acciones, plegable, abierto = true, children, style }: { titulo: string; ayuda?: string; acciones?: ReactNode; plegable?: boolean; abierto?: boolean; children: ReactNode; style?: string }) {
+export function Section({ titulo, ayuda, acciones, plegable, abierto = true, children, style, tour }: { titulo: string; ayuda?: string; acciones?: ReactNode; plegable?: boolean; abierto?: boolean; children: ReactNode; style?: string; tour?: string }) {
   const [open, setOpen] = useState(abierto)
   const head = (
     <div style={sx('display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center')}>
@@ -83,7 +83,7 @@ export function Section({ titulo, ayuda, acciones, plegable, abierto = true, chi
     </div>
   )
   return (
-    <section className="card" style={sx('display:flex;flex-direction:column;gap:14px;' + (style ?? ''))}>
+    <section className="card" data-tour={tour} style={sx('display:flex;flex-direction:column;gap:14px;' + (style ?? ''))}>
       {head}
       {(!plegable || open) && children}
     </section>

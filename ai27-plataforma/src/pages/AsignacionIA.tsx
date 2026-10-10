@@ -158,7 +158,7 @@ export default function AsignacionIA() {
 
       <div style={sx('display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start')}>
         {/* Ranking */}
-        <section aria-label="Ranking de candidatos" style={sx('flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px')}>
+        <section aria-label="Ranking de candidatos" data-tour="ranking" style={sx('flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px')}>
           <div className="card" style={sx('display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-color:#C7D0F2;background:#F0F3FD;padding:14px 18px')}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475CC7" strokeWidth="1.8" strokeLinejoin="round" aria-hidden="true" style={sx('flex:none')}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg>
             <div style={sx('flex:1 1 320px;display:flex;flex-direction:column;gap:2px;min-width:0')}>

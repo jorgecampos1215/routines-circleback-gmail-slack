@@ -125,7 +125,7 @@ export default function Main() {
         <Nota>Datos al miércoles 7 oct 2026, 14:32 · GPS de Samsara y Ruptela en una sola vista.</Nota>
       </PageHeader>
 
-      <Section titulo="¿Qué quieres hacer?" ayuda="Los cuatro pasos del servicio, en orden. Entra al que te toca.">
+      <Section tour="acciones" titulo="¿Qué quieres hacer?" ayuda="Los cuatro pasos del servicio, en orden. Entra al que te toca.">
         <nav aria-label="Accesos rápidos" style={sx('display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:12px')}>
           {ACCESOS.map((a, i) => (
             <Link key={a.to} to={a.to} className="acceso">
@@ -152,7 +152,7 @@ export default function Main() {
           {filtrado && <button type="button" className="btn" onClick={() => setF(FILTROS_DEFAULT)} title="Quitar filtros">Limpiar</button>}
         </form>
 
-        <section aria-label="Indicadores principales" className="kpis">
+        <section aria-label="Indicadores principales" className="kpis" data-tour="kpis">
           <Kpi to={ROUTES.Servicios} label={k.esOct ? 'Servicios activos' : 'Servicios del periodo'} significado="Tráileres que estamos custodiando o monitoreando ahora.">
             <span className="kpi">{k.activos}</span>
             <span style={sx('font-size:13px;color:#5F6B7A')}>{k.evento} por evento · {k.dedicado} dedicado · {k.monitoreo} monitoreo</span>

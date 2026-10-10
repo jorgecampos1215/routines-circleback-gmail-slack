@@ -71,6 +71,32 @@ export type Lead = {
   creado: string
 }
 
+/** Asignación creada por el usuario: cliente ↔ custodios ↔ unidades con rango de tiempo (ver src/data/asignaciones.ts). */
+export type AsignacionNueva = {
+  id: string
+  cliente: string
+  servicio: string
+  tipo: 'Por evento' | 'Dedicado' | 'Monitoreo'
+  ruta: string
+  custodios: string[]
+  unidades: string[]
+  inicio: string
+  fin: string
+  horas: number
+  estatus: 'Programada' | 'En curso' | 'Terminada' | 'Cancelada'
+  notas?: string
+  creado: string
+}
+
+/** Orden de taller creada desde Flotilla ("Mandar a taller"). */
+export type OrdenNueva = { id: string; unidad: string; tipo: 'Preventivo' | 'Correctivo'; falla: string; proveedor: string; costo: number; diasFuera: number; estatus: 'Abierta' | 'Cerrada' | 'En aseguradora'; fecha: string }
+
+/** Carga o registro diario de combustible/kilometraje capturado a mano. */
+export type CargaNueva = { id: string; unidad: string; fecha: string; litros: number; costo: number; km: number; odometro?: number; nota?: string; creado: string }
+
+/** Cambios de estatus de unidades hechos por el usuario (Operando → En taller → Operando…). */
+export type EstatusUnidadOverride = { unidad: string; estatus: 'Operando' | 'Disponible' | 'En taller' | 'Siniestrada' | 'Baja'; desde: string; motivo?: string }
+
 type State = {
   vacaciones: SolicitudVacaciones[]
   servicios: ServicioCreado[]
@@ -78,6 +104,10 @@ type State = {
   tramites: TramiteRH[]
   clientesNuevos: ClienteNuevo[]
   leads: Lead[]
+  asignaciones: AsignacionNueva[]
+  ordenesNuevas: OrdenNueva[]
+  cargasNuevas: CargaNueva[]
+  estatusUnidades: EstatusUnidadOverride[]
 }
 
 const KEY = 'ai27-demo-state-v1'
@@ -88,6 +118,10 @@ const initial: State = {
   tramites: [],
   clientesNuevos: [],
   leads: [],
+  asignaciones: [],
+  ordenesNuevas: [],
+  cargasNuevas: [],
+  estatusUnidades: [],
 }
 
 function load(): State {
@@ -201,6 +235,45 @@ export const actions = {
   },
   registrarDecision(d: Omit<DecisionIA, 'fecha'>) {
     set({ ...state, decisiones: [{ ...d, fecha: new Date().toISOString() }, ...state.decisiones] })
+  },
+  /** Asigna uno o más custodios y una o más unidades a un cliente/servicio por un rango de tiempo. */
+  crearAsignacion(a: Omit<AsignacionNueva, 'id' | 'creado' | 'estatus' | 'horas'> & { estatus?: AsignacionNueva['estatus'] }) {
+    const id = 'ASG-' + (9000 + (state.asignaciones ?? []).length)
+    const horas = Math.max(0, Math.round((new Date(a.fin).getTime() - new Date(a.inicio).getTime()) / 3_600_000))
+    set({ ...state, asignaciones: [{ estatus: 'Programada', ...a, id, horas, creado: new Date().toISOString() }, ...(state.asignaciones ?? [])] })
+    return id
+  },
+  cambiarEstatusAsignacion(id: string, estatus: AsignacionNueva['estatus']) {
+    set({ ...state, asignaciones: (state.asignaciones ?? []).map(x => (x.id === id ? { ...x, estatus } : x)) })
+  },
+  /** Manda una unidad a taller: crea la orden y cambia su estatus. */
+  enviarATaller(o: Omit<OrdenNueva, 'id' | 'estatus' | 'fecha'> & { fecha?: string }) {
+    const id = 'OT-' + (1300 + (state.ordenesNuevas ?? []).length)
+    const fecha = o.fecha ?? new Date().toISOString().slice(0, 10)
+    set({
+      ...state,
+      ordenesNuevas: [{ ...o, id, fecha, estatus: 'Abierta' }, ...(state.ordenesNuevas ?? [])],
+      estatusUnidades: [{ unidad: o.unidad, estatus: 'En taller', desde: fecha, motivo: o.falla }, ...(state.estatusUnidades ?? []).filter(e => e.unidad !== o.unidad)],
+    })
+    return id
+  },
+  /** Cierra la orden y regresa la unidad a Operando. */
+  cerrarOrden(id: string) {
+    const orden = (state.ordenesNuevas ?? []).find(o => o.id === id)
+    set({
+      ...state,
+      ordenesNuevas: (state.ordenesNuevas ?? []).map(o => (o.id === id ? { ...o, estatus: 'Cerrada' } : o)),
+      estatusUnidades: orden ? [{ unidad: orden.unidad, estatus: 'Operando', desde: new Date().toISOString().slice(0, 10) }, ...(state.estatusUnidades ?? []).filter(e => e.unidad !== orden.unidad)] : state.estatusUnidades,
+    })
+  },
+  cambiarEstatusUnidad(unidad: string, estatus: EstatusUnidadOverride['estatus'], motivo?: string) {
+    set({ ...state, estatusUnidades: [{ unidad, estatus, desde: new Date().toISOString().slice(0, 10), motivo }, ...(state.estatusUnidades ?? []).filter(e => e.unidad !== unidad)] })
+  },
+  /** Registra una carga de gasolina o el kilometraje del día de una unidad. */
+  registrarCarga(c: Omit<CargaNueva, 'id' | 'creado'>) {
+    const id = 'CG-' + (7000 + (state.cargasNuevas ?? []).length)
+    set({ ...state, cargasNuevas: [{ ...c, id, creado: new Date().toISOString() }, ...(state.cargasNuevas ?? [])] })
+    return id
   },
   reset() { set(initial) },
 }

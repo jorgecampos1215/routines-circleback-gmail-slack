@@ -19,5 +19,6 @@ export const ROUTES = {
   Reportes: '/reportes',
   CustodioMovil: '/custodio',
   Flujo: '/flujo',
+  Oportunidades: '/oportunidades',
 } as const
 export type PageName = keyof typeof ROUTES

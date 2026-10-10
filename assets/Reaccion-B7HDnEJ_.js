@@ -1,4 +1,4 @@
-import{a as e,d as t,h as n,p as r,r as i,t as a}from"./jsx-runtime-DqzFiGwU.js";import{c as o,d as s}from"./index-Df_zB-uy.js";import{t as c}from"./Shell-DDmUFijV.js";import{i as l,n as u,r as d,t as f}from"./Page-DW9Qv4N7.js";import{a as p,i as m,n as h,o as g,r as _,t as v}from"./reaccion-BDIZFqVU.js";var y=n(r(),1),b=a(),x=`
+import{a as e,d as t,h as n,p as r,r as i,t as a}from"./jsx-runtime-DqzFiGwU.js";import{c as o,d as s}from"./index-B6kAmJi1.js";import{t as c}from"./Shell-t6y23zSC.js";import{i as l,n as u,r as d,t as f}from"./Page-DW9Qv4N7.js";import{a as p,i as m,n as h,o as g,r as _,t as v}from"./reaccion-BDIZFqVU.js";var y=n(r(),1),b=a(),x=`
 a{color:#3448A8}a:hover{color:#0D1D41}
 .card{background:#FFFFFF;border:1px solid #E4E8ED;border-radius:10px;padding:20px;box-sizing:border-box;min-width:0}
 .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5F6B7A;font-weight:500}

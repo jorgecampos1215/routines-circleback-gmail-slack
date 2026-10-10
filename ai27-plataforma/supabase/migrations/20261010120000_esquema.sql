@@ -158,12 +158,21 @@ create table if not exists demo_estado (
   actualizado timestamptz not null default now()
 );
 
-alter publication supabase_realtime add table demo_estado;
+-- Tiempo real: la app escucha cambios en demo_estado. (Idempotente: se puede volver a ejecutar.)
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'demo_estado') then
+    alter publication supabase_realtime add table demo_estado;
+  end if;
+end $$;
 
 -- ───────────────────────── Seguridad (modo demo) ─────────────────────────
 -- Para el demo, la llave anónima puede leer todo y escribir en demo_estado.
 -- Antes de producción: Supabase Auth + políticas por rol (ver usuarios/roles en la app).
 alter table demo_estado enable row level security;
+drop policy if exists "demo lee estado" on demo_estado;
+drop policy if exists "demo escribe estado" on demo_estado;
+drop policy if exists "demo actualiza estado" on demo_estado;
 create policy "demo lee estado" on demo_estado for select using (true);
 create policy "demo escribe estado" on demo_estado for insert with check (true);
 create policy "demo actualiza estado" on demo_estado for update using (true) with check (true);
@@ -173,6 +182,7 @@ declare t text;
 begin
   foreach t in array array['zonas','clientes','custodios','unidades','ordenes_taller','cargas_combustible','servicios','incidentes','colaboradores','eventos_telemetria'] loop
     execute format('alter table %I enable row level security', t);
+    execute format('drop policy if exists "lectura publica demo" on %I', t);
     execute format('create policy "lectura publica demo" on %I for select using (true)', t);
   end loop;
 end $$;

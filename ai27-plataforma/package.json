@@ -6,7 +6,8 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "seed:supabase": "tsx scripts/seed-supabase.ts"
+    "seed:supabase": "tsx scripts/seed-supabase.ts",
+    "sql:demo": "tsx scripts/exportar-sql.ts"
   },
   "keywords": [],
   "author": "",

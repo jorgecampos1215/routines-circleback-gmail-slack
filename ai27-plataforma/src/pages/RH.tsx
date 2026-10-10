@@ -6,6 +6,7 @@ import { ROUTES } from '../lib/routes'
 import { useStore, actions, type SolicitudVacaciones, type TramiteRH } from '../lib/store'
 import { Field, Modal, Pager, btnPriStyle, btnStyle, inputStyle, usePagination, useToast } from '../components/ui'
 import { Nota, PageHeader, Section } from '../components/Page'
+import { EvolucionEquipo } from '../components/EvolucionEquipo'
 import { AREAS_DISENO, HOY, JEFE_POR_AREA, altas as altasDe, antiguedad, bajas as BAJAS_SEED, descargar, diasPorLey, esVoluntaria, fechaCorta, fmtPesos, mesAnio, personas as PERSONAS, porArea, porMes, sedes as SEDES, toCSV, type Movimiento, type Persona } from '../data/rh'
 
 const CSS = `
@@ -287,6 +288,8 @@ export default function RH() {
         <Kpi label="Ingresos en curso" value={onb.length} sub={`${onb.filter(o => o.ck.every(Boolean)).length} listos para cerrar · ${off.length} bajas en proceso`} onClick={() => setTab('on')} />
         <Kpi label="Vacantes abiertas" value={nVacantes} sub={`${candidatos} candidatos en proceso · 19 días para contratar`} onClick={() => setTab('rec')} />
       </section>
+
+      <EvolucionEquipo />
 
       <div role="tablist" aria-label="Secciones de Equipo" style={sx('display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #E4E8ED;padding-bottom:10px')}>
         {TABS.map(([k, label]) => (

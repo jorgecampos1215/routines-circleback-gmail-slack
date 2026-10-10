@@ -191,3 +191,24 @@ export function descargar(nombre: string, contenido: string | Blob, tipo = 'text
   a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
+
+/* ───────────── Evolución del equipo (headcount por mes, con filtro de área) ─────────────
+ * Headcount al cierre de cada mes = personas con ingreso ≤ fin de mes que todavía no habían causado baja.
+ * Las bajas solo existen en 2026 (seed), por lo que antes de enero el equipo solo crece con los ingresos.
+ */
+export type PuntoHeadcount = { mes: string; etiqueta: string; headcount: number; altas: number; bajas: number }
+export function headcountMensual(area = 'Todas las áreas', meses = 12, lista: Persona[] = personas, bajasLista: Movimiento[] = bajas): PuntoHeadcount[] {
+  const hoyIso = `${HOY.getFullYear()}-${String(HOY.getMonth() + 1).padStart(2, '0')}-${String(HOY.getDate()).padStart(2, '0')}`
+  // quien ya está en la plantilla cuenta como presente hoy aunque su fecha de ingreso en la seed sea posterior
+  const ps = (area === 'Todas las áreas' ? lista : lista.filter(p => p.area === area)).map(p => (p.ingreso > hoyIso ? { ...p, ingreso: hoyIso } : p))
+  const bs = area === 'Todas las áreas' ? bajasLista : bajasLista.filter(b => b.area === area)
+  const out: PuntoHeadcount[] = []
+  for (let i = meses - 1; i >= 0; i--) {
+    const d = new Date(HOY.getFullYear(), HOY.getMonth() - i + 1, 0) // último día del mes
+    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const fin = `${ym}-${String(d.getDate()).padStart(2, '0')}`
+    const activos = ps.filter(p => p.ingreso <= fin).length + bs.filter(b => b.fecha > fin && b.fecha.startsWith('2026')).length
+    out.push({ mes: ym, etiqueta: `${MES[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`, headcount: activos, altas: ps.filter(p => p.ingreso.startsWith(ym)).length, bajas: bs.filter(b => b.fecha.startsWith(ym)).length })
+  }
+  return out
+}

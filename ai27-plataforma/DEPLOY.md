@@ -2,7 +2,9 @@
 
 La plataforma ya está en GitHub (`jorgecampos1215/routines-circleback-gmail-slack`, carpeta `ai27-plataforma/`, en `main` y en la rama de trabajo `claude/ai27-plataforma`). Lo que falta es una base de datos en Supabase y el hosting en Vercel. Las dos tienen plan gratuito y entras a ambas con tu cuenta de GitHub.
 
-Hay tres formas de hacerlo. Todas terminan igual: un link `https://ai27-plataforma.vercel.app` conectado a tu base.
+**Estado actual:** Vercel ya está conectado al repo (equipo `da-codes1`, proyecto `routines-circleback-gmail-slack`) y publica https://routines-circleback-gmail-slack.vercel.app en cada push a `main`. Falta crear las tablas y cargar la seed en Supabase, y poner las dos variables `VITE_SUPABASE_*` en Vercel.
+
+Hay tres formas de hacer lo que falta. Todas terminan igual: el link de Vercel conectado a tu base.
 
 | Forma | Qué haces tú | Quién corre el deploy |
 |---|---|---|
